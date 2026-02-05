@@ -47,6 +47,10 @@
   transform: translateY(-2px);
 }
 
+.dashboard-card.clickable {
+  cursor: pointer;
+}
+
 .dashboard-card h3 {
   color: #3A6F85;
   margin-top: 0;

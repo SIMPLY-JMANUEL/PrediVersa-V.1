@@ -62,7 +62,7 @@ function Login({ isOpen, onClose, onLoginSuccess }) {
         setError(data.message || 'Error al iniciar sesión')
       }
     } catch (err) {
-      setError('Error de conexión. Asegúrate que el backend esté corriendo en http://localhost:5001')
+      setError('Error de conexión. Asegúrate que el backend esté corriendo en http://localhost:5000')
       console.error('Error:', err)
     } finally {
       setLoading(false)

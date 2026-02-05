@@ -9,6 +9,7 @@ import StudentDashboard from './components/StudentDashboard'
 import AdminDashboard from './components/AdminDashboard'
 import CollaboratorDashboard from './components/CollaboratorDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
+import RoleProtectedRoute from './components/RoleProtectedRoute'
 
 function AppRoutes({ user, isLoginOpen, setIsLoginOpen, handleLogin, handleLogout }) {
   return (
@@ -21,19 +22,19 @@ function AppRoutes({ user, isLoginOpen, setIsLoginOpen, handleLogin, handleLogou
           </>
         } />
         <Route path="/student" element={
-          <ProtectedRoute user={user}>
+          <RoleProtectedRoute user={user} allowedRoles={['Estudiante']}>
             <StudentDashboard user={user} onLogout={handleLogout} />
-          </ProtectedRoute>
+          </RoleProtectedRoute>
         } />
         <Route path="/admin" element={
-          <ProtectedRoute user={user}>
+          <RoleProtectedRoute user={user} allowedRoles={['Administrador']}>
             <AdminDashboard user={user} onLogout={handleLogout} />
-          </ProtectedRoute>
+          </RoleProtectedRoute>
         } />
         <Route path="/collaborator" element={
-          <ProtectedRoute user={user}>
+          <RoleProtectedRoute user={user} allowedRoles={['Colaboradores']}>
             <CollaboratorDashboard user={user} onLogout={handleLogout} />
-          </ProtectedRoute>
+          </RoleProtectedRoute>
         } />
       </Routes>
       <Chatbot isAuthenticated={!!user} isLoginOpen={isLoginOpen} />
@@ -50,6 +51,7 @@ function AppRoutes({ user, isLoginOpen, setIsLoginOpen, handleLogin, handleLogou
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [user, setUser] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     // Cargar usuario del localStorage al iniciar
@@ -57,6 +59,7 @@ function App() {
     if (storedUser) {
       setUser(JSON.parse(storedUser))
     }
+    setIsLoading(false)
   }, [])
 
   const handleLogin = (userData) => {
@@ -67,6 +70,11 @@ function App() {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     setUser(null)
+  }
+
+  // Mostrar loading mientras se verifica el usuario
+  if (isLoading) {
+    return <div style={{ padding: '20px', textAlign: 'center' }}>Cargando...</div>
   }
 
   return (
