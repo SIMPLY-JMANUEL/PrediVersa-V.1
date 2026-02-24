@@ -8,7 +8,7 @@ const { pool } = require('./connection');
 const getAllUsers = async () => {
   try {
     const [rows] = await pool.execute(
-      'SELECT id, documentId, email, name, role, phone, address, birthDate, status, createdAt, updatedAt FROM users ORDER BY id ASC'
+      'SELECT id, documentId, email, name, role, phone, address, birthDate, edad, lugarNacimiento, nombrePadre, nombreMadre, grado, status, createdAt, updatedAt FROM users ORDER BY id ASC'
     );
     return rows;
   } catch (error) {
@@ -70,12 +70,12 @@ const getUserByDocumentId = async (documentId) => {
  */
 const createUser = async (userData) => {
   try {
-    const { documentId, email, password, name, role, phone, address, birthDate } = userData;
+    const { documentId, email, password, name, role, phone, address, birthDate, edad, lugarNacimiento, nombrePadre, nombreMadre, grado } = userData;
     
     const [result] = await pool.execute(
-      `INSERT INTO users (documentId, email, password, name, role, phone, address, birthDate, status) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Activo')`,
-      [documentId, email, password, name, role, phone || '', address || '', birthDate || null]
+      `INSERT INTO users (documentId, email, password, name, role, phone, address, birthDate, edad, lugarNacimiento, nombrePadre, nombreMadre, grado, status) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Activo')`,
+      [documentId, email, password, name, role, phone || '', address || '', birthDate || null, edad || '', lugarNacimiento || '', nombrePadre || '', nombreMadre || '', grado || '']
     );
     
     // Retornar el usuario creado (sin contraseña)
@@ -91,7 +91,7 @@ const createUser = async (userData) => {
  */
 const updateUser = async (id, userData) => {
   try {
-    const { documentId, email, name, role, phone, address, birthDate, status, password } = userData;
+    const { documentId, email, name, role, phone, address, birthDate, status, password, edad, lugarNacimiento, nombrePadre, nombreMadre, grado } = userData;
     
     // Construir la consulta dinámicamente según los campos proporcionados
     const updates = [];
@@ -133,6 +133,26 @@ const updateUser = async (id, userData) => {
       updates.push('password = ?');
       values.push(password);
     }
+    if (edad !== undefined) {
+      updates.push('edad = ?');
+      values.push(edad);
+    }
+    if (lugarNacimiento !== undefined) {
+      updates.push('lugarNacimiento = ?');
+      values.push(lugarNacimiento);
+    }
+    if (nombrePadre !== undefined) {
+      updates.push('nombrePadre = ?');
+      values.push(nombrePadre);
+    }
+    if (nombreMadre !== undefined) {
+      updates.push('nombreMadre = ?');
+      values.push(nombreMadre);
+    }
+    if (grado !== undefined) {
+      updates.push('grado = ?');
+      values.push(grado);
+    }
     
     if (updates.length === 0) {
       return await getUserById(id);
@@ -147,7 +167,7 @@ const updateUser = async (id, userData) => {
     
     // Retornar el usuario actualizado (sin contraseña)
     const [rows] = await pool.execute(
-      'SELECT id, documentId, email, name, role, phone, address, birthDate, status, createdAt, updatedAt FROM users WHERE id = ?',
+      'SELECT id, documentId, email, name, role, phone, address, birthDate, edad, lugarNacimiento, nombrePadre, nombreMadre, grado, status, createdAt, updatedAt FROM users WHERE id = ?',
       [id]
     );
     return rows[0] || null;
@@ -293,6 +313,194 @@ const documentIdExists = async (documentId, excludeId = null) => {
   }
 };
 
+// ==================== FUNCIONES DE ALERTAS ====================
+
+/**
+ * Obtener todas las alertas
+ */
+const getAllAlerts = async () => {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT a.*, u.name as creatorName 
+       FROM alerts a 
+       LEFT JOIN users u ON a.createdBy = u.id 
+       ORDER BY a.createdAt DESC`
+    );
+    return rows;
+  } catch (error) {
+    console.error('❌ Error al obtener alertas:', error.message);
+    throw error;
+  }
+};
+
+/**
+ * Obtener una alerta por ID
+ */
+const getAlertById = async (id) => {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT a.*, u.name as creatorName 
+       FROM alerts a 
+       LEFT JOIN users u ON a.createdBy = u.id 
+       WHERE a.id = ?`,
+      [id]
+    );
+    return rows[0] || null;
+  } catch (error) {
+    console.error('❌ Error al obtener alerta por ID:', error.message);
+    throw error;
+  }
+};
+
+/**
+ * Crear una nueva alerta
+ */
+const createAlert = async (alertData) => {
+  try {
+    const { 
+      userId, studentName, studentDocumentId, studentAge, studentGrade, 
+      studentUsername, alertType, description, ticketNumber, alertDate, 
+      alertTime, deadline, assignedTo, status, createdBy 
+    } = alertData;
+    
+    const [result] = await pool.execute(
+      `INSERT INTO alerts (userId, studentName, studentDocumentId, studentAge, studentGrade, 
+        studentUsername, alertType, description, ticketNumber, alertDate, alertTime, 
+        deadline, assignedTo, status, createdBy) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [userId || null, studentName || '', studentDocumentId || '', studentAge || '', 
+       studentGrade || '', studentUsername || '', alertType || 'General', description || '', 
+       ticketNumber || '', alertDate || '', alertTime || '', deadline || '', 
+       assignedTo || '', status || 'Pendiente', createdBy || null]
+    );
+    
+    return await getAlertById(result.insertId);
+  } catch (error) {
+    console.error('❌ Error al crear alerta:', error.message);
+    throw error;
+  }
+};
+
+/**
+ * Actualizar una alerta
+ */
+const updateAlert = async (id, alertData) => {
+  try {
+    const { 
+      userId, studentName, studentDocumentId, studentAge, studentGrade, 
+      studentUsername, alertType, description, ticketNumber, alertDate, 
+      alertTime, deadline, assignedTo, status 
+    } = alertData;
+    
+    // Construir la consulta dinámicamente
+    const updates = [];
+    const values = [];
+    
+    if (userId !== undefined) { updates.push('userId = ?'); values.push(userId); }
+    if (studentName !== undefined) { updates.push('studentName = ?'); values.push(studentName); }
+    if (studentDocumentId !== undefined) { updates.push('studentDocumentId = ?'); values.push(studentDocumentId); }
+    if (studentAge !== undefined) { updates.push('studentAge = ?'); values.push(studentAge); }
+    if (studentGrade !== undefined) { updates.push('studentGrade = ?'); values.push(studentGrade); }
+    if (studentUsername !== undefined) { updates.push('studentUsername = ?'); values.push(studentUsername); }
+    if (alertType !== undefined) { updates.push('alertType = ?'); values.push(alertType); }
+    if (description !== undefined) { updates.push('description = ?'); values.push(description); }
+    if (ticketNumber !== undefined) { updates.push('ticketNumber = ?'); values.push(ticketNumber); }
+    if (alertDate !== undefined) { updates.push('alertDate = ?'); values.push(alertDate); }
+    if (alertTime !== undefined) { updates.push('alertTime = ?'); values.push(alertTime); }
+    if (deadline !== undefined) { updates.push('deadline = ?'); values.push(deadline); }
+    if (assignedTo !== undefined) { updates.push('assignedTo = ?'); values.push(assignedTo); }
+    if (status !== undefined) { updates.push('status = ?'); values.push(status); }
+    
+    if (updates.length === 0) {
+      return await getAlertById(id);
+    }
+    
+    values.push(id);
+    
+    await pool.execute(
+      `UPDATE alerts SET ${updates.join(', ')}, updatedAt = NOW() WHERE id = ?`,
+      values
+    );
+    
+    return await getAlertById(id);
+  } catch (error) {
+    console.error('❌ Error al actualizar alerta:', error.message);
+    throw error;
+  }
+};
+
+/**
+ * Eliminar una alerta
+ */
+const deleteAlert = async (id) => {
+  try {
+    const alert = await getAlertById(id);
+    
+    if (!alert) {
+      return null;
+    }
+    
+    await pool.execute('DELETE FROM alerts WHERE id = ?', [id]);
+    
+    return alert;
+  } catch (error) {
+    console.error('❌ Error al eliminar alerta:', error.message);
+    throw error;
+  }
+};
+
+/**
+ * Obtener estadísticas de alertas
+ */
+const getAlertStats = async () => {
+  try {
+    // Total de alertas
+    const [totalResult] = await pool.execute('SELECT COUNT(*) as count FROM alerts');
+    const totalAlerts = totalResult[0].count;
+    
+    // Alertas pendientes
+    const [pendingResult] = await pool.execute(
+      "SELECT COUNT(*) as count FROM alerts WHERE status = 'Pendiente'"
+    );
+    const pendingAlerts = pendingResult[0].count;
+    
+    // Alertas resueltas
+    const [resolvedResult] = await pool.execute(
+      "SELECT COUNT(*) as count FROM alerts WHERE status = 'Resuelto'"
+    );
+    const resolvedAlerts = resolvedResult[0].count;
+    
+    // Alertas por tipo
+    const [typeResults] = await pool.execute(
+      'SELECT alertType, COUNT(*) as count FROM alerts GROUP BY alertType'
+    );
+    const alertsByType = typeResults.reduce((acc, row) => {
+      acc[row.alertType] = row.count;
+      return acc;
+    }, {});
+    
+    // Alertas por estado
+    const [statusResults] = await pool.execute(
+      'SELECT status, COUNT(*) as count FROM alerts GROUP BY status'
+    );
+    const alertsByStatus = statusResults.reduce((acc, row) => {
+      acc[row.status] = row.count;
+      return acc;
+    }, {});
+    
+    return {
+      totalAlerts,
+      pendingAlerts,
+      resolvedAlerts,
+      alertsByType,
+      alertsByStatus
+    };
+  } catch (error) {
+    console.error('❌ Error al obtener estadísticas de alertas:', error.message);
+    throw error;
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -303,5 +511,12 @@ module.exports = {
   deleteUser,
   getUserStats,
   emailExists,
-  documentIdExists
+  documentIdExists,
+  // Funciones de alertas
+  getAllAlerts,
+  getAlertById,
+  createAlert,
+  updateAlert,
+  deleteAlert,
+  getAlertStats
 };

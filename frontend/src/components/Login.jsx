@@ -37,8 +37,6 @@ function Login({ isOpen, onClose, onLoginSuccess }) {
         localStorage.setItem('token', data.token)
         localStorage.setItem('user', JSON.stringify(data.user))
         
-        console.log('✓ Login exitoso:', data.user)
-        
         // Notificar al App
         onLoginSuccess(data.user)
         

@@ -1,0 +1,9 @@
+# REGLAS DE HARDWARE Y ENTORNO
+- GPU detectada: Intel Arc B580 (12GB VRAM).
+- Dispositivo de IA: Usa siempre "xpu" (vía intel_extension_for_pytorch).
+- Entorno Python: Usa siempre el ejecutable en .\env_ia_intel\Scripts\python.exe.
+- Instalaciones: Usa siempre .\env_ia_intel\Scripts\pip.exe install.
+
+# AUTOMATIZACIÓN DE TERMINAL
+- Tienes permiso para ejecutar comandos en la terminal para validar código o instalar dependencias necesarias.
+- Si un comando falla, analiza el error y propón una corrección inmediata.

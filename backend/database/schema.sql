@@ -8,6 +8,18 @@ CREATE DATABASE IF NOT EXISTS prediversa
 
 USE prediversa;
 
+-- ================================================================================
+-- MIGRACIÓN: Agregar columnas nuevas a la tabla users (si no existen)
+-- ================================================================================
+ALTER TABLE users ADD COLUMN IF NOT EXISTS edad VARCHAR(10) DEFAULT '' COMMENT 'Edad del estudiante' AFTER birthDate;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS lugarNacimiento VARCHAR(100) DEFAULT '' COMMENT 'Lugar de nacimiento' AFTER edad;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS nombrePadre VARCHAR(100) DEFAULT '' COMMENT 'Nombre del padre' AFTER lugarNacimiento;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS nombreMadre VARCHAR(100) DEFAULT '' COMMENT 'Nombre de la madre' AFTER nombrePadre;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS grado VARCHAR(50) DEFAULT '' COMMENT 'Grado o curso' AFTER nombreMadre;
+
+-- Verificar y agregar rol 'Psicología' si no existe (MySQL 8.0+)
+-- Nota: Esto requiere recrear la tabla en versiones antiguas de MySQL
+
 -- Tabla de usuarios
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -15,10 +27,15 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(100) NOT NULL UNIQUE COMMENT 'Correo electrónico',
   password VARCHAR(255) NOT NULL COMMENT 'Contraseña hasheada con bcrypt',
   name VARCHAR(100) NOT NULL COMMENT 'Nombre completo del usuario',
-  role ENUM('Estudiante', 'Administrador', 'Colaboradores') NOT NULL COMMENT 'Rol del usuario',
+  role ENUM('Estudiante', 'Administrador', 'Colaboradores', 'Psicología') NOT NULL COMMENT 'Rol del usuario',
   phone VARCHAR(20) DEFAULT '' COMMENT 'Teléfono de contacto',
   address VARCHAR(255) DEFAULT '' COMMENT 'Dirección física',
   birthDate DATE DEFAULT NULL COMMENT 'Fecha de nacimiento',
+  edad VARCHAR(10) DEFAULT '' COMMENT 'Edad del estudiante',
+  lugarNacimiento VARCHAR(100) DEFAULT '' COMMENT 'Lugar de nacimiento',
+  nombrePadre VARCHAR(100) DEFAULT '' COMMENT 'Nombre del padre',
+  nombreMadre VARCHAR(100) DEFAULT '' COMMENT 'Nombre de la madre',
+  grado VARCHAR(50) DEFAULT '' COMMENT 'Grado o curso',
   status ENUM('Activo', 'Inactivo') DEFAULT 'Activo' COMMENT 'Estado del usuario',
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de creación',
   updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Fecha de última actualización',
@@ -50,3 +67,43 @@ DESCRIBE users;
 -- Verificar usuarios insertados (sin mostrar contraseñas)
 SELECT id, documentId, email, name, role, phone, address, birthDate, status, createdAt, updatedAt 
 FROM users;
+
+-- ================================================================================
+-- Tabla de Alertas
+-- ================================================================================
+CREATE TABLE IF NOT EXISTS alerts (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  userId INT DEFAULT NULL COMMENT 'Usuario relacionado con la alerta (opcional)',
+  studentName VARCHAR(100) NOT NULL COMMENT 'Nombre del estudiante',
+  studentDocumentId VARCHAR(20) DEFAULT '' COMMENT 'Documento del estudiante',
+  studentAge VARCHAR(10) DEFAULT '' COMMENT 'Edad del estudiante',
+  studentGrade VARCHAR(50) DEFAULT '' COMMENT 'Grado del estudiante',
+  studentUsername VARCHAR(100) DEFAULT '' COMMENT 'Usuario del estudiante',
+  
+  alertType ENUM('Informativa', 'Preventiva', 'Advertencia', 'Critica') NOT NULL COMMENT 'Tipo de alerta',
+  description TEXT NOT NULL COMMENT 'Descripción de la alerta/orden de acción',
+  
+  ticketNumber VARCHAR(20) DEFAULT '' COMMENT 'Número de ticket',
+  alertDate DATE DEFAULT NULL COMMENT 'Fecha de la alerta',
+  alertTime TIME DEFAULT NULL COMMENT 'Hora de la alerta',
+  deadline VARCHAR(50) DEFAULT '' COMMENT 'Plazo para responder',
+  assignedTo VARCHAR(100) DEFAULT '' COMMENT 'Usuario asignado para atender la alerta',
+  
+  status ENUM('Pendiente', 'En Proceso', 'Resuelta', 'Cerrada') DEFAULT 'Pendiente' COMMENT 'Estado de la alerta',
+  
+  createdBy INT DEFAULT NULL COMMENT 'ID del admin que creó la alerta',
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de creación',
+  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Fecha de última actualización',
+  
+  INDEX idx_alertType (alertType),
+  INDEX idx_status (status),
+  INDEX idx_createdAt (createdAt)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT='Tabla de alertas del sistema PrediVersa';
+
+-- Insertar alertas de ejemplo
+INSERT INTO alerts (studentName, studentDocumentId, studentAge, studentGrade, alertType, description, ticketNumber, alertDate, alertTime, deadline, assignedTo, status) VALUES
+('Juan Díaz', '12345678', '15', '10A', 'Informativa', 'Se le solicita de manera inmediata al funcionario tomar acciones con el fin de identificar la conducta y prevenir cualquier alteración.', 'TKT-001', '2024-01-15', '09:30:00', '24 horas', 'María Pérez', 'Pendiente'),
+('Carlos Gómez', '87654321', '14', '9B', 'Preventiva', 'Se requiere revisión de comportamiento en clase de matemáticas.', 'TKT-002', '2024-01-14', '14:20:00', '48 horas', 'Ana López', 'En Proceso'),
+('María López', '11223344', '16', '11C', 'Advertencia', 'Seguimiento a situación reportada anteriormente.', 'TKT-003', '2024-01-13', '10:00:00', '72 horas', 'Pedro Sánchez', 'Resuelta')
+ON DUPLICATE KEY UPDATE studentName = VALUES(studentName);

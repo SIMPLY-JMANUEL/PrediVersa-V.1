@@ -1,0 +1,42 @@
+# ================================================================================
+# PrediVersa V.1 - Requisitos del Proyecto
+# ================================================================================
+# Este proyecto es una aplicación web construida con Node.js y React.
+# Las dependencias están gestionadas en package.json (backend y frontend)
+# Este archivo es solo para referencia y documentación.
+# ================================================================================
+
+# BACKEND - Node.js Dependencies
+# Instalar con: cd backend && npm install
+# 
+# Production Dependencies:
+#   - express@^4.18.2        # Framework web
+#   - cors@^2.8.5           # Cross-Origin Resource Sharing
+#   - dotenv@^16.0.3        # Variables de entorno
+#   - jsonwebtoken@^8.5.1  # Autenticación JWT
+#   - bcryptjs@^2.4.3       # Hash de contraseñas
+#   - mysql2@^3.16.3        # Driver MySQL
+#
+# Development Dependencies:
+#   - nodemon@^2.0.20      # Recarga automática
+
+# FRONTEND - React Dependencies  
+# Instalar con: cd frontend && npm install
+#
+# Dependencies:
+#   - react@^18.2.0        # Biblioteca UI
+#   - react-dom@^18.2.0    # React DOM
+#   - react-router-dom@^7.13.0  # Enrutamiento
+#
+# Dev Dependencies:
+#   - vite@^5.0.8          # Build tool
+
+# BASE DE DATOS
+# MySQL en AWS RDS
+#   - Host: prediversa-db.ce1qo0a0sygg.us-east-1.rds.amazonaws.com
+#   - Puerto: 3306
+#   - Base de datos: PrediVersa
+
+# ================================================================================
+# NOTA: Para instalar las dependencias, use npm install en cada carpeta
+# ================================================================================

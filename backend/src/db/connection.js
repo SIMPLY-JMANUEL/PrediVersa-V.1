@@ -84,6 +84,35 @@ const initializeDatabase = async () => {
 
     console.log('✅ Tabla de usuarios verificada/creada correctamente');
 
+    // Crear tabla de alertas si no existe
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS alerts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        userId INT DEFAULT NULL,
+        studentName VARCHAR(100) NOT NULL,
+        studentDocumentId VARCHAR(20) DEFAULT '',
+        studentAge VARCHAR(10) DEFAULT '',
+        studentGrade VARCHAR(50) DEFAULT '',
+        studentUsername VARCHAR(100) DEFAULT '',
+        alertType ENUM('Informativa', 'Preventiva', 'Advertencia', 'Critica') NOT NULL,
+        description TEXT NOT NULL,
+        ticketNumber VARCHAR(20) DEFAULT '',
+        alertDate DATE DEFAULT NULL,
+        alertTime TIME DEFAULT NULL,
+        deadline VARCHAR(50) DEFAULT '',
+        assignedTo VARCHAR(100) DEFAULT '',
+        status ENUM('Pendiente', 'En Proceso', 'Resuelta', 'Cerrada') DEFAULT 'Pendiente',
+        createdBy INT DEFAULT NULL,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_alertType (alertType),
+        INDEX idx_status (status),
+        INDEX idx_createdAt (createdAt)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    console.log('✅ Tabla de alertas verificada/creada correctamente');
+
     // Verificar si hay usuarios, si no, insertar datos de prueba
     const [rows] = await connection.execute('SELECT COUNT(*) as count FROM users');
     if (rows[0].count === 0) {

@@ -72,6 +72,39 @@ function AdminDashboard({ user, onLogout }) {
   // Estado para edición
   const [editingUser, setEditingUser] = useState(null)
 
+  // Estado para ver detalles de usuario
+  const [viewingUser, setViewingUser] = useState(null)
+
+  // Estado para alertas
+  const [alerts, setAlerts] = useState([])
+  const [loadingAlerts, setLoadingAlerts] = useState(false)
+  const [alertMessage, setAlertMessage] = useState('')
+
+  // Estado para formulario de alerta
+  const [alertForm, setAlertForm] = useState({
+    alertType: 'Informativa',
+    ticketNumber: '',
+    alertDate: '',
+    alertTime: '',
+    studentName: '',
+    studentDocumentId: '',
+    studentAge: '',
+    lugarNacimiento: '',
+    nombrePadre: '',
+    nombreMadre: '',
+    studentGrade: '',
+    studentUsername: '',
+    description: '',
+    deadline: '',
+    assignedTo: '',
+    status: 'Pendiente'
+  })
+
+  // Cargar alertas al iniciar
+  useEffect(() => {
+    fetchAlerts()
+  }, [])
+
   // Obtener token del localStorage
   const token = localStorage.getItem('token')
 
@@ -207,6 +240,187 @@ function AdminDashboard({ user, onLogout }) {
     }
   }
 
+  // Cargar alertas
+  const fetchAlerts = async () => {
+    setLoadingAlerts(true)
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/alerts', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      const data = await response.json()
+      if (data.success) {
+        setAlerts(data.alerts)
+      }
+    } catch (error) {
+      console.error('Error fetching alerts:', error)
+    } finally {
+      setLoadingAlerts(false)
+    }
+  }
+
+  // Manejar cambios en el formulario de alerta
+  const handleAlertChange = (e) => {
+    const { name, value } = e.target
+    setAlertForm({ ...alertForm, [name]: value })
+    
+    // Si cambia el documento, buscar estudiante
+    if (name === 'studentDocumentId' && value.trim().length >= 3) {
+      searchStudentByDocument(value.trim())
+    }
+  }
+
+  // Buscar estudiante por documento
+  const searchStudentByDocument = async (documentId) => {
+    try {
+      const trimmedDocId = documentId.trim()
+      const response = await fetch(`http://localhost:5000/api/auth/users?documentId=${encodeURIComponent(trimmedDocId)}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      const data = await response.json()
+      if (data.success && data.users && data.users.length > 0) {
+        const student = data.users.find(u => u.documentId && u.documentId.trim() === trimmedDocId)
+        if (student) {
+          const userEmail = student.email || ''
+          setAlertForm(prev => ({
+            ...prev,
+            studentName: student.name || '',
+            studentDocumentId: student.documentId || documentId,
+            studentAge: student.edad || '',
+            lugarNacimiento: student.lugarNacimiento || '',
+            nombrePadre: student.nombrePadre || '',
+            nombreMadre: student.nombreMadre || '',
+            studentGrade: student.grado || '',
+            studentUsername: userEmail,
+            userId: student.id
+          }))
+        }
+      }
+    } catch (error) {
+      console.error('Error searching student:', error)
+    }
+  }
+
+  // Generar número de ticket automático
+  const generateTicketNumber = () => {
+    const now = new Date()
+    const ticket = `TKT-${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}`
+    return ticket
+  }
+
+  // Remitir/Crear alerta
+  const handleRemitAlert = async () => {
+    if (!alertForm.studentName.trim()) {
+      setAlertMessage('El nombre del estudiante es requerido')
+      setTimeout(() => setAlertMessage(''), 3000)
+      return
+    }
+
+    try {
+      const now = new Date()
+      const alertData = {
+        ...alertForm,
+        ticketNumber: alertForm.ticketNumber || generateTicketNumber(),
+        alertDate: alertForm.alertDate || now.toISOString().split('T')[0],
+        alertTime: alertForm.alertTime || now.toTimeString().slice(0, 5),
+        alertType: alertForm.alertType,
+        status: 'Pendiente'
+      }
+
+      const response = await fetch('http://localhost:5000/api/auth/alerts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(alertData)
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        setAlertMessage('Alerta remitida exitosamente ✓')
+        setAlertForm({
+          alertType: 'Informativa',
+          ticketNumber: '',
+          alertDate: '',
+          alertTime: '',
+          studentName: '',
+          studentDocumentId: '',
+          studentAge: '',
+          studentGrade: '',
+          studentUsername: '',
+          description: '',
+          deadline: '',
+          assignedTo: '',
+          status: 'Pendiente'
+        })
+        fetchAlerts()
+      } else {
+        setAlertMessage(data.message || 'Error al crear alerta')
+      }
+    } catch (error) {
+      console.error('Error creating alert:', error)
+      setAlertMessage('Error de conexión')
+    }
+
+    setTimeout(() => setAlertMessage(''), 3000)
+  }
+
+  // Actualizar estado de alerta
+  const handleUpdateAlertStatus = async (alertId, newStatus) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/auth/alerts/${alertId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        fetchAlerts()
+      }
+    } catch (error) {
+      console.error('Error updating alert:', error)
+    }
+  }
+
+  // Eliminar alerta
+  const handleDeleteAlert = async (alertId) => {
+    if (!confirm('¿Está seguro de que desea eliminar esta alerta?')) return
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/auth/alerts/${alertId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        fetchAlerts()
+        setAlertMessage('Alerta eliminada exitosamente')
+      } else {
+        setAlertMessage(data.message || 'Error al eliminar alerta')
+      }
+    } catch (error) {
+      console.error('Error deleting alert:', error)
+      setAlertMessage('Error de conexión')
+    }
+
+    setTimeout(() => setAlertMessage(''), 3000)
+  }
+
+  // Obtener usuarios para el dropdown de asignación
+  const availableUsers = users.filter(u => u.role === 'Colaboradores' || u.role === 'Psicología')
+
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setUserForm({ ...userForm, [name]: value })
@@ -294,15 +508,15 @@ function AdminDashboard({ user, onLogout }) {
       nombres: nameParts[0] || '',
       apellidos: nameParts.slice(1).join(' ') || '',
       id: userToEdit.documentId || '',
-      edad: '',
+      edad: userToEdit.edad || '',
       fechaNacimiento: userToEdit.birthDate ? userToEdit.birthDate.split('T')[0] : '',
-      lugarNacimiento: '',
+      lugarNacimiento: userToEdit.lugarNacimiento || '',
       telefono: userToEdit.phone || '',
       direccion: userToEdit.address || '',
-      nombreMadre: '',
-      nombrePadre: '',
+      nombreMadre: userToEdit.nombreMadre || '',
+      nombrePadre: userToEdit.nombrePadre || '',
       email: userToEdit.email || '',
-      grado: '',
+      grado: userToEdit.grado || '',
       rol: userToEdit.role || 'Estudiante'
     })
     setActiveTab('creacion')
@@ -325,7 +539,12 @@ function AdminDashboard({ user, onLogout }) {
           role: userForm.rol,
           phone: userForm.telefono,
           address: userForm.direccion,
-          birthDate: userForm.fechaNacimiento || null
+          birthDate: userForm.fechaNacimiento || null,
+          edad: userForm.edad,
+          lugarNacimiento: userForm.lugarNacimiento,
+          nombrePadre: userForm.nombrePadre,
+          nombreMadre: userForm.nombreMadre,
+          grado: userForm.grado
         })
       })
 
@@ -360,6 +579,16 @@ function AdminDashboard({ user, onLogout }) {
     }
 
     setTimeout(() => setSaveMessage(''), 3000)
+  }
+
+  // Ver detalles de usuario
+  const handleViewUser = (user) => {
+    setViewingUser(user)
+  }
+
+  // Cerrar modal de detalles
+  const closeViewModal = () => {
+    setViewingUser(null)
   }
 
   const handleDelete = async (userId) => {
@@ -701,6 +930,7 @@ function AdminDashboard({ user, onLogout }) {
                     <span>{u.role}</span>
                     <span className={`status-${u.status?.toLowerCase()}`}>{u.status}</span>
                     <span>
+                      <button className="action-btn-small view" onClick={() => handleViewUser(u)} title="Ver detalles">👁️</button>
                       <button className="action-btn-small edit" onClick={() => handleEdit(u)}>Editar</button>
                     </span>
                   </div>
@@ -825,25 +1055,42 @@ function AdminDashboard({ user, onLogout }) {
             <div className="alert-header">
               <div className="alert-type-selector">
                 <span>Tipo de Alerta</span>
-                <select className="action-select alert-select">
-                  <option>Informativa</option>
-                  <option>Preventiva</option>
-                  <option>Advertencia</option>
-                  <option>Critica / Emergencia</option>
+                <select 
+                  className="action-select alert-select"
+                  name="alertType"
+                  value={alertForm.alertType}
+                  onChange={handleAlertChange}
+                >
+                  <option value="Informativa">Informativa</option>
+                  <option value="Preventiva">Preventiva</option>
+                  <option value="Advertencia">Advertencia</option>
+                  <option value="Critica / Emergencia">Critica / Emergencia</option>
                 </select>
               </div>
               <div className="alert-meta">
                 <div className="meta-item">
                   <span>Ticket #</span>
-                  <span className="meta-value">xxxx</span>
+                  <span className="meta-value">{alertForm.ticketNumber || 'xxxx'}</span>
                 </div>
                 <div className="meta-item">
                   <span>FECHA</span>
-                  <span className="meta-value">xxxx</span>
+                  <input 
+                    type="date" 
+                    name="alertDate"
+                    value={alertForm.alertDate}
+                    onChange={handleAlertChange}
+                    className="meta-input"
+                  />
                 </div>
                 <div className="meta-item">
                   <span>HORA</span>
-                  <span className="meta-value">xxxx</span>
+                  <input 
+                    type="time" 
+                    name="alertTime"
+                    value={alertForm.alertTime}
+                    onChange={handleAlertChange}
+                    className="meta-input"
+                  />
                 </div>
               </div>
             </div>
@@ -851,51 +1098,128 @@ function AdminDashboard({ user, onLogout }) {
             <div className="alert-details">
               <div className="alert-user-data">
                 <div className="form-field">
+                  <label>Identificación</label>
+                  <span>:</span>
+                  <div className="input-wrapper">
+                    <input 
+                      type="text" 
+                      name="studentDocumentId"
+                      value={alertForm.studentDocumentId}
+                      onChange={handleAlertChange}
+                      className="wireframe-input" 
+                      placeholder="Número documento"
+                    />
+                  </div>
+                </div>
+                <div className="form-field">
                   <label>Nombres</label>
                   <span>:</span>
                   <div className="input-wrapper">
-                    <input type="text" className="wireframe-input" />
-                  </div>
-                </div>
-                <div className="form-field">
-                  <label>Apellidos</label>
-                  <span>:</span>
-                  <div className="input-wrapper">
-                    <input type="text" className="wireframe-input" />
-                  </div>
-                </div>
-                <div className="form-field">
-                  <label>ID</label>
-                  <span>:</span>
-                  <div className="input-wrapper">
-                    <input type="text" className="wireframe-input" />
+                    <input 
+                      type="text" 
+                      name="studentName"
+                      value={alertForm.studentName}
+                      onChange={handleAlertChange}
+                      className="wireframe-input" 
+                      placeholder="Nombre estudiante"
+                    />
                   </div>
                 </div>
                 <div className="form-field">
                   <label>Edad</label>
                   <span>:</span>
                   <div className="input-wrapper">
-                    <input type="text" className="wireframe-input" />
+                    <input 
+                      type="text" 
+                      name="studentAge"
+                      value={alertForm.studentAge}
+                      onChange={handleAlertChange}
+                      className="wireframe-input" 
+                      placeholder="Edad"
+                    />
                   </div>
                 </div>
                 <div className="form-field">
                   <label>Grado</label>
                   <span>:</span>
                   <div className="input-wrapper">
-                    <input type="text" className="wireframe-input" />
+                    <input 
+                      type="text" 
+                      name="studentGrade"
+                      value={alertForm.studentGrade}
+                      onChange={handleAlertChange}
+                      className="wireframe-input" 
+                      placeholder="Grado"
+                    />
+                  </div>
+                </div>
+                <div className="form-field">
+                  <label>Lugar de Nac.</label>
+                  <span>:</span>
+                  <div className="input-wrapper">
+                    <input 
+                      type="text" 
+                      name="lugarNacimiento"
+                      value={alertForm.lugarNacimiento}
+                      onChange={handleAlertChange}
+                      className="wireframe-input" 
+                      placeholder="Lugar de nacimiento"
+                    />
+                  </div>
+                </div>
+                <div className="form-field">
+                  <label>Nombre Padre</label>
+                  <span>:</span>
+                  <div className="input-wrapper">
+                    <input 
+                      type="text" 
+                      name="nombrePadre"
+                      value={alertForm.nombrePadre}
+                      onChange={handleAlertChange}
+                      className="wireframe-input" 
+                      placeholder="Nombre del padre"
+                    />
+                  </div>
+                </div>
+                <div className="form-field">
+                  <label>Nombre Madre</label>
+                  <span>:</span>
+                  <div className="input-wrapper">
+                    <input 
+                      type="text" 
+                      name="nombreMadre"
+                      value={alertForm.nombreMadre}
+                      onChange={handleAlertChange}
+                      className="wireframe-input" 
+                      placeholder="Nombre de la madre"
+                    />
                   </div>
                 </div>
                 <div className="form-field">
                   <label>Usuario</label>
                   <span>:</span>
                   <div className="input-wrapper">
-                    <input type="text" className="wireframe-input" />
+                    <input 
+                      type="text" 
+                      name="studentUsername"
+                      value={alertForm.studentUsername}
+                      onChange={handleAlertChange}
+                      className="wireframe-input" 
+                      placeholder="usuario@email.com"
+                    />
                   </div>
                 </div>
               </div>
 
               <div className="alert-description">
-                <p><strong>ORDEN DE ACCION:</strong> Se le solicita de manera inmediata al funcionario tomar acciones con el fin de identificar la conducta y prevenir cualquier alteración de la usuaria.</p>
+                <label>Descripción de la Alerta</label>
+                <textarea 
+                  name="description"
+                  value={alertForm.description}
+                  onChange={handleAlertChange}
+                  className="wireframe-textarea"
+                  placeholder="ORDEN DE ACCION: Se le solicita de manera inmediata al funcionario tomar acciones..."
+                />
               </div>
             </div>
 
@@ -903,24 +1227,224 @@ function AdminDashboard({ user, onLogout }) {
               <div className="footer-items">
                 <div className="footer-item">
                   <span>Plazo</span>
-                  <span className="footer-value">xxxx</span>
+                  <input 
+                    type="date" 
+                    name="deadline"
+                    value={alertForm.deadline}
+                    onChange={handleAlertChange}
+                    className="footer-input"
+                  />
                 </div>
                 <div className="footer-item">
                   <span>Asignado a:</span>
-                  <span className="footer-value"></span>
+                  <select 
+                    name="assignedTo"
+                    value={alertForm.assignedTo}
+                    onChange={handleAlertChange}
+                    className="footer-select"
+                  >
+                    <option value="">Seleccionar...</option>
+                    {availableUsers.map(u => (
+                      <option key={u.id} value={u.name}>{u.name} ({u.role})</option>
+                    ))}
+                  </select>
                 </div>
               </div>
-              <button className="remit-btn">Remitir</button>
+              <button className="remit-btn" onClick={handleRemitAlert}>Remitir</button>
+            </div>
+
+            {alertMessage && (
+              <div className={`alert-message ${alertMessage.includes('Error') ? 'error' : 'success'}`}>
+                {alertMessage}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeAlertTab === 'alertas' && (
+          <div className="alerts-content">
+            <div className="alerts-list-full">
+              <h3 className="alerts-section-title">Listado de Alertas</h3>
+              {loadingAlerts ? (
+                <p>Cargando alertas...</p>
+              ) : alerts.length === 0 ? (
+                <p className="empty-message">No hay alertas registradas</p>
+              ) : (
+                <div className="alerts-table-full">
+                  <div className="alerts-table-header">
+                    <span>Ticket</span>
+                    <span>Estudiante</span>
+                    <span>Tipo</span>
+                    <span>Asignado a</span>
+                    <span>Estado</span>
+                    <span>Fecha</span>
+                    <span>Acciones</span>
+                  </div>
+                  {alerts.map(alert => (
+                    <div key={alert.id} className="alerts-table-row">
+                      <span>{alert.ticketNumber}</span>
+                      <span>{alert.studentName}</span>
+                      <span>{alert.alertType}</span>
+                      <span>{alert.assignedTo || '-'}</span>
+                      <span className={`status-${alert.status?.toLowerCase()}`}>{alert.status}</span>
+                      <span>{alert.alertDate}</span>
+                      <span>
+                        <button className="action-btn-small delete" onClick={() => handleDeleteAlert(alert.id)} title="Eliminar">🗑️</button>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {activeAlertTab !== 'asignacion' && (
-          <div className="alerts-content empty">
-            <p className="empty-message">Contenido en desarrollo para {activeAlertTab === 'alertas' ? 'Alertas' : activeAlertTab === 'acciones' ? 'Acciones' : 'Estado Proceso'}</p>
+        {activeAlertTab === 'acciones' && (
+          <div className="alerts-content">
+            <div className="acciones-section">
+              <h3 className="alerts-section-title">Acciones sobre Alertas</h3>
+              {alerts.length === 0 ? (
+                <p className="empty-message">No hay alertas para gestionar</p>
+              ) : (
+                <div className="acciones-list">
+                  {alerts.map(alert => (
+                    <div key={alert.id} className="accion-card">
+                      <div className="accion-header">
+                        <span className="accion-ticket">{alert.ticketNumber}</span>
+                        <span className={`accion-status status-${alert.status?.toLowerCase()}`}>{alert.status}</span>
+                      </div>
+                      <div className="accion-body">
+                        <p><strong>Estudiante:</strong> {alert.studentName}</p>
+                        <p><strong>Tipo:</strong> {alert.alertType}</p>
+                      </div>
+                      <div className="accion-actions">
+                        <button 
+                          className="action-btn-small edit"
+                          onClick={() => handleUpdateAlertStatus(alert.id, 'En Proceso')}
+                          disabled={alert.status === 'Resuelto'}
+                        >
+                          Iniciar Proceso
+                        </button>
+                        <button 
+                          className="action-btn-small"
+                          style={{background: '#059669', color: 'white'}}
+                          onClick={() => handleUpdateAlertStatus(alert.id, 'Resuelto')}
+                          disabled={alert.status === 'Resuelto'}
+                        >
+                          Marcar Resuelto
+                        </button>
+                        <button 
+                          className="action-btn-small delete"
+                          onClick={() => handleDeleteAlert(alert.id)}
+                          title="Eliminar"
+                        >
+                          🗑️ Eliminar
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeAlertTab === 'estadoProceso' && (
+          <div className="alerts-content">
+            <div className="estado-section">
+              <h3 className="alerts-section-title">Estado del Proceso</h3>
+              <div className="estado-stats">
+                <div className="estado-card">
+                  <span className="estado-count">{alerts.filter(a => a.status === 'Pendiente').length}</span>
+                  <span className="estado-label">Pendientes</span>
+                </div>
+                <div className="estado-card proceso">
+                  <span className="estado-count">{alerts.filter(a => a.status === 'En Proceso').length}</span>
+                  <span className="estado-label">En Proceso</span>
+                </div>
+                <div className="estado-card success">
+                  <span className="estado-count">{alerts.filter(a => a.status === 'Resuelto').length}</span>
+                  <span className="estado-label">Resueltos</span>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
+
+      {/* Modal de detalles de usuario */}
+      {viewingUser && (
+        <div className="modal-overlay" onClick={closeViewModal}>
+          <div className="modal-content user-details-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Detalles del Usuario</h3>
+              <button className="close-modal-btn" onClick={closeViewModal}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div className="detail-row">
+                <span className="detail-label">Nombre:</span>
+                <span className="detail-value">{viewingUser.name}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Documento:</span>
+                <span className="detail-value">{viewingUser.documentId}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Email:</span>
+                <span className="detail-value">{viewingUser.email}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Rol:</span>
+                <span className="detail-value">{viewingUser.role}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Teléfono:</span>
+                <span className="detail-value">{viewingUser.phone || 'No registrado'}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Dirección:</span>
+                <span className="detail-value">{viewingUser.address || 'No registrada'}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Fecha de Nac.:</span>
+                <span className="detail-value">{viewingUser.birthDate ? viewingUser.birthDate.split('T')[0] : 'No registrada'}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Edad:</span>
+                <span className="detail-value">{viewingUser.edad || 'No registrada'}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Lugar de Nac.:</span>
+                <span className="detail-value">{viewingUser.lugarNacimiento || 'No registrado'}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Nombre Padre:</span>
+                <span className="detail-value">{viewingUser.nombrePadre || 'No registrado'}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Nombre Madre:</span>
+                <span className="detail-value">{viewingUser.nombreMadre || 'No registrado'}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Grado:</span>
+                <span className="detail-value">{viewingUser.grado || 'No registrado'}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Estado:</span>
+                <span className={`detail-value status-${viewingUser.status?.toLowerCase()}`}>{viewingUser.status}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Creado:</span>
+                <span className="detail-value">{viewingUser.createdAt ? new Date(viewingUser.createdAt).toLocaleString() : 'No disponible'}</span>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="action-btn" onClick={() => { closeViewModal(); handleEdit(viewingUser); }}>Editar Usuario</button>
+              <button className="action-btn cancel" onClick={closeViewModal}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   )

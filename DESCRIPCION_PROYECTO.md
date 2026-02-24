@@ -15,12 +15,13 @@ PrediVersa-V.1/
 │   │   ├── app.js             # Configuración de Express
 │   │   ├── server.js          # Punto de entrada del servidor
 │   │   ├── routes/
-│   │   │   └── auth.js        # Rutas de autenticación (login)
+│   │   │   └── auth.js        # Rutas de autenticación, usuarios y alertas
 │   │   ├── db/
-│   │   │   └── users.js       # Base de datos de usuarios (hardcoded)
-│   │   ├── controllers/       # (Vacío - para expansión futura)
-│   │   ├── middlewares/       # (Vacío - para expansión futura)
-│   │   └── services/          # (Vacío - para expansión futura)
+│   │   │   ├── connection.js  # Conexión a MySQL AWS RDS
+│   │   │   └── users.js       # CRUD de usuarios en MySQL
+│   │   └── database/
+│   │       ├── schema.sql     # Esquema de base de datos
+│   │       └── migrate_users.js  # Migración de columnas
 │   ├── .env                   # Configuración de entorno
 │   ├── package.json           # Dependencias del backend
 │   └── node_modules/          # Módulos instalados
@@ -55,6 +56,10 @@ PrediVersa-V.1/
     │       ├── CollaboratorDashboard.jsx  # Dashboard para colaboradores
     │       ├── CollaboratorDashboard.css
     │       ├── ProtectedRoute.jsx      # Componente para rutas protegidas
+    │       ├── UserManagement.jsx      # Gestión de usuarios
+    │       ├── UserManagement.css
+    │       ├── Reports.jsx             # Reportes
+    │       └── Reports.css
     │   ├── .env                # Configuración de entorno (VITE_API_URL)
     │   ├── vite.config.js      # Configuración de Vite
     │   ├── package.json        # Dependencias del frontend
@@ -526,6 +531,56 @@ Response (200):
 }
 ```
 
+### Usuarios (requiere JWT)
+```
+GET /api/auth/users
+GET /api/auth/users?documentId=123456  # Buscar por documento
+
+POST /api/auth/users
+Body:
+{
+  "documentId": "string",
+  "email": "string",
+  "password": "string",
+  "name": "string",
+  "role": "student|admin|collaborator",
+  "phone": "string",
+  "address": "string",
+  "birthDate": "string",
+  "edad": "number",
+  "lugarNacimiento": "string",
+  "nombrePadre": "string",
+  "nombreMadre": "string",
+  "grado": "string"
+}
+
+PUT /api/auth/users/:id
+DELETE /api/auth/users/:id
+```
+
+### Alertas (requiere JWT)
+```
+GET /api/auth/alerts
+
+POST /api/auth/alerts
+Body:
+{
+  "studentDocumentId": "string",
+  "studentName": "string",
+  "studentAge": "string",
+  "lugarNacimiento": "string",
+  "nombrePadre": "string",
+  "nombreMadre": "string",
+  "studentGrade": "string",
+  "studentUsername": "string",
+  "description": "string",
+  "status": "Pendiente|En Proceso|Resuelto"
+}
+
+PUT /api/auth/alerts/:id
+DELETE /api/auth/alerts/:id
+```
+
 ### Health Check
 ```
 GET /api/health
@@ -544,6 +599,10 @@ Response (200):
 PORT=5000
 NODE_ENV=development
 JWT_SECRET=tu_secreto_super_seguro_prediversa_123
+DB_HOST=prediversa-db.ce1qo0a0sygg.us-east-1.rds.amazonaws.com
+DB_USER=admin
+DB_PASSWORD=tu_password_mysql
+DB_DATABASE=PrediVersa
 ```
 
 ### Frontend (.env)
@@ -594,14 +653,46 @@ npm start      # Ejecuta con node (no nodemon)
 
 ## 📦 ESTRUCTURA DE DATOS
 
-### Usuario (Base de datos hardcoded)
+### Usuario (MySQL AWS RDS)
 ```javascript
 {
   id: number,
-  name: string,
+  documentId: string,
   email: string,
-  password: string,  // Sin encriptar (TODO: implementar bcrypt)
-  role: "student|admin|collaborator"
+  password: string (hash bcrypt),
+  name: string,
+  role: "student|admin|collaborator",
+  phone: string,
+  address: string,
+  birthDate: date,
+  edad: number,
+  lugarNacimiento: string,
+  nombrePadre: string,
+  nombreMadre: string,
+  grado: string,
+  status: "Activo|Inactivo",
+  createdAt: timestamp,
+  updatedAt: timestamp
+}
+```
+
+### Alerta (MySQL AWS RDS)
+```javascript
+{
+  id: number,
+  studentDocumentId: string,
+  studentName: string,
+  studentAge: string,
+  lugarNacimiento: string,
+  nombrePadre: string,
+  nombreMadre: string,
+  studentGrade: string,
+  studentUsername: string,
+  userId: number,
+  description: string,
+  status: "Pendiente|En Proceso|Resuelto",
+  createdAt: timestamp,
+  updatedAt: timestamp
 }
 ```
 
@@ -622,6 +713,7 @@ npm start      # Ejecuta con node (no nodemon)
 
 ✅ Página de inicio pública con hero section
 ✅ Autenticación por email/password con JWT
+✅ Base de datos MySQL AWS RDS
 ✅ Tres tipos de dashboards según rol
 ✅ Rutas protegidas con verificación de rol
 ✅ Chatbot Botpress integrado (público y para estudiantes)
@@ -629,6 +721,15 @@ npm start      # Ejecuta con node (no nodemon)
 ✅ LocalStorage para persistencia de sesión
 ✅ Logout con limpieza de datos
 ✅ Health check del backend
+
+### AdminDashboard
+✅ CRUD completo de usuarios
+✅ CRUD completo de alertas
+✅ Autocompletado de datos del estudiante por documento
+✅ 4 pestañas: Alertas, Asignación, Acciones, Estado Proceso
+✅ Modal de detalles de usuario
+✅ Exportar usuarios a CSV
+✅ Actualizar estado de alertas (Pendiente → En Proceso → Resuelto)
 
 ---
 
@@ -692,12 +793,12 @@ removeBotpressScripts() {
 
 ---
 
-## ⚠️ LIMITACIONES Y TODO
+## ⚠️ LIMITACIONES Y MEJORAS
 
-### 🔴 SEGURIDAD - CRÍTICO PARA PRODUCCIÓN
-
-- ❌ **Contraseñas almacenadas en texto plano** (backend/src/db/users.js)
-  - Necesita: Implementación de bcryptjs (ya disponible en package.json)
+### ✅ Implementado
+- Contraseñas hasheadas con bcryptjs
+- Base de datos MySQL AWS RDS
+- CRUD completo de usuarios y alertas
   - Acción: Hash de contraseñas en login y registro
   - Prioridad: ALTA
 
