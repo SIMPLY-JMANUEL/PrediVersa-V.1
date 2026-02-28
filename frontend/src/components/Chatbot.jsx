@@ -28,6 +28,21 @@ function removeBotpressScripts() {
 function Chatbot({ isAuthenticated, isLoginOpen }) {
   const location = useLocation()
 
+  // Botpress configuration URLs - Replace with your own bot IDs
+  const PUBLIC_CONFIG_URL = 'https://files.bpcontent.cloud/2026/02/24/03/20260224033302-7VFXIL75.js'
+  const STUDENT_CONFIG_URL = 'https://files.bpcontent.cloud/2026/02/24/03/20260224033302-7VFXIL75.js'
+
+  // Get user data from localStorage
+  const getUserData = () => {
+    try {
+      const userData = localStorage.getItem('user')
+      if (userData) {
+        return JSON.parse(userData)
+      }
+    } catch (e) {}
+    return null
+  }
+
   useEffect(() => {
     // Si el login está abierto, ocultar chatbot
     if (isLoginOpen) {
@@ -40,8 +55,14 @@ function Chatbot({ isAuthenticated, isLoginOpen }) {
     const isPublicHome = location.pathname === '/'
     const isStudentRoute = location.pathname === '/student'
 
+    // Show public chatbot on home page when NOT authenticated
+    // Get user data and role
+    const userData = getUserData()
+    const userRole = userData?.role || null
+    
+    // Show student chatbot on ANY route when authenticated
     const showPublic = isPublicHome && !isAuthenticated
-    const showStudent = isStudentRoute && isAuthenticated
+    const showStudent = isAuthenticated
 
     // Si no se debe mostrar ningún chatbot
     if (!showPublic && !showStudent) {
@@ -58,15 +79,15 @@ function Chatbot({ isAuthenticated, isLoginOpen }) {
       if (!document.getElementById(PUBLIC_INJECT_ID)) {
         const script1 = document.createElement('script')
         script1.id = PUBLIC_INJECT_ID
-        script1.src = 'https://cdn.botpress.cloud/webchat/v3.5/inject.js'
+        script1.src = 'https://cdn.botpress.cloud/webchat/v3.6/inject.js'
         script1.async = true
         document.body.appendChild(script1)
       }
-
+      
       if (!document.getElementById(PUBLIC_CONFIG_ID)) {
         const script2 = document.createElement('script')
         script2.id = PUBLIC_CONFIG_ID
-        script2.src = 'https://files.bpcontent.cloud/2026/02/01/22/20260201225345-6RFZIFLO.js'
+        script2.src = PUBLIC_CONFIG_URL
         script2.defer = true
         document.body.appendChild(script2)
       }
@@ -77,16 +98,33 @@ function Chatbot({ isAuthenticated, isLoginOpen }) {
       if (!document.getElementById(STUDENT_INJECT_ID)) {
         const script1 = document.createElement('script')
         script1.id = STUDENT_INJECT_ID
-        script1.src = 'https://cdn.botpress.cloud/webchat/v3.5/inject.js'
+        script1.src = 'https://cdn.botpress.cloud/webchat/v3.6/inject.js'
         script1.async = true
         document.body.appendChild(script1)
       }
-
+      
       if (!document.getElementById(STUDENT_CONFIG_ID)) {
         const script2 = document.createElement('script')
         script2.id = STUDENT_CONFIG_ID
-        script2.src = 'https://files.bpcontent.cloud/2026/02/04/01/20260204011551-9Y10Y2F8.js'
+        script2.src = STUDENT_CONFIG_URL
         script2.defer = true
+        script2.onload = () => {
+          // Pass user role to Botpress after config loads
+          setTimeout(() => {
+            if (window.botpressWebChat) {
+              window.botpressWebChat.configure({
+                userId: userData?.email || 'authenticated-user',
+                extra: {
+                  role: userRole,
+                  name: userData?.name,
+                  email: userData?.email
+                }
+              }).catch(() => {
+                console.log('Botpress configure not available yet')
+              })
+            }
+          }, 1000)
+        }
         document.body.appendChild(script2)
       }
     }

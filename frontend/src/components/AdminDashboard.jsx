@@ -900,10 +900,7 @@ function AdminDashboard({ user, onLogout }) {
                 </button>
               )}
               
-              <div className="action-box flex-1">
-                <span>Creación usuario</span>
-                <span className="action-value">Usuario se genera automáticamente</span>
-              </div>
+
             </div>
 
             {saveMessage && (
