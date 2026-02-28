@@ -33,7 +33,7 @@ FRONTEND:
   - CSS Modular
 
 INTEGRACIONES:
-  - Botpress Cloud - Chatbot con IA (dos instancias)
+  - Botpress Cloud - Chatbot con IA (configuración única con datos de usuario)
 
 1.3 ESTRUCTURA DE CARPETAS
 --------------------------
@@ -216,8 +216,11 @@ Login:
   - Redirige según rol tras login exitoso
 
 Chatbot:
-  - Integración Botpress
-  - Dos instancias: pública (homepage) y autenticada (dashboards)
+  - Integración Botpress Cloud Webchat v3.6
+  - Una sola configuración que detecta el rol del usuario
+  - Datos pasados a Botpress: role, name, email
+  - URL de configuración: https://files.bpcontent.cloud/2026/02/24/03/20260224033302-7VFXIL75.js
+  - Se muestra en homepage (público) y en dashboards (autenticado)
 
 ================================================================================
                         SECCIÓN 5: PROBLEMAS IDENTIFICADOS
@@ -581,6 +584,10 @@ Acciones:
 [x] Autocompletado de estudiante por documento - ✅ COMPLETADO
 [x] Modal de detalles de usuario - ✅ COMPLETADO
 [x] Limpieza de código (console.log) - ✅ COMPLETADO
+[x] Integración con cuenta propia de Botpress - ✅ COMPLETADO
+[x] Chatbot pasa datos de usuario (rol, email) a Botpress - ✅ COMPLETADO
+[x] Chatbot se muestra en todas las rutas autenticadas - ✅ COMPLETADO
+[x] Eliminación de botón innecesario en AdminDashboard - ✅ COMPLETADO
 
 [ ] Implementar recuperación de contraseña
 [ ] Agregar más gráficos en reportes
@@ -589,6 +596,56 @@ Acciones:
 [ ] Implementar dark mode
 [ ] Implementar notificaciones en tiempo real
 [ ] Agregar logs de auditoría
+
+================================================================================
+                    SECCIÓN 7: INTEGRACIÓN CHATBOT BOTPRESS
+================================================================================
+
+7.1 CONFIGURACIÓN ACTUAL
+------------------------
+El chatbot de PrediVersa está integrado con Botpress Cloud Webchat v3.6.
+
+Archivos relacionados:
+- frontend/src/components/Chatbot.jsx - Componente principal del chatbot
+- frontend/src/components/Chatbot.css - Estilos del chatbot
+
+7.2 FUNCIONALIDADES IMPLEMENTADAS
+---------------------------------
+- Chatbot se muestra en la página de inicio (sin autenticación)
+- Chatbot se muestra en todas las rutas cuando el usuario está autenticado
+- Se pasan datos del usuario a Botpress:
+  * role: Rol del usuario (Estudiante, Colaboradores, Administrador)
+  * name: Nombre del usuario
+  * email: Correo electrónico del usuario
+
+7.3 URL DE CONFIGURACIÓN
+-----------------------
+- Config: https://files.bpcontent.cloud/2026/02/24/03/20260224033302-7VFXIL75.js
+- Inject: https://cdn.botpress.cloud/webchat/v3.6/inject.js
+
+7.4 CÓMO CONFIGURAR FLUJOS POR ROL
+-----------------------------------
+En Botpress Studio:
+1. Ir a Chatflow >编辑 el flujo principal
+2. Usar la variable {{user.extra.role}} para detectar el rol
+3. Crear diferentes nodos para cada rol:
+   - Si role = 'Estudiante' → mensaje para estudiantes
+   - Si role = 'Colaboradores' → mensaje para colaboradores
+   - Si role = 'Administrador' → mensaje para administradores
+
+================================================================================
+                    SECCIÓN 8: CAMBIOS ADMIN DASHBOARD
+================================================================================
+
+8.1 ELIMINACIÓN DE BOTÓN DE CREACIÓN DE USUARIO
+------------------------------------------------
+Se eliminó el botón "Creación usuario" que aparecía junto al botón 
+"Guardar Información" ya que:
+- No tenía funcionalidad real
+- Los usuarios se generan automáticamente desde los datos de estudiantes
+
+Archivos modificados:
+- frontend/src/components/AdminDashboard.jsx
 
 ================================================================================
                                FIN DEL DOCUMENTO
