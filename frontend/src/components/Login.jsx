@@ -88,7 +88,6 @@ function Login({ isOpen, onClose, onLoginSuccess }) {
               placeholder="tu@email.com"
               disabled={loading}
             />
-            <small>Prueba: estudiante@prediversa.com, admin@prediversa.com, colaborador@prediversa.com</small>
           </div>
 
           <div className="form-group">
@@ -101,7 +100,6 @@ function Login({ isOpen, onClose, onLoginSuccess }) {
               placeholder="••••••••"
               disabled={loading}
             />
-            <small>Prueba: estudiante123, admin123, colaborador123</small>
           </div>
 
           {error && <p className="login-error">{error}</p>}

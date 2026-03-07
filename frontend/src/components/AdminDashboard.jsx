@@ -40,6 +40,7 @@ function AdminDashboard({ user, onLogout }) {
     nombreMadre: '',
     nombrePadre: '',
     email: '',
+    password: '',
     grado: '',
     rol: 'Estudiante'
   })
@@ -485,6 +486,7 @@ function AdminDashboard({ user, onLogout }) {
           nombreMadre: '',
           nombrePadre: '',
           email: '',
+          password: '',
           grado: '',
           rol: 'Estudiante'
         })
@@ -516,6 +518,7 @@ function AdminDashboard({ user, onLogout }) {
       nombreMadre: userToEdit.nombreMadre || '',
       nombrePadre: userToEdit.nombrePadre || '',
       email: userToEdit.email || '',
+      password: '',
       grado: userToEdit.grado || '',
       rol: userToEdit.role || 'Estudiante'
     })
@@ -544,7 +547,8 @@ function AdminDashboard({ user, onLogout }) {
           lugarNacimiento: userForm.lugarNacimiento,
           nombrePadre: userForm.nombrePadre,
           nombreMadre: userForm.nombreMadre,
-          grado: userForm.grado
+          grado: userForm.grado,
+          password: userForm.password || null
         })
       })
 
@@ -565,6 +569,7 @@ function AdminDashboard({ user, onLogout }) {
           nombreMadre: '',
           nombrePadre: '',
           email: '',
+          password: '',
           grado: '',
           rol: 'Estudiante'
         })
@@ -632,6 +637,7 @@ function AdminDashboard({ user, onLogout }) {
       nombreMadre: '',
       nombrePadre: '',
       email: '',
+      password: '',
       grado: '',
       rol: 'Estudiante'
     })
@@ -747,18 +753,6 @@ function AdminDashboard({ user, onLogout }) {
           >
             Verificación de usuario
           </button>
-          <button 
-            className={`tab-btn ${activeTab === 'resultado' ? 'active' : 'inactive'}`}
-            onClick={() => setActiveTab('resultado')}
-          >
-            Resultado
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'estado' ? 'active' : ''}`}
-            onClick={() => setActiveTab('estado')}
-          >
-            Estado
-          </button>
         </div>
 
         {/* PESTAÑA: CREACIÓN DE USUARIO */}
@@ -793,6 +787,7 @@ function AdminDashboard({ user, onLogout }) {
                 </div>
                 {formErrors.id && <span className="field-error">{formErrors.id}</span>}
                 
+                {userForm.rol === 'Estudiante' ? (
                 <div className="form-field">
                   <label>Edad</label>
                   <span>:</span>
@@ -800,9 +795,11 @@ function AdminDashboard({ user, onLogout }) {
                     <input type="text" name="edad" value={userForm.edad} onChange={handleInputChange} className="wireframe-input" placeholder="Edad" />
                   </div>
                 </div>
+                ) : null}
               </div>
 
               <div className="form-column">
+                {userForm.rol === 'Estudiante' ? (
                 <div className="form-field">
                   <label>F/Nacimiento</label>
                   <span>:</span>
@@ -810,6 +807,8 @@ function AdminDashboard({ user, onLogout }) {
                     <input type="date" name="fechaNacimiento" value={userForm.fechaNacimiento} onChange={handleInputChange} className="wireframe-input" />
                   </div>
                 </div>
+                ) : null}
+                {userForm.rol === 'Estudiante' ? (
                 <div className="form-field">
                   <label>L/ Nacimiento</label>
                   <span>:</span>
@@ -817,6 +816,7 @@ function AdminDashboard({ user, onLogout }) {
                     <input type="text" name="lugarNacimiento" value={userForm.lugarNacimiento} onChange={handleInputChange} className="wireframe-input" placeholder="Lugar de nacimiento" />
                   </div>
                 </div>
+                ) : null}
                 <div className={`form-field ${formErrors.telefono ? 'has-error' : ''}`}>
                   <label>Teléfono</label>
                   <span>:</span>
@@ -836,6 +836,7 @@ function AdminDashboard({ user, onLogout }) {
               </div>
 
               <div className="form-column">
+                {userForm.rol === 'Estudiante' ? (
                 <div className="form-field">
                   <label>N/Madre</label>
                   <span>:</span>
@@ -843,6 +844,8 @@ function AdminDashboard({ user, onLogout }) {
                     <input type="text" name="nombreMadre" value={userForm.nombreMadre} onChange={handleInputChange} className="wireframe-input" placeholder="Nombre madre" />
                   </div>
                 </div>
+                ) : null}
+                {userForm.rol === 'Estudiante' ? (
                 <div className="form-field">
                   <label>N/Padre</label>
                   <span>:</span>
@@ -850,6 +853,7 @@ function AdminDashboard({ user, onLogout }) {
                     <input type="text" name="nombrePadre" value={userForm.nombrePadre} onChange={handleInputChange} className="wireframe-input" placeholder="Nombre padre" />
                   </div>
                 </div>
+                ) : null}
                 <div className={`form-field ${formErrors.email ? 'has-error' : ''}`}>
                   <label>Email *</label>
                   <span>:</span>
@@ -860,12 +864,22 @@ function AdminDashboard({ user, onLogout }) {
                 {formErrors.email && <span className="field-error">{formErrors.email}</span>}
                 
                 <div className="form-field">
+                  <label>Contraseña *</label>
+                  <span>:</span>
+                  <div className="input-wrapper">
+                    <input type="password" name="password" value={userForm.password} onChange={handleInputChange} className="wireframe-input" placeholder="Contraseña" />
+                  </div>
+                </div>
+                
+                {userForm.rol === 'Estudiante' ? (
+                <div className="form-field">
                   <label>Grado</label>
                   <span>:</span>
                   <div className="input-wrapper">
                     <input type="text" name="grado" value={userForm.grado} onChange={handleInputChange} className="wireframe-input" placeholder="Grado" />
                   </div>
                 </div>
+                ) : null}
               </div>
             </div>
 
@@ -948,13 +962,15 @@ function AdminDashboard({ user, onLogout }) {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
               />
-              <span className="search-count">Total: {filteredUsers.length} usuarios</span>
-              <button className="export-btn" onClick={() => exportToCSV(filteredUsers)}>
-                📥 Exportar CSV
-              </button>
+              {searchTerm ? (
+                <span className="search-count">Resultados: {filteredUsers.length} usuarios</span>
+              ) : (
+                <span className="search-count">Escribe para buscar</span>
+              )}
             </div>
             
-            <div className="users-table full-list">
+            {searchTerm ? (
+              <div className="users-table full-list">
               <div className="users-table-header">
                 <span className="sortable" onClick={() => handleSort('name')}>
                   Nombre {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
@@ -991,6 +1007,11 @@ function AdminDashboard({ user, onLogout }) {
                 ))
               )}
             </div>
+            ) : (
+              <div className="search-placeholder">
+                <p>🔍 Escribe en el buscador para encontrar usuarios</p>
+              </div>
+            )}
 
             {/* Paginación */}
             {totalPages > 1 && (

@@ -438,6 +438,19 @@
   font-weight: 600;
 }
 
+.search-placeholder {
+  text-align: center;
+  padding: 3rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  color: #6b7280;
+}
+
+.search-placeholder p {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
 .users-table.full-list {
   max-height: 400px;
   overflow-y: auto;
