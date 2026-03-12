@@ -11,7 +11,7 @@ body,
 }
 
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: #F2F9FC;
   color: #3A6F85;
   display: flex;

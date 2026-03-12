@@ -1,11 +1,8 @@
-/* Ocultar Botpress cuando no corresponde mostrarlo */
-body.hide-botpress [class*="bpw-"] ,
-body.hide-botpress [id^="bp-"] ,
-body.hide-botpress .bpw-widget,
-body.hide-botpress .bpw-chat-bubble,
-body.hide-botpress #bp-web-widget-container,
-body.hide-botpress iframe[src*="botpress"] {
+/* Opcioón Nuclear: Ocultar TODO lo que inyecten scripts de terceros fuera del root de React cuando no corresponda mostrarlo */
+body.hide-botpress > *:not(#root) {
 	display: none !important;
+	opacity: 0 !important;
 	visibility: hidden !important;
 	pointer-events: none !important;
+	z-index: -99999 !important;
 }

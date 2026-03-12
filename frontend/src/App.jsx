@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Main from './components/Main'
 import Footer from './components/Footer'
@@ -12,6 +12,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import RoleProtectedRoute from './components/RoleProtectedRoute'
 
 function AppRoutes({ user, isLoginOpen, setIsLoginOpen, handleLogin, handleLogout }) {
+  const location = useLocation()
   return (
     <>
       <Routes>
@@ -37,7 +38,7 @@ function AppRoutes({ user, isLoginOpen, setIsLoginOpen, handleLogin, handleLogou
           </RoleProtectedRoute>
         } />
       </Routes>
-      <Chatbot isAuthenticated={!!user} isLoginOpen={isLoginOpen} />
+      <Chatbot key={location.pathname} isAuthenticated={!!user} isLoginOpen={isLoginOpen} />
       <Footer />
       <Login 
         isOpen={isLoginOpen} 

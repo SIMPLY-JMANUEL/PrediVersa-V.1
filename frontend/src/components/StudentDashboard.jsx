@@ -1,4 +1,5 @@
 import DashboardHeader from './DashboardHeader'
+import { BookOpen, LineChart, CheckSquare, GraduationCap } from 'lucide-react'
 import './StudentDashboard.css'
 
 function StudentDashboard({ user, onLogout }) {
@@ -14,23 +15,35 @@ function StudentDashboard({ user, onLogout }) {
 
         <div className="dashboard-grid">
           <div className="dashboard-card">
-            <h3>📚 Mis Cursos</h3>
-            <p>Accede a tus cursos y materiales de estudio.</p>
+            <div className="card-icon-wrapper">
+              <BookOpen className="card-icon" size={28} />
+            </div>
+            <h3>Mis Cursos</h3>
+            <p>Accede a tus cursos y materiales de estudio interactivos.</p>
           </div>
 
           <div className="dashboard-card">
-            <h3>📊 Mi Progreso</h3>
-            <p>Visualiza tu avance en las diferentes asignaturas.</p>
+            <div className="card-icon-wrapper">
+              <LineChart className="card-icon" size={28} />
+            </div>
+            <h3>Mi Progreso</h3>
+            <p>Visualiza tu avance detallado en las diferentes asignaturas.</p>
           </div>
 
           <div className="dashboard-card">
-            <h3>📝 Tareas</h3>
-            <p>Entrega tus tareas y revisa las pendientes.</p>
+            <div className="card-icon-wrapper">
+              <CheckSquare className="card-icon" size={28} />
+            </div>
+            <h3>Tareas</h3>
+            <p>Entrega tus tareas a tiempo y revisa las pendientes.</p>
           </div>
 
           <div className="dashboard-card">
-            <h3>🎓 Calificaciones</h3>
-            <p>Consulta tus calificaciones y desempeño.</p>
+            <div className="card-icon-wrapper">
+              <GraduationCap className="card-icon" size={28} />
+            </div>
+            <h3>Calificaciones</h3>
+            <p>Consulta tus calificaciones, retroalimentación y desempeño general.</p>
           </div>
         </div>
       </div>

@@ -4,7 +4,7 @@ import './Login.css'
 
 function Login({ isOpen, onClose, onLoginSuccess }) {
   const navigate = useNavigate()
-  const [usuario, setUsuario] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -13,7 +13,7 @@ function Login({ isOpen, onClose, onLoginSuccess }) {
     e.preventDefault()
     setError('')
     
-    if (!usuario || !password) {
+    if (!email || !password) {
       setError('Por favor completa todos los campos')
       return
     }
@@ -27,7 +27,7 @@ function Login({ isOpen, onClose, onLoginSuccess }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ usuario, password })
+        body: JSON.stringify({ email, password })
       })
 
       const data = await response.json()
@@ -41,7 +41,7 @@ function Login({ isOpen, onClose, onLoginSuccess }) {
         onLoginSuccess(data.user)
         
         // Limpiar formulario
-        setUsuario('')
+        setEmail('')
         setPassword('')
         
         // Redirigir según el rol
@@ -79,16 +79,16 @@ function Login({ isOpen, onClose, onLoginSuccess }) {
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
-            <label htmlFor="usuario">Usuario</label>
+            <label htmlFor="email">Email</label>
             <input
-              type="text"
-              id="usuario"
-              value={usuario}
-              onChange={(e) => setUsuario(e.target.value)}
-              placeholder="tu_usuario"
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="tu_email@ejemplo.com"
               disabled={loading}
             />
-            <small>Ingresa tu usuario registrado en el sistema</small>
+            <small>Ingresa tu email registrado en el sistema</small>
           </div>
 
           <div className="form-group">
