@@ -1,0 +1,11 @@
+/* Ocultar Botpress cuando no corresponde mostrarlo */
+body.hide-botpress [class*="bpw-"] ,
+body.hide-botpress [id^="bp-"] ,
+body.hide-botpress .bpw-widget,
+body.hide-botpress .bpw-chat-bubble,
+body.hide-botpress #bp-web-widget-container,
+body.hide-botpress iframe[src*="botpress"] {
+	display: none !important;
+	visibility: hidden !important;
+	pointer-events: none !important;
+}
