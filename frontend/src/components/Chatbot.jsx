@@ -41,12 +41,22 @@ function Chatbot({ isAuthenticated, isLoginOpen }) {
   const CONFIG_JS = 'https://files.bpcontent.cloud/2026/02/01/22/20260201225345-6RFZIFLO.js'
 
   useEffect(() => {
-    // Rutas donde NUNCA debe aparecer el chatbot
+    // Rutas donde NUNCA debe aparecer el chatbot PÚBLICO
     const noChatbotRoutes = ['/login', '/student', '/admin', '/collaborator']
     
-    // Si el login está abierto o estamos en un dashboard, ocultar chatbot
+    // Si el login está abierto o estamos en un dashboard, ocultar chatbot PÚBLICO
     if (isLoginOpen || noChatbotRoutes.some(route => location.pathname.startsWith(route))) {
-      document.body.classList.add('hide-botpress')
+      // Solo ocultamos los elementos inyectados del chatbot público, no bloqueamos la clase hide-botpress 
+      // si estamos en la ruta /student porque allí queremos que el OTRO chatbot se vea.
+      
+      const isStudentRoute = location.pathname.startsWith('/student');
+      
+      if (!isStudentRoute) {
+        document.body.classList.add('hide-botpress')
+      } else {
+        document.body.classList.remove('hide-botpress')
+      }
+      
       removeBotpressScripts()
       
       // Intentar forzar el cierre del widget de Botpress si existe la API

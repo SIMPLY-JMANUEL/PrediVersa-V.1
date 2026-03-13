@@ -1,0 +1,20 @@
+/* Contenedor principal del chatbot de estudiante */
+.student-chatbot-container {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  overflow: hidden;
+  border-radius: 12px;
+  height: 100%;
+}
+
+/* El iframe de Botpress debe ocupar exactamente todo el espacio disponible */
+.student-chatbot-container iframe {
+  flex: 1;
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  display: block !important;
+}
