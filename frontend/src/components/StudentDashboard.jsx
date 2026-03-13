@@ -2,10 +2,12 @@ import { useState } from 'react'
 import DashboardHeader from './DashboardHeader'
 import { UserCircle, ChevronDown, Scale, Newspaper, ClipboardList, AlertTriangle } from 'lucide-react'
 import StudentChatbot from './StudentChatbot'
+import { useUserPhoto } from '../hooks/useUserPhoto'
 import './StudentDashboard.css'
 
 function StudentDashboard({ user, onLogout }) {
   const [activeMenu, setActiveMenu] = useState('denuncia')
+  const [photo] = useUserPhoto()
 
   return (
     <div className="dashboard-wrapper">
@@ -18,8 +20,11 @@ function StudentDashboard({ user, onLogout }) {
           <aside className="dashboard-sidebar">
             <div className="dashboard-card profile-card">
               <div className="profile-photo">
-                <UserCircle size={64} color="#8ECFEA" strokeWidth={1.5} />
-                <p>Insertar Imagen</p>
+                {photo
+                  ? <img src={photo} alt="Foto de perfil" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '3px solid #8ECFEA' }} />
+                  : <UserCircle size={64} color="#8ECFEA" strokeWidth={1.5} />
+                }
+                <p>{photo ? '' : 'Insertar Imagen'}</p>
               </div>
               <div className="profile-details">
                 <div className="detail-item">

@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import DashboardHeader from './DashboardHeader'
 import { UserCircle, ChevronDown, AlertCircle, ClipboardCheck, HelpCircle, Scale } from 'lucide-react'
+import { useUserPhoto } from '../hooks/useUserPhoto'
 import './CollaboratorDashboard.css'
 
 function CollaboratorDashboard({ user, onLogout }) {
   const [activeMenu, setActiveMenu] = useState('alerta')
+  const [photo] = useUserPhoto()
 
   return (
     <div className="dashboard-wrapper">
@@ -17,8 +19,11 @@ function CollaboratorDashboard({ user, onLogout }) {
           <aside className="dashboard-sidebar">
             <div className="dashboard-card profile-card">
               <div className="profile-photo">
-                <UserCircle size={64} color="#8ECFEA" strokeWidth={1.5} />
-                <p>Insertar Imagen</p>
+                {photo
+                  ? <img src={photo} alt="Foto de perfil" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '3px solid #8ECFEA' }} />
+                  : <UserCircle size={64} color="#8ECFEA" strokeWidth={1.5} />
+                }
+                <p>{photo ? '' : 'Insertar Imagen'}</p>
               </div>
               <div className="profile-details">
                 <div className="detail-item">

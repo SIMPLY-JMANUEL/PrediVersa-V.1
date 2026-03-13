@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Settings, X, Sun, Moon, Monitor, Camera, UserCircle, LogOut, Check } from 'lucide-react'
+import { useUserPhoto } from '../hooks/useUserPhoto'
 import './DashboardHeader.css'
 
 const THEMES = [
@@ -12,7 +13,7 @@ const THEMES = [
 function DashboardHeader({ user, onLogout }) {
   const navigate = useNavigate()
   const [showSettings, setShowSettings] = useState(false)
-  const [photo, setPhoto] = useState(() => localStorage.getItem('userPhoto') || null)
+  const [photo, setPhoto] = useUserPhoto()   // ← hook compartido con los dashboards
   const [theme, setTheme] = useState(() => localStorage.getItem('appTheme') || 'light')
   const [photoSaved, setPhotoSaved] = useState(false)
   const fileInputRef = useRef(null)
@@ -59,9 +60,7 @@ function DashboardHeader({ user, onLogout }) {
     if (!file) return
     const reader = new FileReader()
     reader.onload = (evt) => {
-      const dataUrl = evt.target.result
-      setPhoto(dataUrl)
-      localStorage.setItem('userPhoto', dataUrl)
+      setPhoto(evt.target.result)   // ← hook notifica a todos los dashboards
       setPhotoSaved(true)
       setTimeout(() => setPhotoSaved(false), 2500)
     }
@@ -69,8 +68,7 @@ function DashboardHeader({ user, onLogout }) {
   }
 
   const removePhoto = () => {
-    setPhoto(null)
-    localStorage.removeItem('userPhoto')
+    setPhoto(null)   // ← hook limpia el localStorage y notifica
   }
 
   return (

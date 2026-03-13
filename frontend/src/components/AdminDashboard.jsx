@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import DashboardHeader from './DashboardHeader'
 import { UserCircle, Users, UserCheck, UserX, BarChart2, CheckCircle2, FileSpreadsheet } from 'lucide-react'
 import ExcelUploader from './ExcelUploader'
+import { useUserPhoto } from '../hooks/useUserPhoto'
 import './StudentDashboard.css'
 import './AdminDashboard.css'
 
@@ -55,6 +56,7 @@ function AdminDashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('creacion')
   const [activeAlertTab, setActiveAlertTab] = useState('asignacion')
   const [showExcelUploader, setShowExcelUploader] = useState(false)
+  const [photo] = useUserPhoto()
 
   // Estado para mensaje de guardado
   const [saveMessage, setSaveMessage] = useState('')
@@ -658,8 +660,11 @@ function AdminDashboard({ user, onLogout }) {
           <aside className="dashboard-sidebar">
             <div className="dashboard-card profile-card">
               <div className="profile-photo">
-                <UserCircle size={64} color="#8ECFEA" strokeWidth={1.5} />
-                <p>Foto Administrador</p>
+                {photo
+                  ? <img src={photo} alt="Foto de perfil" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '3px solid #8ECFEA' }} />
+                  : <UserCircle size={64} color="#8ECFEA" strokeWidth={1.5} />
+                }
+                <p>{photo ? '' : 'Foto Administrador'}</p>
               </div>
               <div className="profile-details">
                 <div className="detail-item">
