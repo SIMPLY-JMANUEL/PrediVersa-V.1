@@ -635,7 +635,96 @@ router.delete('/alerts/:id', async (req, res) => {
   }
 });
 
-// POST /api/auth/users/bulk - Carga masiva de usuarios desde Excel
+// POST /api/alerts/analyze - Recibe webhook de Botpress y crea alerta automática
+// Este endpoint es llamado por los nodos "Ejecutar código" de Botpress Studio
+router.post('/alerts/analyze', async (req, res) => {
+  try {
+    const {
+      studentName,
+      studentUsername,
+      studentDocumentId,
+      studentAge,
+      studentGrade,
+      nivel,        // 'crítica' | 'Alta' | 'medio' | 'bajo'
+      tipoViolencia,
+      mensaje,
+      esUrgente,
+      // Clave de seguridad opcional para verificar que viene de Botpress
+      apiKey
+    } = req.body;
+
+    // Validar campos mínimos
+    if (!studentName || !nivel) {
+      return res.status(400).json({
+        success: false,
+        message: 'Se requieren studentName y nivel para crear la alerta'
+      });
+    }
+
+    // Mapear nivel de Botpress → tipo de alerta de PrediVersa
+    const nivelMap = {
+      'crítica': { alertType: 'Crítica',     emoji: '🔴', prioridad: 'URGENTE'  },
+      'critica':  { alertType: 'Crítica',     emoji: '🔴', prioridad: 'URGENTE'  },
+      'alta':     { alertType: 'Alta',        emoji: '🟠', prioridad: 'ALTA'     },
+      'Alta':     { alertType: 'Alta',        emoji: '🟠', prioridad: 'ALTA'     },
+      'medio':    { alertType: 'Informativa', emoji: '🟡', prioridad: 'MEDIA'    },
+      'bajo':     { alertType: 'Informativa', emoji: '🟢', prioridad: 'BAJA'     }
+    };
+
+    const nivelInfo = nivelMap[nivel] || { alertType: 'Informativa', emoji: '🟡', prioridad: 'MEDIA' };
+
+    // Generar número de ticket automático con prefijo BOT
+    const now = new Date();
+    const ticketNumber = `BOT-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+
+    // Construir descripción completa de la alerta
+    const description = [
+      `${nivelInfo.emoji} ALERTA AUTOMÁTICA GENERADA POR CHATBOT PREDIVERSA`,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      `Prioridad: ${nivelInfo.prioridad}`,
+      `Tipo de situación: ${tipoViolencia || 'No especificado'}`,
+      `Naturaleza: ${esUrgente ? '⚠️ RIESGO INMEDIATO' : 'Seguimiento requerido'}`,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      `Fragmento del mensaje del estudiante:`,
+      `"${mensaje || 'Sin fragmento disponible'}"`,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      `Fuente: Chatbot PrediVersa (generación automática)`
+    ].join('\n');
+
+    const newAlert = await createAlert({
+      userId:             null,
+      studentName:        studentName || 'No identificado',
+      studentDocumentId:  studentDocumentId || '',
+      studentAge:         studentAge || '',
+      studentGrade:       studentGrade || '',
+      studentUsername:    studentUsername || '',
+      alertType:          nivelInfo.alertType,
+      description,
+      ticketNumber,
+      alertDate:          now.toISOString().split('T')[0],
+      alertTime:          now.toTimeString().slice(0, 5),
+      deadline:           '',
+      assignedTo:         '',
+      status:             esUrgente ? 'Urgente' : 'Pendiente',
+      createdBy:          null
+    });
+
+    console.log(`✅ Alerta BOT creada: ${ticketNumber} | Nivel: ${nivel} | Estudiante: ${studentName}`);
+
+    res.status(201).json({
+      success: true,
+      message: `Alerta ${nivelInfo.prioridad} creada exitosamente`,
+      ticketNumber,
+      alert: newAlert
+    });
+
+  } catch (error) {
+    console.error('❌ Error en /alerts/analyze:', error);
+    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+  }
+});
+
+
 router.post('/users/bulk', async (req, res) => {
   try {
     const { users: usersToCreate } = req.body;
