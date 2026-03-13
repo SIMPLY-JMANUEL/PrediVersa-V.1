@@ -1,4 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
+import DashboardHeader from './DashboardHeader'
+import { UserCircle, Users, UserCheck, UserX, BarChart2, CheckCircle2, FileSpreadsheet } from 'lucide-react'
+import ExcelUploader from './ExcelUploader'
+import './StudentDashboard.css'
 import './AdminDashboard.css'
 
 // Función para exportar a CSV
@@ -50,6 +54,7 @@ function AdminDashboard({ user, onLogout }) {
   // Estado para las pestañas
   const [activeTab, setActiveTab] = useState('creacion')
   const [activeAlertTab, setActiveAlertTab] = useState('asignacion')
+  const [showExcelUploader, setShowExcelUploader] = useState(false)
 
   // Estado para mensaje de guardado
   const [saveMessage, setSaveMessage] = useState('')
@@ -342,7 +347,7 @@ function AdminDashboard({ user, onLogout }) {
       const data = await response.json()
       
       if (data.success) {
-        setAlertMessage('Alerta remitida exitosamente ✓')
+        setAlertMessage('Alerta remitida exitosamente')
         setAlertForm({
           alertType: 'Informativa',
           ticketNumber: '',
@@ -472,7 +477,7 @@ function AdminDashboard({ user, onLogout }) {
       const data = await response.json()
       
       if (data.success) {
-        setSaveMessage('Usuario creado exitosamente ✓')
+        setSaveMessage('Usuario creado exitosamente')
         setUserForm({
           nombres: '',
           apellidos: '',
@@ -551,7 +556,7 @@ function AdminDashboard({ user, onLogout }) {
       const data = await response.json()
       
       if (data.success) {
-        setSaveMessage('Usuario actualizado exitosamente ✓')
+        setSaveMessage('Usuario actualizado exitosamente')
         setEditingUser(null)
         setUserForm({
           nombres: '',
@@ -605,7 +610,7 @@ function AdminDashboard({ user, onLogout }) {
       const data = await response.json()
       
       if (data.success) {
-        setSaveMessage('Usuario eliminado exitosamente ✓')
+        setSaveMessage('Usuario eliminado exitosamente')
         fetchUsers()
       } else {
         setSaveMessage(data.message || 'Error al eliminar usuario')
@@ -644,77 +649,86 @@ function AdminDashboard({ user, onLogout }) {
   ).slice(0, 5)
 
   return (
-    <div className="admin-dashboard-wireframe">
+    <div className="dashboard-wrapper">
+      <DashboardHeader user={user} onLogout={onLogout} />
       
-      {/* Sección 1: Datos del Administrador */}
-      <div className="admin-top-section">
-        <div className="admin-section">
-          <div className="admin-photo-section">
-            <div className="admin-photo">
-              <span>Foto<br/>Administrador</span>
-            </div>
-          </div>
+      <div className="dashboard-container" style={{maxWidth: '1600px', width: '100%'}}>
+        <div className="dashboard-layout">
           
-          <div className="admin-data-section">
-            <h2 className="section-title">Datos Administrador</h2>
-            <div className="admin-form-grid">
-              <div className="admin-form-field">
-                <label>Nombres</label>
-                <span>:</span>
-                <div className="input-wrapper">
-                  <input type="text" name="adminNombres" className="wireframe-input" defaultValue={user?.name || ''} />
-                </div>
+          <aside className="dashboard-sidebar">
+            <div className="dashboard-card profile-card">
+              <div className="profile-photo">
+                <UserCircle size={64} color="#8ECFEA" strokeWidth={1.5} />
+                <p>Foto Administrador</p>
               </div>
-              <div className="admin-form-field">
-                <label>Apellidos</label>
-                <span>:</span>
-                <div className="input-wrapper">
-                  <input type="text" name="adminApellidos" className="wireframe-input" />
+              <div className="profile-details">
+                <div className="detail-item">
+                  <span className="label">Nombres y apellidos:</span>
+                  <span className="value">{user?.name || 'Nombre del Administrador'}</span>
                 </div>
-              </div>
-              <div className="admin-form-field">
-                <label>ID</label>
-                <span>:</span>
-                <div className="input-wrapper">
-                  <input type="text" name="adminId" className="wireframe-input" defaultValue={user?.id || ''} />
+                <div className="detail-item">
+                  <span className="label">Tipo documento:</span>
+                  <span className="value">CC</span>
                 </div>
-              </div>
-              <div className="admin-form-field">
-                <label>Usuario</label>
-                <span>:</span>
-                <div className="input-wrapper">
-                  <input type="text" name="adminUsuario" className="wireframe-input" defaultValue={user?.email || ''} />
+                <div className="detail-item">
+                  <span className="label">Número documento:</span>
+                  <span className="value">{user?.id || '1234567890'}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="label">Rol:</span>
+                  <span className="value">{user?.role || 'Administrador'}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="label">Teléfono:</span>
+                  <span className="value">{user?.phone || '+57 000 000 0000'}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="label">Usuario:</span>
+                  <span className="value">{user?.email || 'admin@ejemplo.com'}</span>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        <button className="logout-btn-top" onClick={onLogout}>
-          Cerrar Sesión
-        </button>
-      </div>
+            <div className="dashboard-card academic-card" style={{minHeight: '180px'}}>
+              <h3 className="card-title">PANEL GENERAL</h3>
+              <div className="academic-content">
+                <p className="text-muted">Centro de Control y Gestión de usuarios de toda la plataforma Evalúa.</p>
+              </div>
+            </div>
+          </aside>
+
+          <main className="dashboard-main">
+            <div className="admin-dashboard-wireframe" style={{padding: '0', maxWidth: '100%'}}>
 
       {/* Panel de Estadísticas */}
       <div className="stats-section">
-        <h3 className="stats-title">📊 Estadísticas de Usuarios</h3>
+        <h3 className="stats-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <BarChart2 size={24} color="#3A6F85" />
+          Estadísticas de Usuarios
+        </h3>
         <div className="stats-grid">
           <div className="stat-card-large">
-            <span className="stat-icon">👥</span>
+            <span className="stat-icon">
+              <Users size={28} />
+            </span>
             <div className="stat-info">
               <span className="stat-value">{stats.total}</span>
               <span className="stat-label">Total Usuarios</span>
             </div>
           </div>
           <div className="stat-card-large success">
-            <span className="stat-icon">✅</span>
+            <span className="stat-icon" style={{color: '#16a34a'}}>
+              <UserCheck size={28} />
+            </span>
             <div className="stat-info">
               <span className="stat-value">{stats.activos}</span>
               <span className="stat-label">Usuarios Activos</span>
             </div>
           </div>
           <div className="stat-card-large danger">
-            <span className="stat-icon">❌</span>
+            <span className="stat-icon" style={{color: '#dc2626'}}>
+              <UserX size={28} />
+            </span>
             <div className="stat-info">
               <span className="stat-value">{stats.inactivos}</span>
               <span className="stat-label">Usuarios Inactivos</span>
@@ -734,7 +748,7 @@ function AdminDashboard({ user, onLogout }) {
 
       {/* Sección 2: Creación de Usuario */}
       <div className="user-creation-section">
-        <div className="tabs-row">
+        <div className="tabs-row" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           <button 
             className={`tab-btn ${activeTab === 'creacion' ? 'active' : ''}`}
             onClick={() => setActiveTab('creacion')}
@@ -759,7 +773,24 @@ function AdminDashboard({ user, onLogout }) {
           >
             Estado
           </button>
+          {/* Botón carga masiva Excel */}
+          <button
+            className="tab-btn excel-upload-btn"
+            onClick={() => setShowExcelUploader(true)}
+            title="Carga masiva de usuarios desde Excel"
+            style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.4rem', background: '#16a34a', color: 'white', borderColor: '#16a34a' }}
+          >
+            <FileSpreadsheet size={16} />
+            Carga Excel
+          </button>
         </div>
+        {/* Modal de carga Excel */}
+        {showExcelUploader && (
+          <ExcelUploader
+            onUploadSuccess={() => { fetchUsers(); }}
+            onClose={() => setShowExcelUploader(false)}
+          />
+        )}
 
         {/* PESTAÑA: CREACIÓN DE USUARIO */}
         {activeTab === 'creacion' && (
@@ -1443,6 +1474,10 @@ function AdminDashboard({ user, onLogout }) {
         </div>
       )}
 
+            </div>
+          </main>
+        </div>
+      </div>
     </div>
   )
 }

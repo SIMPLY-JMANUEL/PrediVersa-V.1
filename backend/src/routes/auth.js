@@ -635,4 +635,80 @@ router.delete('/alerts/:id', async (req, res) => {
   }
 });
 
+// POST /api/auth/users/bulk - Carga masiva de usuarios desde Excel
+router.post('/users/bulk', async (req, res) => {
+  try {
+    const { users: usersToCreate } = req.body;
+
+    if (!Array.isArray(usersToCreate) || usersToCreate.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Se debe enviar un array de usuarios no vacío'
+      });
+    }
+
+    if (usersToCreate.length > 500) {
+      return res.status(400).json({
+        success: false,
+        message: 'Máximo 500 usuarios por carga'
+      });
+    }
+
+    const saltRounds = 10;
+    const defaultPassword = await bcrypt.hash('Password123', saltRounds);
+
+    const results = { creados: 0, duplicados: [], errores: [] };
+
+    for (const userData of usersToCreate) {
+      try {
+        const { documentId, email, name, role, phone, address, birthDate, edad, lugarNacimiento, nombrePadre, nombreMadre, grado } = userData;
+
+        // Validar campos mínimos
+        if (!documentId || !email || !name || !role) {
+          results.errores.push({ fila: name || documentId, motivo: 'Faltan campos obligatorios (documentId, email, name, role)' });
+          continue;
+        }
+
+        // Verificar duplicados
+        const emailDup = await emailExists(email);
+        const docDup = await documentIdExists(documentId);
+
+        if (emailDup || docDup) {
+          results.duplicados.push({ name, email, documentId, motivo: emailDup ? 'Email duplicado' : 'Documento duplicado' });
+          continue;
+        }
+
+        await createUser({
+          documentId: String(documentId),
+          email,
+          password: defaultPassword,
+          name,
+          role: role || 'Estudiante',
+          phone: phone || '',
+          address: address || '',
+          birthDate: birthDate || null,
+          edad: edad || '',
+          lugarNacimiento: lugarNacimiento || '',
+          nombrePadre: nombrePadre || '',
+          nombreMadre: nombreMadre || '',
+          grado: grado || ''
+        });
+
+        results.creados++;
+      } catch (itemError) {
+        results.errores.push({ fila: userData.name || userData.documentId, motivo: itemError.message });
+      }
+    }
+
+    res.status(201).json({
+      success: true,
+      message: `Carga completada: ${results.creados} creados, ${results.duplicados.length} duplicados, ${results.errores.length} errores`,
+      results
+    });
+  } catch (error) {
+    console.error('❌ Error en carga masiva:', error);
+    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+  }
+});
+
 module.exports = router;
