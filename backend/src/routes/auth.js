@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const { analizarRiesgo } = require('../utils/riskDictionary');
 const {
   getAllUsers,
   getUserByEmail,
@@ -636,7 +637,7 @@ router.delete('/alerts/:id', async (req, res) => {
 });
 
 // POST /api/alerts/analyze - Recibe webhook de Botpress y crea alerta automática
-// Este endpoint es llamado por los nodos "Ejecutar código" de Botpress Studio
+// Usa el motor de detección local para elevar el nivel si detecta palabras críticas
 router.post('/alerts/analyze', async (req, res) => {
   try {
     const {
@@ -645,76 +646,86 @@ router.post('/alerts/analyze', async (req, res) => {
       studentDocumentId,
       studentAge,
       studentGrade,
-      nivel,        // 'crítica' | 'Alta' | 'medio' | 'bajo'
+      nivel        = 'bajo',  // Nivel que envió Botpress
       tipoViolencia,
-      mensaje,
-      esUrgente,
-      // Clave de seguridad opcional para verificar que viene de Botpress
-      apiKey
+      mensaje      = '',
+      esUrgente    = false
     } = req.body;
 
-    // Validar campos mínimos
-    if (!studentName || !nivel) {
+    // Validar campo mínimo
+    if (!studentName) {
       return res.status(400).json({
         success: false,
-        message: 'Se requieren studentName y nivel para crear la alerta'
+        message: 'Se requiere studentName para crear la alerta'
       });
     }
 
-    // Mapear nivel de Botpress → tipo de alerta de PrediVersa
-    const nivelMap = {
-      'crítica': { alertType: 'Crítica',     emoji: '🔴', prioridad: 'URGENTE'  },
-      'critica':  { alertType: 'Crítica',     emoji: '🔴', prioridad: 'URGENTE'  },
-      'alta':     { alertType: 'Alta',        emoji: '🟠', prioridad: 'ALTA'     },
-      'Alta':     { alertType: 'Alta',        emoji: '🟠', prioridad: 'ALTA'     },
-      'medio':    { alertType: 'Informativa', emoji: '🟡', prioridad: 'MEDIA'    },
-      'bajo':     { alertType: 'Informativa', emoji: '🟢', prioridad: 'BAJA'     }
-    };
+    // ── MOTOR DE DETECCIÓN LOCAL ──────────────────────────────
+    // Analiza el mensaje con el diccionario de palabras clave.
+    // Si detecta algo más grave que lo que dijo Botpress, lo eleva.
+    const analisis = analizarRiesgo(mensaje, nivel);
 
-    const nivelInfo = nivelMap[nivel] || { alertType: 'Informativa', emoji: '🟡', prioridad: 'MEDIA' };
+    if (analisis.fueElevado) {
+      console.log(`⬆️  Nivel elevado por motor local: ${nivel} → ${analisis.prioridad}`);
+      console.log(`   Palabras detectadas: ${analisis.palabrasDetectadas.map(p => p.frase).join(', ')}`);
+    }
+    // ─────────────────────────────────────────────────────────
 
-    // Generar número de ticket automático con prefijo BOT
+    // Generar ticket con prefijo BOT
     const now = new Date();
     const ticketNumber = `BOT-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
 
-    // Construir descripción completa de la alerta
+    // Construir descripción con info del motor
+    const lineasDeteccion = analisis.palabrasDetectadas.length > 0
+      ? [
+          `Palabras clave detectadas por motor local:`,
+          ...analisis.palabrasDetectadas.map(p => `  • "${p.frase}" (${p.categoria})`)
+        ]
+      : ['Motor local: sin palabras clave adicionales detectadas'];
+
     const description = [
-      `${nivelInfo.emoji} ALERTA AUTOMÁTICA GENERADA POR CHATBOT PREDIVERSA`,
+      `${analisis.emoji} ALERTA AUTOMÁTICA — CHATBOT PREDIVERSA`,
       `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-      `Prioridad: ${nivelInfo.prioridad}`,
+      `Prioridad: ${analisis.prioridad}`,
+      `Nivel Botpress: ${nivel.toUpperCase()} | Nivel Final: ${analisis.prioridad}${analisis.fueElevado ? ' ⬆️ (elevado por motor)' : ''}`,
       `Tipo de situación: ${tipoViolencia || 'No especificado'}`,
-      `Naturaleza: ${esUrgente ? '⚠️ RIESGO INMEDIATO' : 'Seguimiento requerido'}`,
+      `Categorías detectadas: ${analisis.categorias.join(', ') || 'ninguna'}`,
+      `Naturaleza: ${analisis.esUrgente || esUrgente ? '⚠️ RIESGO INMEDIATO' : 'Seguimiento requerido'}`,
       `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
       `Fragmento del mensaje del estudiante:`,
       `"${mensaje || 'Sin fragmento disponible'}"`,
+      `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+      ...lineasDeteccion,
       `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
       `Fuente: Chatbot PrediVersa (generación automática)`
     ].join('\n');
 
     const newAlert = await createAlert({
-      userId:             null,
-      studentName:        studentName || 'No identificado',
-      studentDocumentId:  studentDocumentId || '',
-      studentAge:         studentAge || '',
-      studentGrade:       studentGrade || '',
-      studentUsername:    studentUsername || '',
-      alertType:          nivelInfo.alertType,
+      userId:            null,
+      studentName:       studentName || 'No identificado',
+      studentDocumentId: studentDocumentId || '',
+      studentAge:        studentAge || '',
+      studentGrade:      studentGrade || '',
+      studentUsername:   studentUsername || '',
+      alertType:         analisis.alertType,
       description,
       ticketNumber,
-      alertDate:          now.toISOString().split('T')[0],
-      alertTime:          now.toTimeString().slice(0, 5),
-      deadline:           '',
-      assignedTo:         '',
-      status:             esUrgente ? 'Urgente' : 'Pendiente',
-      createdBy:          null
+      alertDate:         now.toISOString().split('T')[0],
+      alertTime:         now.toTimeString().slice(0, 5),
+      deadline:          '',
+      assignedTo:        '',
+      status:            (analisis.esUrgente || esUrgente) ? 'Urgente' : 'Pendiente',
+      createdBy:         null
     });
 
-    console.log(`✅ Alerta BOT creada: ${ticketNumber} | Nivel: ${nivel} | Estudiante: ${studentName}`);
+    console.log(`✅ Alerta BOT: ${ticketNumber} | ${analisis.prioridad} | Estudiante: ${studentName}`);
 
     res.status(201).json({
       success: true,
-      message: `Alerta ${nivelInfo.prioridad} creada exitosamente`,
+      message: `Alerta ${analisis.prioridad} creada exitosamente`,
       ticketNumber,
+      nivelFinal: analisis.prioridad,
+      fueElevado: analisis.fueElevado,
       alert: newAlert
     });
 
