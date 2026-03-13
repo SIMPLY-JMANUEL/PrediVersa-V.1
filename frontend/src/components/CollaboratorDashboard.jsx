@@ -20,10 +20,10 @@ function CollaboratorDashboard({ user, onLogout }) {
             <div className="dashboard-card profile-card">
               <div className="profile-photo">
                 {photo
-                  ? <img src={photo} alt="Foto de perfil" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '3px solid #8ECFEA' }} />
+                  ? <img src={photo} alt="Foto de perfil" className="profile-photo-img" />
                   : <UserCircle size={64} color="#8ECFEA" strokeWidth={1.5} />
                 }
-                <p>{photo ? '' : 'Insertar Imagen'}</p>
+                {!photo && <p>Insertar Imagen</p>}
               </div>
               <div className="profile-details">
                 <div className="detail-item">
