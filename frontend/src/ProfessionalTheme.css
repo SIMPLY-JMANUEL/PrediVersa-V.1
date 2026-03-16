@@ -10,6 +10,7 @@
     margin: 0 auto;
     padding: 2rem;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .dashboard-layout {
@@ -17,6 +18,50 @@
     grid-template-columns: 320px 1fr;
     gap: 2rem;
     align-items: stretch;
+}
+
+/* RESPONSIVE BREAKPOINTS */
+@media (max-width: 1200px) {
+    .dashboard-layout {
+        grid-template-columns: 280px 1fr;
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .dashboard-container.profesional-theme {
+        padding: 1.5rem;
+    }
+    .dashboard-layout {
+        grid-template-columns: 1fr; /* Stack on tablet */
+    }
+    .dashboard-sidebar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container.profesional-theme {
+        padding: 1rem;
+    }
+    .dashboard-sidebar {
+        grid-template-columns: 1fr;
+    }
+    .mgmt-content {
+        padding: 1.5rem !important;
+    }
+    .management-tabs {
+        flex-wrap: wrap; /* Permite que las pestañas se envuelvan */
+        gap: 8px;
+    }
+    .mgmt-tab {
+        flex: 1 1 calc(50% - 8px); /* 2 columnas en móvil */
+        border-radius: 12px !important;
+        justify-content: center;
+        padding: 12px !important;
+    }
 }
 
 /* SIDEBAR STYLES */

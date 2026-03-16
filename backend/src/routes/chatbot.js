@@ -4,6 +4,7 @@ const router = express.Router();
 const { query } = require('../db/connection');
 const { analyzeText } = require('../utils/motorVersa');
 const { createAlert } = require('../db/users');
+const centralAI = require('../utils/centralAIService');
 
 // ─────────────────────────────────────────────────────
 // SSE — Clientes admin conectados en tiempo real
@@ -82,78 +83,37 @@ router.post('/analizar', async (req, res) => {
       });
     }
 
-    // ── CAPA 5: Gemini solo cuando score 30-65 (zona gris) ──
+    // ── CAPA 5: Delegación al SERVIDOR CENTRAL DE IA ──
     try {
-      const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-      if (!apiKey) throw new Error('No API Key for Gemini');
-
-      const prompt = `Eres el validador de riesgo del sistema PrediVersa para violencia escolar en Colombia.
-El motor de análisis automático ya procesó el texto y obtuvo un SCORE DE ${resultadoMotor.score}/100 (zona ambigua entre bajo y alto).
-
-Tu tarea: analizar el contexto profundo, sarcasmo, eufemismos y jerga juvenil colombiana para determinar el nivel final.
-
-Datos del caso:
-- Mensaje: "${mensaje}"
-- Tipo violencia declarado: ${tipo_violencia || 'no declarado'}
-- Frecuencia: ${frecuencia || 'no declarada'}
-- Keywords detectadas: ${resultadoMotor.keywords_detectadas.join(', ') || 'ninguna'}
-- Patrones: ${resultadoMotor.patrones.join(', ') || 'ninguno'}
-
-RESPONDE SOLO con este JSON (sin texto extra):
-{"nivel_riesgo":"medio","ajuste":"confirmado","razon":"explicacion breve"}
-Donde nivel_riesgo debe ser: "bajo", "medio" o "alto"`;
-
-      const geminiRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { 
-              temperature: 0.1, 
-              maxOutputTokens: 200,
-              responseMimeType: "application/json"
-            }
-          })
-        }
-      );
-
-      if (!geminiRes.ok) {
-        throw new Error(`Gemini API Error: ${geminiRes.status}`);
-      }
-
-      const geminiData = await geminiRes.json();
-      const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+      console.log(`📡 Consultando Servidor Central de IA para validación profunda...`);
       
-      // Parsing robusto para evitar Error 500
-      let geminiResult;
-      try {
-        const cleaned = rawText.replace(/```json|```/g, '').trim();
-        geminiResult = JSON.parse(cleaned);
-      } catch (parseError) {
-        console.error('⚠️ Error al parsear JSON de Gemini:', rawText);
-        throw new Error('Invalid JSON from Gemini');
-      }
+      const geminiResult = await centralAI.analizarRiesgo({
+        mensaje,
+        tipo_violencia,
+        frecuencia,
+        historial: historialMensajes
+      });
 
       const nivelFinal = geminiResult.nivel_riesgo || resultadoMotor.nivel_riesgo;
+      const scoreFinal = geminiResult.score || resultadoMotor.score;
 
-      console.log(`🤖 Gemini validó: ${resultadoMotor.nivel_riesgo} → ${nivelFinal}`);
+      console.log(`🤖 Servidor Central validó: ${resultadoMotor.nivel_riesgo} → ${nivelFinal} (Score: ${scoreFinal})`);
+      
       return res.json({
         success: true,
-        fuente: 'motor_versa+gemini',
+        fuente: 'central_ia_server',
         data: {
           nivel_riesgo: nivelFinal,
           keywords_encontradas: resultadoMotor.keywords_detectadas,
           tiene_alerta_critica: nivelFinal === 'alto',
-          tipos_violencia: resultadoMotor.tipos_violencia,
-          score: resultadoMotor.score,
+          tipos_violencia: geminiResult.tipos_identificados || resultadoMotor.tipos_violencia,
+          score: scoreFinal,
           sentimiento: resultadoMotor.sentimiento,
-          resumen_patron: `${resultadoMotor.resumen} | Gemini: ${geminiResult.razon || 'Validación IA'}`
+          resumen_patron: `${resultadoMotor.resumen} | IA Central: ${geminiResult.razon || 'Análisis exitoso'}`
         }
       });
     } catch (geminiError) {
-      console.error('⚠️ Fallo en validación IA, usando motor local:', geminiError.message);
+      console.error('⚠️ Fallo en Servidor Central, usando motor local:', geminiError.message);
       return res.json({
         success: true,
         fuente: 'motor_versa_fallback',
@@ -184,44 +144,19 @@ Donde nivel_riesgo debe ser: "bajo", "medio" o "alto"`;
 router.post('/chat-ia', async (req, res) => {
   try {
     const { mensaje, nivelRiesgo, historial = [] } = req.body;
-    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-    if (!apiKey) throw new Error('No API Key for Gemini');
-
-    // Construir contexto de la conversación
-    let contextHistory = historial.map(m => `${m.type === 'user' ? 'Estudiante' : 'Versa'}: ${m.text}`).join('\n');
-
-    let promptContexto = `Eres Versa, un asistente virtual empático, amable y adolescente de "PrediVersa" (un sistema de bienestar para colegios en Colombia).
-Tu objetivo es responder de manera muy natural, breve (máximo 2-3 líneas), amigable y sin sonar como robot. Usa emojis.
-Trata al usuario con confianza. Si se despide, despídete bien. Si saluda, saluda cálidamente y pregúntale cómo se siente.
-Si el usuario menciona que está aburrido, feliz, triste, adapta tu empatía.
-NO des diagnósticos médicos. NO pidas mucha información de golpe.
-
-Nivel de riesgo detectado en este input por el motor interno: ${nivelRiesgo.toUpperCase()}.
-
-Historial reciente de la charla:
-${contextHistory}
-Estudiante: ${mensaje}
-Versa:`;
-
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: promptContexto }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 150 }
-        })
-      }
-    );
-
-    const geminiData = await geminiRes.json();
-    const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'Entiendo lo que me dices. Aquí estoy para apoyarte. 💙';
     
-    return res.json({ success: true, respuesta: rawText.trim() });
+    console.log(`💬 Generando respuesta empática vía Servidor Central...`);
+    
+    const respuesta = await centralAI.generarRespuesta({
+      mensaje,
+      nivelRiesgo,
+      historial
+    });
+    
+    return res.json({ success: true, respuesta });
   } catch (error) {
     console.error('❌ Error en /chat-ia:', error.message);
-    return res.json({ success: false, respuesta: 'Te entiendo. Sabes que cuentas conmigo para lo que necesites platicar. 💙' });
+    return res.json({ success: false, respuesta: 'Te entiendo perfectamente. Sabes que cuentas conmigo para lo que necesites platicar. 💙' });
   }
 });
 

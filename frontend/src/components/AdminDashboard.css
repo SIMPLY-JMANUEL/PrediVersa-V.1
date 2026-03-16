@@ -116,6 +116,38 @@
   font-size: 1.1rem;
 }
 
+.mgmt-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.5rem;
+  padding: 10px 0;
+  border-bottom: 1.5px solid #f1f5f9;
+}
+
+.mgmt-title-pro {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.mgmt-subtitle-pro {
+  color: #64748b;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .mgmt-header-row {
+     flex-direction: column;
+     gap: 1.5rem;
+     align-items: flex-start;
+  }
+}
+
 /* ========================
    Section 1: Admin Data - Top Section
    ======================== */
@@ -1525,4 +1557,64 @@
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* RESPONSIVE ADMIN DASHBOARD */
+@media (max-width: 1200px) {
+    .user-form-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 1024px) {
+    .admin-top-section {
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+    }
+    .admin-data-section {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .user-form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    .users-table-header {
+        display: none; /* Hide headers on mobile and use data labels if possible */
+    }
+    .users-table-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 1.5rem;
+    }
+    .users-table-row > div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .users-table-row > div::before {
+        content: attr(data-label); /* Requires data-label in JSX */
+        font-weight: 700;
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+    .tabs-row {
+        overflow-x: auto;
+        padding-bottom: 5px;
+    }
+    .tab-btn {
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
 }

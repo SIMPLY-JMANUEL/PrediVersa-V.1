@@ -36,26 +36,25 @@ function StudentDashboard({ user, onLogout }) {
           
           <aside className="dashboard-sidebar">
             <div className="dashboard-card profile-card">
-              <div className="profile-photo">
+              <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
                 {photo ? (
-                  <img src={photo} alt="Perfil" className="profile-photo-img" />
+                  <img src={photo} alt="Perfil" className="profile-photo-img img-theme-circle" />
                 ) : (
-                  <UserCircle size={80} color="#94a3b8" strokeWidth={1} />
+                  <div className="img-theme-circle flex-center" style={{background: '#f8fafc'}}>
+                    <UserCircle size={80} color="#94a3b8" strokeWidth={1} />
+                  </div>
                 )}
+
                 {isUploading && (
                   <div style={{
                     position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white',
-                    fontSize: '0.75rem', fontWeight: 'bold'
+                    fontSize: '0.75rem', fontWeight: 'bold', borderRadius: '50%'
                   }}>Cargando...</div>
                 )}
               </div>
-              <label style={{
-                background: '#f1f5f9', color: '#475569', padding: '8px 16px',
-                borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold',
-                cursor: 'pointer', transition: 'all 0.2s', border: '1px solid #e2e8f0',
-                marginBottom: '1.5rem'
-              }}>
+
+              <label className="photo-upload-btn">
                 <input type="file" onChange={handlePhotoChange} accept="image/*" hidden />
                 {photo ? 'Cambiar Foto' : 'Subir Foto'}
               </label>
@@ -67,19 +66,19 @@ function StudentDashboard({ user, onLogout }) {
               </div>
             </div>
 
-            <div className="dashboard-card" style={{ padding: '1.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#0c4a6e', marginBottom: '1rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.5rem' }}>
+            <div className="dashboard-card sidebar-info">
+              <div className="card-header-pro">
                 <Info size={18} />
-                <h4 style={{ fontSize: '0.9rem', fontWeight: '800', margin: 0 }}>PANEL ESTUDIANTIL</h4>
+                <h4>PANEL ESTUDIANTIL</h4>
               </div>
-              <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0 }}>Gestiona tus reportes, consultas y normatividad institucional.</p>
+              <p>Gestiona tus reportes, consultas y normatividad institucional.</p>
             </div>
           </aside>
 
           <main className="dashboard-main">
             <div className="professional-header">
               <h2 className="page-title">Centro de Apoyo Versa</h2>
-              <p style={{ color: '#64748b', fontSize: '1rem' }}>Bienvenido de nuevo, {user?.name}. ¿En qué podemos ayudarte hoy?</p>
+              <p className="page-subtitle">Bienvenido de nuevo, {user?.name}. ¿En qué podemos ayudarte hoy?</p>
             </div>
 
             <div className="management-tabs">
@@ -102,7 +101,7 @@ function StudentDashboard({ user, onLogout }) {
             
             <div className="dashboard-card mgmt-content">
               {activeMenu === 'chat' && (
-                <div className="animate-fade-in" style={{ height: '500px', display: 'flex', flexDirection: 'column' }}>
+                <div className="animate-fade-in chat-container-pro">
                   <ChatbotVersa user={user} />
                 </div>
               )}

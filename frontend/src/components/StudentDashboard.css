@@ -185,6 +185,46 @@
     line-height: 1.6;
 }
 
+.sidebar-info {
+    padding: 1.5rem;
+}
+
+.sidebar-info p {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.page-subtitle {
+    color: #64748b;
+    font-size: 1rem;
+}
+
+.chat-container-pro {
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
 .fade-in {
     animation: animate-fade-in 0.4s ease-out;
+}
+
+@media (max-width: 768px) {
+    .profile-card-pro {
+        padding: 1.5rem 1rem;
+    }
+    .profile-photo-pro {
+        width: 100px;
+        height: 100px;
+    }
+    .user-name-pro {
+        font-size: 1.1rem;
+    }
+    .chat-card-pro {
+        height: 400px;
+    }
+    .dashboard-main-pro {
+        gap: 1.5rem;
+    }
 }

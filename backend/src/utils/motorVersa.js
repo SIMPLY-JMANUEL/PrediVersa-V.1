@@ -172,9 +172,14 @@ const DICCIONARIO = {
   },
   negligencia: {
     score: 28, label: 'Negligencia / Abandono',
-    palabras: ['estoy solo','nadie me cuida','no tengo comida','sin ropa limpia']
+    palabras: ['estoy solo','nadie me cuida','no tengo comida','sin ropa limpia','me dejan solo','me dejan sola','mis papas no vuelven']
+  },
+  ideacion_suicida: {
+    score: 50, label: 'Riesgo Vital',
+    palabras: ['no quiero vivir', 'morirme', 'matarme', 'acabar con todo', 'irme para siempre', 'descansar en paz']
   }
 }
+
 
 // --- OPTIMIZACIÓN: Pre-normalizar diccionario ---
 const norm = (str) => str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')

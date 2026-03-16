@@ -209,7 +209,7 @@ function AdminDashboard({ user, onLogout }) {
           <main className="dashboard-main">
             <div className="professional-header">
               <h2 className="page-title">Panel de Administración</h2>
-              <p style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: '500' }}>Gestión global de la plataforma PrediVersa.</p>
+              <p className="page-subtitle">Gestión global de la plataforma PrediVersa.</p>
             </div>
 
             <div className="management-tabs">
@@ -233,17 +233,10 @@ function AdminDashboard({ user, onLogout }) {
             <div className="dashboard-card mgmt-content">
               {activeTab === 'usuarios' && (
                 <div className="animate-fade-in">
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center', 
-                    marginBottom: '2.5rem',
-                    padding: '10px 0',
-                    borderBottom: '1.5px solid #f1f5f9'
-                  }}>
-                    <div>
-                      <h3 style={{ fontSize: '1.25rem', fontWeight: '900', color: '#1e293b', margin: 0, letterSpacing: '-0.02em' }}>Gestión de Personal</h3>
-                      <p style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '4px', fontWeight: '600' }}>Administra los perfiles y accesos de la comunidad educativa.</p>
+                  <div className="mgmt-header-row">
+                    <div className="mgmt-header-titles">
+                      <h3 className="mgmt-title-pro">Gestión de Personal</h3>
+                      <p className="mgmt-subtitle-pro">Administra los perfiles y accesos de la comunidad educativa.</p>
                     </div>
                     <button 
                       className="btn-primary-pro" 

@@ -379,18 +379,44 @@
    =========================== */
 @media (max-width: 768px) {
   .dashboard-header { padding: 0.75rem 1rem; }
-  .dashboard-logo { height: 40px; }
+  .dashboard-logo { height: 35px; }
 
   .settings-btn span { display: none; }
-  .settings-btn { padding: 0.65rem; }
+  .settings-btn { 
+    padding: 0.65rem; 
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+  }
 
+  .logout-btn span { display: none; } /* Ocultar texto en móviles muy pequeños */
   .logout-btn {
-    padding: 0.6rem 1rem;
-    font-size: 0.85rem;
+    padding: 0.65rem;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+    border-radius: 50%;
+  }
+  
+  .logout-btn::after {
+    content: '🚪'; /* Icono de salida para móvil */
+    font-size: 1.2rem;
   }
 
   .settings-panel {
     width: 290px;
     right: -10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-header-content {
+    gap: 0.5rem;
+  }
+  .settings-panel {
+    width: 95vw;
+    right: -2.5vw;
+    position: fixed;
+    top: 70px;
   }
 }
