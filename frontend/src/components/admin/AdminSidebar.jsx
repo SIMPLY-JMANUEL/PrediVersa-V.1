@@ -1,7 +1,24 @@
-import React from 'react';
-import { UserCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { UserCircle, ShieldCheck } from 'lucide-react';
+import { useUserPhoto } from '../../hooks/useUserPhoto';
 
-const AdminSidebar = ({ photo, user }) => {
+const AdminSidebar = ({ user }) => {
+  const [photo, setPhoto] = useUserPhoto();
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      await setPhoto(reader.result);
+      setIsUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <aside className="dashboard-sidebar">
       <div className="dashboard-card profile-card">
@@ -9,28 +26,39 @@ const AdminSidebar = ({ photo, user }) => {
           {photo ? (
             <img src={photo} alt="Perfil" className="profile-photo-img" />
           ) : (
-            <UserCircle size={64} color="#8ECFEA" />
+            <UserCircle size={80} color="#94a3b8" strokeWidth={1} />
+          )}
+          {isUploading && (
+            <div style={{
+              position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white',
+              fontSize: '0.75rem', fontWeight: 'bold'
+            }}>Cargando...</div>
           )}
         </div>
+        <label style={{
+          background: '#f1f5f9', color: '#475569', padding: '8px 16px',
+          borderRadius: '20px', fontSize: '0.75rem', fontWeight: 'bold',
+          cursor: 'pointer', transition: 'all 0.2s', border: '1px solid #e2e8f0',
+          marginBottom: '1.5rem'
+        }}>
+          <input type="file" onChange={handlePhotoChange} accept="image/*" hidden />
+          {photo ? 'Cambiar Foto' : 'Subir Foto'}
+        </label>
+
         <div className="profile-details">
-          <div className="detail-item">
-            <span className="label">Nombre:</span>
-            <span className="value">{user?.name}</span>
-          </div>
-          <div className="detail-item">
-            <span className="label">Rol:</span>
-            <span className="value">{user?.role}</span>
-          </div>
-          <div className="detail-item">
-            <span className="label">Email:</span>
-            <span className="value">{user?.email}</span>
-          </div>
+          <h3 className="user-name">{user?.name}</h3>
+          <p className="user-role">{user?.role}</p>
+          <p className="user-email">{user?.email}</p>
         </div>
       </div>
 
-      <div className="dashboard-card academic-card">
-        <h3 className="card-title">PANEL GENERAL</h3>
-        <p className="text-muted">Centro de Control y Gestión Evalúa.</p>
+      <div className="dashboard-card" style={{ padding: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#0c4a6e', marginBottom: '1rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.5rem' }}>
+          <ShieldCheck size={18} />
+          <h4 style={{ fontSize: '0.9rem', fontWeight: '800', margin: 0 }}>PANEL DE CONTROL</h4>
+        </div>
+        <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0 }}>Gestión integral Evalúa: Usuarios, Alertas y Auditoría.</p>
       </div>
     </aside>
   );

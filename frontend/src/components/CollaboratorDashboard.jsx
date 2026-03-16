@@ -155,7 +155,7 @@ function CollaboratorDashboard({ user, onLogout }) {
 
             <div className="dashboard-card caseload-card">
               <h4 className="card-title">
-                <Briefcase size={18} /> Casos Asignados
+                <Briefcase size={18} /> Casos Asignados{' '}
                 <span className="badge">{assignedAlerts.length}</span>
               </h4>
               <div className="caseload-list">

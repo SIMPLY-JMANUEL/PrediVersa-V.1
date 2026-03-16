@@ -1,14 +1,25 @@
-/* Dashboard Styles Modernizados */
-.admin-dashboard-wireframe {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem;
-  color: #3A6F85;
+.dashboard-main {
+    flex: 1;
+    min-width: 0;
 }
 
-/* Common Border */
-.wireframe-border {
-  border: 1px solid rgba(142, 207, 234, 0.4);
+.pro-field-input {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    font-size: 0.95rem;
+    font-family: 'Inter', sans-serif;
+    color: #1e293b;
+    transition: all 0.2s;
+}
+
+.pro-field-input:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
 }
 
 /* Input Wrapper - contains the input field within the border */
@@ -119,11 +130,11 @@
 
 .admin-data-section {
   background-color: white;
-  border: 1px solid rgba(142, 207, 234, 0.4);
-  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
   padding: 2rem;
   max-width: 500px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
 }
 
 .admin-form-grid {
@@ -1332,9 +1343,6 @@
   .admin-dashboard-wireframe {
     padding: 0 1rem;
   }
-}
-
-
   .users-list-section, .alerts-section, .user-creation-section, .stats-section, .admin-data-section {
     padding: 1rem;
   }
@@ -1401,7 +1409,6 @@
   .tab-btn {
     flex: 1 1 100%;
   }
-@media (max-width: 480px) {
   .users-list-section, .alerts-section, .user-creation-section, .stats-section, .admin-data-section {
     padding: 1rem;
   }

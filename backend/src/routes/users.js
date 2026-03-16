@@ -180,4 +180,29 @@ router.delete('/:id', authorizeRoles('Administrador'), async (req, res) => {
   }
 });
 
+/**
+ * @route PUT /api/users/profile/photo
+ * @desc Actualizar la foto de perfil del usuario actual
+ */
+router.put('/profile/photo', async (req, res) => {
+  try {
+    const { profilePicture } = req.body;
+    const userId = req.user.id;
+
+    if (profilePicture === undefined) {
+      return res.status(400).json({ success: false, message: 'Se requiere la imagen de perfil' });
+    }
+
+    const updatedUser = await updateUser(userId, { profilePicture });
+    res.json({
+      success: true,
+      message: 'Foto de perfil actualizada correctamente',
+      profilePicture: updatedUser.profilePicture
+    });
+  } catch (error) {
+    console.error('❌ Error al actualizar foto de perfil:', error);
+    res.status(500).json({ success: false, message: 'Error interno al actualizar la foto' });
+  }
+});
+
 module.exports = router;

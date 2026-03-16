@@ -74,6 +74,7 @@ const initializeDatabase = async () => {
         phone VARCHAR(20) DEFAULT '',
         address VARCHAR(255) DEFAULT '',
         birthDate DATE DEFAULT NULL,
+        profilePicture LONGTEXT DEFAULT NULL,
         status ENUM('Activo', 'Inactivo') DEFAULT 'Activo',
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

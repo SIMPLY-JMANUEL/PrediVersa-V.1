@@ -1,0 +1,148 @@
+/* SHARED PROFESSIONAL THEME - PrediVersa */
+
+.profesional-theme {
+    background: #f1f5f9;
+    min-height: 100vh;
+}
+
+.dashboard-container.profesional-theme {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 2rem;
+    width: 100%;
+}
+
+.dashboard-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 2rem;
+    align-items: stretch;
+}
+
+/* SIDEBAR STYLES */
+.dashboard-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.dashboard-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+}
+
+.profile-card {
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.profile-photo {
+    width: 120px;
+    height: 120px;
+    background: #f8fafc;
+    border-radius: 50%;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 4px solid #fff;
+    box-shadow: 0 0 0 1px #e2e8f0, 0 10px 15px -3px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-details .user-name {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.profile-details .user-role {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #0ea5e9;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+}
+
+.profile-details .user-email {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+/* TABS STYLES */
+.management-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: -1px;
+    position: relative;
+    z-index: 10;
+}
+
+.mgmt-tab {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    background: #e2e8f0;
+    border: none;
+    border-radius: 12px 12px 0 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mgmt-tab:hover {
+    background: #cbd5e1;
+    color: #1e293b;
+}
+
+.mgmt-tab.active {
+    background: #fff;
+    color: #0ea5e9;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+}
+
+.mgmt-content {
+    border-radius: 0 16px 16px 16px !important;
+    padding: 2.5rem !important;
+    min-height: 500px;
+}
+
+/* PANELS & HEADERS */
+.professional-header {
+    margin-bottom: 2.5rem;
+}
+
+.page-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+/* ANIMATIONS */
+@keyframes animate-fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: animate-fade-in 0.4s ease-out;
+}

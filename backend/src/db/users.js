@@ -8,7 +8,11 @@ const { pool } = require('./connection');
 const getAllUsers = async () => {
   try {
     const [rows] = await pool.execute(
-      'SELECT id, documentId, email, name, role, phone, address, birthDate, edad, lugarNacimiento, nombrePadre, nombreMadre, grado, status, createdAt, updatedAt FROM users ORDER BY id ASC'
+      `SELECT id, documentId, email, name, role, phone, address, birthDate, edad, lugarNacimiento, 
+       nombrePadre, nombreMadre, grado, profilePicture, status, 
+       repName, repDocType, repDocId, repRelationship, repPhone, repEmail, repAddress,
+       institutionalEmail, isVerified, createdAt, updatedAt 
+       FROM users ORDER BY id ASC`
     );
     return rows;
   } catch (error) {
@@ -70,12 +74,27 @@ const getUserByDocumentId = async (documentId) => {
  */
 const createUser = async (userData) => {
   try {
-    const { documentId, email, password, name, role, phone, address, birthDate, edad, lugarNacimiento, nombrePadre, nombreMadre, grado } = userData;
+    const { 
+      documentId, email, password, name, role, phone, address, birthDate, edad, 
+      lugarNacimiento, nombrePadre, nombreMadre, grado, profilePicture,
+      repName, repDocType, repDocId, repRelationship, repPhone, repEmail, repAddress,
+      institutionalEmail, isVerified
+    } = userData;
     
     const [result] = await pool.execute(
-      `INSERT INTO users (documentId, email, password, name, role, phone, address, birthDate, edad, lugarNacimiento, nombrePadre, nombreMadre, grado, status) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Activo')`,
-      [documentId, email, password, name, role, phone || '', address || '', birthDate || null, edad || '', lugarNacimiento || '', nombrePadre || '', nombreMadre || '', grado || '']
+      `INSERT INTO users (
+        documentId, email, password, name, role, phone, address, birthDate, edad, 
+        lugarNacimiento, nombrePadre, nombreMadre, grado, profilePicture, 
+        repName, repDocType, repDocId, repRelationship, repPhone, repEmail, repAddress,
+        institutionalEmail, isVerified, status
+      ) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Activo')`,
+      [
+        documentId, email, password, name, role, phone || '', address || '', birthDate || null, edad || '', 
+        lugarNacimiento || '', nombrePadre || '', nombreMadre || '', grado || '', profilePicture || null,
+        repName || '', repDocType || '', repDocId || '', repRelationship || '', repPhone || '', 
+        repEmail || '', repAddress || '', institutionalEmail || '', isVerified || false
+      ]
     );
     
     // Retornar el usuario creado (sin contraseña)
@@ -91,7 +110,7 @@ const createUser = async (userData) => {
  */
 const updateUser = async (id, userData) => {
   try {
-    const { documentId, email, name, role, phone, address, birthDate, status, password, edad, lugarNacimiento, nombrePadre, nombreMadre, grado } = userData;
+    const { documentId, email, name, role, phone, address, birthDate, status, password, edad, lugarNacimiento, nombrePadre, nombreMadre, grado, profilePicture } = userData;
     
     // Construir la consulta dinámicamente según los campos proporcionados
     const updates = [];
@@ -153,6 +172,19 @@ const updateUser = async (id, userData) => {
       updates.push('grado = ?');
       values.push(grado);
     }
+    if (profilePicture !== undefined) {
+      updates.push('profilePicture = ?');
+      values.push(profilePicture);
+    }
+    if (repName !== undefined) { updates.push('repName = ?'); values.push(repName); }
+    if (repDocType !== undefined) { updates.push('repDocType = ?'); values.push(repDocType); }
+    if (repDocId !== undefined) { updates.push('repDocId = ?'); values.push(repDocId); }
+    if (repRelationship !== undefined) { updates.push('repRelationship = ?'); values.push(repRelationship); }
+    if (repPhone !== undefined) { updates.push('repPhone = ?'); values.push(repPhone); }
+    if (repEmail !== undefined) { updates.push('repEmail = ?'); values.push(repEmail); }
+    if (repAddress !== undefined) { updates.push('repAddress = ?'); values.push(repAddress); }
+    if (institutionalEmail !== undefined) { updates.push('institutionalEmail = ?'); values.push(institutionalEmail); }
+    if (isVerified !== undefined) { updates.push('isVerified = ?'); values.push(isVerified); }
     
     if (updates.length === 0) {
       return await getUserById(id);
@@ -167,7 +199,11 @@ const updateUser = async (id, userData) => {
     
     // Retornar el usuario actualizado (sin contraseña)
     const [rows] = await pool.execute(
-      'SELECT id, documentId, email, name, role, phone, address, birthDate, edad, lugarNacimiento, nombrePadre, nombreMadre, grado, status, createdAt, updatedAt FROM users WHERE id = ?',
+      `SELECT id, documentId, email, name, role, phone, address, birthDate, edad, lugarNacimiento, 
+       nombrePadre, nombreMadre, grado, profilePicture, status, 
+       repName, repDocType, repDocId, repRelationship, repPhone, repEmail, repAddress,
+       institutionalEmail, isVerified, createdAt, updatedAt 
+       FROM users WHERE id = ?`,
       [id]
     );
     return rows[0] || null;
@@ -256,6 +292,17 @@ const getUserStats = async () => {
       return acc;
     }, {});
     
+    // Alertas Totales
+    const [alertsResult] = await pool.execute('SELECT COUNT(*) as count FROM alerts');
+    const totalAlerts = alertsResult[0].count;
+
+    // Usuarios Verificados
+    const [verifiedResult] = await pool.execute('SELECT COUNT(*) as count FROM users WHERE isVerified = 1');
+    const verifiedUsers = verifiedResult[0].count;
+
+    // Estado de la Red (Simulado o real si hay logs)
+    const dbConnected = true; // Si llegamos aquí, está conectado
+
     return {
       totalUsers,
       activeUsers,
@@ -263,7 +310,11 @@ const getUserStats = async () => {
       usersByRole,
       usersByStatus,
       recentUsers,
-      usersByMonth
+      usersByMonth,
+      totalAlerts,
+      verifiedUsers,
+      dbConnected,
+      lastSync: new Date().toISOString()
     };
   } catch (error) {
     console.error('❌ Error al obtener estadísticas:', error.message);

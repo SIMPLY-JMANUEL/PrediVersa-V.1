@@ -1,382 +1,190 @@
-/* Layout Principal */
-.dashboard-wrapper {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  background-color: #F2F9FC;
+/* STUDENT DASHBOARD PREMIUM STYLES */
+.dashboard-wrapper.profesional-theme {
+    background: #f1f5f9;
+    min-height: 100vh;
 }
 
-.dashboard-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem;
-  width: 100%;
-}
-
-.dashboard-layout {
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 2rem;
-  align-items: stretch;
-}
-
-/* Tarjetas Base (Glass/Flat Modern) */
-.dashboard-card {
-  background-color: #FFFFFF;
-  border: 1px solid rgba(142, 207, 234, 0.4);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-  overflow: hidden;
-}
-
-/* ==================================
-   PANEL IZQUIERDO: Perfil y Académico
-   ================================== */
-.dashboard-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  height: 100%;
-}
-
-.profile-card {
-  padding: 2rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.profile-photo {
-  width: 140px;
-  height: 170px;
-  border: 2px dashed #B0D4E3;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 2rem;
-  background-color: #FAFDFF;
-  transition: border-color 0.3s;
-  overflow: hidden;
-}
-
-.profile-photo:hover {
-  border-color: #3A6F85;
-}
-
-/* Imagen de perfil a proporcion completa del contenedor */
-.profile-photo-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
-  border-radius: 6px;
-  display: block;
-}
-
-.profile-photo p {
-  font-size: 0.85rem;
-  margin-top: 0.5rem;
-  color: #7A9FAF;
-  margin-bottom: 0;
-}
-
-.profile-details {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-}
-
-.detail-item {
-  display: flex;
-  flex-direction: column;
-  padding-bottom: 0.4rem;
-  border-bottom: 1px solid #F0F6F9;
-}
-
-.detail-item:last-child {
-  border-bottom: none;
-}
-
-.detail-item .label {
-  color: #7A9FAF;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
-  margin-bottom: 0.1rem;
-}
-
-.detail-item .value {
-  color: #2A4E5F;
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.academic-card {
-  padding: 1.5rem;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.card-title {
-  color: #3A6F85;
-  font-size: 1rem;
-  font-weight: 700;
-  text-align: center;
-  margin: 0;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(142, 207, 234, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.academic-content {
-  min-height: 180px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-top: 1rem;
-}
-
-.text-muted {
-  color: #9BA3A8;
-  font-size: 0.9rem;
-  text-align: center;
-  margin: 0;
-}
-
-/* ==================================
-   PANEL CENTRAL: Chat de Evalúa
-   ================================== */
-.dashboard-main {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  min-width: 0; /* Previene overflow en grid */
-  height: 100%;
-}
-
-.chat-card {
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 220px);
-  min-height: 500px;
-  overflow: hidden;
-}
-
-.chat-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background-color: #3A6F85;
-  color: #FFFFFF;
-  padding: 1.25rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.chat-messages-area {
-  flex: 1;
-  background-color: #FAFDFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-bottom: 1px solid #E5E7EB;
-  padding: 1.5rem;
-  overflow-y: auto;
-}
-
-.placeholder-text {
-  color: #CBD5E1;
-  font-size: 1.25rem;
-  font-weight: 500;
-}
-
-.chat-input-wrapper {
-  display: flex;
-  padding: 1rem;
-  gap: 1rem;
-  background-color: #FFFFFF;
-}
-
-.chat-input {
-  flex: 1;
-  border: 1px solid #D1D5DB;
-  border-radius: 8px;
-  padding: 0.8rem 1.2rem;
-  font-family: inherit;
-  font-size: 0.95rem;
-  outline: none;
-  transition: all 0.2s;
-  color: #2A4E5F;
-}
-
-.chat-input:focus {
-  border-color: #8ECFEA;
-  box-shadow: 0 0 0 3px rgba(142, 207, 234, 0.2);
-}
-
-.btn-send {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background-color: #3A6F85;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0 1.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
-}
-
-.btn-send:hover {
-  background-color: #2A4E5F;
-}
-.btn-send:active {
-  transform: scale(0.97);
-}
-
-/* ==================================
-   PANEL CENTRAL: Menús Desplegables
-   ================================== */
-.menu-section {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  flex: 1;
-}
-
-.menu-tabs {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-}
-
-.menu-tab {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 1rem 1.25rem;
-  background-color: #FFFFFF;
-  border: 1px solid rgba(142, 207, 234, 0.4);
-  border-radius: 10px;
-  color: #3A6F85;
-  font-family: inherit;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
-}
-
-.menu-tab .tab-icon {
-  margin-right: 0.5rem;
-  color: #8ECFEA;
-  transition: color 0.2s;
-}
-
-.menu-tab .chevron-wrapper {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.menu-tab .chevron {
-  transition: transform 0.3s ease;
-  color: #A9DDF2;
-}
-
-.menu-tab:hover {
-  background-color: #FAFDFF;
-  border-color: #8ECFEA;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(58, 111, 133, 0.08);
-}
-
-/* Estado Activo (Desplegado) */
-.menu-tab.active {
-  background-color: #3A6F85;
-  color: #FFFFFF;
-  border-color: #3A6F85;
-  transform: translateY(0);
-}
-
-.menu-tab.active .tab-icon,
-.menu-tab.active .chevron {
-  color: #FFFFFF;
-}
-
-.menu-tab.active .chevron {
-  transform: rotate(180deg);
-}
-
-/* Contenido del Menú */
-.menu-content-card {
-  min-height: 250px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 2.5rem;
-  background-color: #FFFFFF;
-  flex: 1;
-}
-
-.content-pane {
-  width: 100%;
-  font-size: 1.05rem;
-  color: #475569;
-  text-align: center;
-  line-height: 1.6;
-}
-
-/* ==================================
-   RESPONSIVIDAD
-   ================================== */
-@media (max-width: 1024px) {
-  .dashboard-layout {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
-  .dashboard-sidebar {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .dashboard-sidebar {
-    grid-template-columns: 1fr;
-  }
-  
-  .menu-tabs {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .dashboard-container {
-    padding: 1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .menu-tabs {
-    grid-template-columns: 1fr;
-  }
-  
-  .chat-input-wrapper {
+.profile-card-pro {
+    padding: 2.5rem 1.5rem;
+    display: flex;
     flex-direction: column;
-  }
-  
-  .btn-send {
+    align-items: center;
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.profile-photo-container {
+    position: relative;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.profile-photo-pro {
+    width: 130px;
+    height: 130px;
+    background: #f8fafc;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
     justify-content: center;
-    padding: 0.8rem;
-  }
+    border: 4px solid #fff;
+    box-shadow: 0 0 0 1px #e2e8f0, 0 10px 15px -3px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+.profile-photo-img-pro {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.upload-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.photo-upload-btn {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid #e2e8f0;
+}
+
+.photo-upload-btn:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.profile-info-pro {
+    text-align: center;
+    width: 100%;
+}
+
+.user-name-pro {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.user-role-pro {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #0ea5e9;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 1.5rem;
+}
+
+.info-grid-pro {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-align: left;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 1.5rem;
+}
+
+.info-item-pro {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: #94a3b8;
+    font-weight: 800;
+    margin-bottom: 2px;
+}
+
+.info-value {
+    font-size: 0.9rem;
+    color: #334155;
+    font-weight: 600;
+}
+
+.academic-card-pro {
+    padding: 1.5rem;
+    background: white;
+    border-radius: 20px;
+}
+
+.card-header-pro {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+    color: #0c4a6e;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 0.75rem;
+}
+
+.card-header-pro h3 {
+    font-size: 0.85rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.academic-content-pro p {
+    font-size: 0.85rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+/* MAIN CONTENT */
+.dashboard-main-pro {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.chat-card-pro {
+    padding: 0 !important;
+    border-radius: 20px !important;
+    height: 500px;
+}
+
+.content-pane-pro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #475569;
+}
+
+.content-pane-pro h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 0.75rem;
+}
+
+.content-pane-pro p {
+    max-width: 500px;
+    line-height: 1.6;
+}
+
+.fade-in {
+    animation: animate-fade-in 0.4s ease-out;
 }

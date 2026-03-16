@@ -8,16 +8,26 @@
  */
 import { useState, useEffect } from 'react'
 
-const STORAGE_KEY = 'userPhoto'
+const STORAGE_KEY = 'user'
 
 export function useUserPhoto() {
-  const [photo, setPhotoState] = useState(() => localStorage.getItem(STORAGE_KEY) || null)
+  const [photo, setPhotoState] = useState(() => {
+    const storedUser = localStorage.getItem(STORAGE_KEY)
+    if (storedUser) {
+      const user = JSON.parse(storedUser)
+      return user.profilePicture || null
+    }
+    return null
+  })
 
   useEffect(() => {
-    // Escuchar actualizaciones desde el panel de configuración
     const handleChange = (e) => {
       if (e.key === STORAGE_KEY || e.type === 'userPhotoChanged') {
-        setPhotoState(localStorage.getItem(STORAGE_KEY) || null)
+        const storedUser = localStorage.getItem(STORAGE_KEY)
+        if (storedUser) {
+          const user = JSON.parse(storedUser)
+          setPhotoState(user.profilePicture || null)
+        }
       }
     }
 
@@ -29,15 +39,33 @@ export function useUserPhoto() {
     }
   }, [])
 
-  const setPhoto = (dataUrl) => {
-    if (dataUrl) {
-      localStorage.setItem(STORAGE_KEY, dataUrl)
-    } else {
-      localStorage.removeItem(STORAGE_KEY)
+  const setPhoto = async (dataUrl) => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch('http://localhost:5000/api/users/profile/photo', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ profilePicture: dataUrl })
+      })
+
+      const data = await response.json()
+      if (data.success) {
+        // Actualizar el usuario en localStorage
+        const storedUser = localStorage.getItem(STORAGE_KEY)
+        if (storedUser) {
+          const user = JSON.parse(storedUser)
+          user.profilePicture = data.profilePicture
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(user))
+          setPhotoState(data.profilePicture)
+          window.dispatchEvent(new Event('userPhotoChanged'))
+        }
+      }
+    } catch (error) {
+      console.error('Error al guardar la foto en el servidor:', error)
     }
-    setPhotoState(dataUrl)
-    // Notificar a todos los componentes suscritos
-    window.dispatchEvent(new Event('userPhotoChanged'))
   }
 
   return [photo, setPhoto]

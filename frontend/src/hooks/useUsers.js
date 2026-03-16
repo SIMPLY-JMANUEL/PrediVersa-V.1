@@ -9,16 +9,24 @@ export const useUsers = (token) => {
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 10;
 
+  const [realStats, setRealStats] = useState(null);
+
   const fetchUsers = async () => {
     setLoadingUsers(true);
     try {
-      const response = await fetch('http://localhost:5000/api/users', {
+      const respUsers = await fetch('http://localhost:5000/api/users', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const data = await response.json();
-      if (data.success) setUsers(data.users);
+      const dataUsers = await respUsers.json();
+      if (dataUsers.success) setUsers(dataUsers.users);
+
+      const respStats = await fetch('http://localhost:5000/api/users/stats', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const dataStats = await respStats.json();
+      if (dataStats.success) setRealStats(dataStats.stats);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error('Error fetching data:', error);
     } finally {
       setLoadingUsers(false);
     }
@@ -57,6 +65,8 @@ export const useUsers = (token) => {
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
   const stats = useMemo(() => {
+    if (realStats) return realStats;
+    
     const total = users.length;
     const activos = users.filter(u => u.status === 'Activo').length;
     const inactivos = total - activos;
@@ -66,8 +76,14 @@ export const useUsers = (token) => {
       Psicología: users.filter(u => u.role === 'Psicología').length,
       Administrador: users.filter(u => u.role === 'Administrador').length
     };
-    return { total, activos, inactivos, porRol };
-  }, [users]);
+    return { 
+      totalUsers: total, 
+      activeUsers: activos, 
+      inactiveUsers: inactivos, 
+      usersByRole: porRol,
+      dbConnected: true 
+    };
+  }, [users, realStats]);
 
   return {
     users,

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import DashboardHeader from './DashboardHeader'
-import { FileSpreadsheet } from 'lucide-react'
+import { FileSpreadsheet, Users, Bell, BarChart3, Settings } from 'lucide-react'
 import ExcelUploader from './ExcelUploader'
 import { useUserPhoto } from '../hooks/useUserPhoto'
 import { useUsers } from '../hooks/useUsers'
@@ -17,7 +17,7 @@ import VersaNotifications from './admin/VersaNotifications'
 import AdminSidebar from './admin/AdminSidebar'
 import CaseTimeline from './admin/CaseTimeline'
 
-import './StudentDashboard.css'
+import '../ProfessionalTheme.css'
 import './AdminDashboard.css'
 
 const exportToCSV = (users, filename = 'usuarios.csv') => {
@@ -37,7 +37,6 @@ const exportToCSV = (users, filename = 'usuarios.csv') => {
 
 function AdminDashboard({ user, onLogout }) {
   const token = localStorage.getItem('token')
-  const [photo] = useUserPhoto()
   const { 
     loadingUsers, searchTerm, setSearchTerm, paginatedUsers, totalPages, stats, 
     fetchUsers, currentPage, setCurrentPage, filteredUsers 
@@ -46,17 +45,17 @@ function AdminDashboard({ user, onLogout }) {
     alerts, loadingAlerts, notifVersa, setNotifVersa, notifVisible, setNotifVisible, fetchAlerts 
   } = useAlerts(token)
 
-  const [activeTab, setActiveTab] = useState('creacion')
-  const [activeAlertTab, setActiveAlertTab] = useState('alertas')
+  const [activeTab, setActiveTab] = useState('dashboard')
+  const [selectedAlert, setSelectedAlert] = useState(null)
   const [showExcelUploader, setShowExcelUploader] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
   const [editingUser, setEditingUser] = useState(null)
   const [viewingUser, setViewingUser] = useState(null)
-  const [selectedAlert, setSelectedAlert] = useState(null)
 
   const [userForm, setUserForm] = useState({
     nombres: '', apellidos: '', id: '', edad: '', fechaNacimiento: '', lugarNacimiento: '',
-    telefono: '', direccion: '', nombreMadre: '', nombrePadre: '', email: '', grado: '', rol: 'Estudiante'
+    telefono: '', direccion: '', nombreMadre: '', nombrePadre: '', email: '', grado: '', rol: 'Estudiante',
+    repName: '', repDocType: 'CC', repDocId: '', repRelationship: '', repPhone: '', repEmail: '', repAddress: ''
   })
   const [formErrors, setFormErrors] = useState({})
 
@@ -75,13 +74,22 @@ function AdminDashboard({ user, onLogout }) {
         body: JSON.stringify({
           documentId: userForm.id, email: userForm.email, name: `${userForm.nombres} ${userForm.apellidos}`,
           role: userForm.rol, phone: userForm.telefono, address: userForm.direccion,
-          birthDate: userForm.fechaNacimiento || null, password: 'Password123'
+          birthDate: userForm.fechaNacimiento || null, password: 'Predi123!',
+          edad: userForm.edad, lugarNacimiento: userForm.lugarNacimiento,
+          nombrePadre: userForm.nombrePadre, nombreMadre: userForm.nombreMadre, grado: userForm.grado,
+          repName: userForm.repName, repDocType: userForm.repDocType, repDocId: userForm.repDocId,
+          repRelationship: userForm.repRelationship, repPhone: userForm.repPhone,
+          repEmail: userForm.repEmail, repAddress: userForm.repAddress
         })
       })
       const data = await response.json()
       if (data.success) {
         setSaveMessage('Usuario creado exitosamente'); fetchUsers();
-        setUserForm({ nombres: '', apellidos: '', id: '', edad: '', fechaNacimiento: '', lugarNacimiento: '', telefono: '', direccion: '', nombreMadre: '', nombrePadre: '', email: '', grado: '', rol: 'Estudiante' })
+        setUserForm({ 
+          nombres: '', apellidos: '', id: '', edad: '', fechaNacimiento: '', lugarNacimiento: '', 
+          telefono: '', direccion: '', nombreMadre: '', nombrePadre: '', email: '', grado: '', rol: 'Estudiante',
+          repName: '', repDocType: 'CC', repDocId: '', repRelationship: '', repPhone: '', repEmail: '', repAddress: ''
+        })
       }
     } catch (error) { console.error(error) }
     setTimeout(() => setSaveMessage(''), 3000)
@@ -93,8 +101,11 @@ function AdminDashboard({ user, onLogout }) {
       nombres: parts[0], apellidos: parts.slice(1).join(' '), id: u.documentId, edad: u.edad || '',
       fechaNacimiento: u.birthDate?.split('T')[0] || '', lugarNacimiento: u.lugarNacimiento || '',
       telefono: u.phone || '', direccion: u.address || '', nombreMadre: u.nombreMadre || '',
-      nombrePadre: u.nombrePadre || '', email: u.email, grado: u.grado || '', rol: u.role
-    }); setActiveTab('creacion')
+      nombrePadre: u.nombrePadre || '', email: u.email, grado: u.grado || '', rol: u.role,
+      repName: u.repName || '', repDocType: u.repDocType || 'CC', repDocId: u.repDocId || '',
+      repRelationship: u.repRelationship || '', repPhone: u.repPhone || '',
+      repEmail: u.repEmail || '', repAddress: u.repAddress || ''
+    }); setActiveTab('usuarios')
   }
 
   const handleUpdate = async () => {
@@ -105,13 +116,20 @@ function AdminDashboard({ user, onLogout }) {
         body: JSON.stringify({
           documentId: userForm.id, email: userForm.email, name: `${userForm.nombres} ${userForm.apellidos}`,
           role: userForm.rol, phone: userForm.telefono, address: userForm.direccion,
-          birthDate: userForm.fechaNacimiento || null, edad: userForm.edad, grado: userForm.grado
+          birthDate: userForm.fechaNacimiento || null, edad: userForm.edad, grado: userForm.grado,
+          repName: userForm.repName, repDocType: userForm.repDocType, repDocId: userForm.repDocId,
+          repRelationship: userForm.repRelationship, repPhone: userForm.repPhone,
+          repEmail: userForm.repEmail, repAddress: userForm.repAddress
         })
       })
       const data = await response.json()
       if (data.success) {
         setSaveMessage('Actualizado exitosamente'); setEditingUser(null); fetchUsers();
-        setUserForm({ nombres: '', apellidos: '', id: '', edad: '', fechaNacimiento: '', lugarNacimiento: '', telefono: '', direccion: '', nombreMadre: '', nombrePadre: '', email: '', grado: '', rol: 'Estudiante' })
+        setUserForm({ 
+          nombres: '', apellidos: '', id: '', edad: '', fechaNacimiento: '', lugarNacimiento: '', 
+          telefono: '', direccion: '', nombreMadre: '', nombrePadre: '', email: '', grado: '', rol: 'Estudiante',
+          repName: '', repDocType: 'CC', repDocId: '', repRelationship: '', repPhone: '', repEmail: '', repAddress: ''
+        })
       }
     } catch (error) { console.error(error) }
     setTimeout(() => setSaveMessage(''), 3000)
@@ -127,98 +145,98 @@ function AdminDashboard({ user, onLogout }) {
   }
 
   return (
-    <div className="dashboard-wrapper">
+    <div className="dashboard-wrapper profesional-theme">
       <DashboardHeader user={user} onLogout={onLogout} />
       <VersaNotifications notifVisible={notifVisible} notifVersa={notifVersa} setNotifVersa={setNotifVersa} setNotifVisible={setNotifVisible} setActiveTab={setActiveTab} />
 
-      <div className="dashboard-container" style={{maxWidth: '1600px', width: '100%'}}>
+      <div className="dashboard-container profesional-theme">
         <div className="dashboard-layout">
-          <AdminSidebar photo={photo} user={user} />
+          <AdminSidebar user={user} />
 
           <main className="dashboard-main">
-            <div className="admin-dashboard-wireframe" style={{padding: '0', maxWidth: '100%'}}>
-              <AdminStats stats={stats} />
+            <div className="professional-header">
+              <h2 className="page-title">Panel de Administración</h2>
+              <p style={{ color: '#64748b', fontSize: '1rem' }}>Gestión global de la plataforma PrediVersa.</p>
+            </div>
 
-              <div className="user-creation-section">
-                <div className="tabs-row">
-                  <button className={`tab-btn ${activeTab === 'creacion' ? 'active' : ''}`} onClick={() => setActiveTab('creacion')}>Creación</button>
-                  <button className={`tab-btn ${activeTab === 'verificacion' ? 'active' : ''}`} onClick={() => setActiveTab('verificacion')}>Verificación</button>
-                  <button className="tab-btn excel-upload-btn" onClick={() => setShowExcelUploader(true)}><FileSpreadsheet size={16} /> Excel</button>
+            <div className="management-tabs">
+              {[
+                { id: 'dashboard', label: 'Dashboard', icon: <BarChart3 size={18} /> },
+                { id: 'usuarios', label: 'Usuarios', icon: <Users size={18} /> },
+                { id: 'alertas', label: 'Centro de Alertas', icon: <Bell size={18} /> },
+                { id: 'configuracion', label: 'Estructura', icon: <Settings size={18} /> }
+              ].map(tab => (
+                <button 
+                  key={tab.id}
+                  className={`mgmt-tab ${activeTab === tab.id ? 'active' : ''}`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  {tab.icon}
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            
+            <div className="dashboard-card mgmt-content">
+              {activeTab === 'dashboard' && (
+                <div className="animate-fade-in">
+                  <AdminStats stats={stats} />
                 </div>
+              )}
 
-                {showExcelUploader && <ExcelUploader onUploadSuccess={fetchUsers} onClose={() => setShowExcelUploader(false)} />}
+              {activeTab === 'usuarios' && (
+                <div className="animate-fade-in">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1e293b' }}>Gestión de Personal</h3>
+                    <button className="mgmt-tab active" onClick={() => setShowExcelUploader(true)} style={{ borderRadius: '12px', padding: '10px 20px' }}>
+                      <FileSpreadsheet size={16} /> Carga Masiva (Excel)
+                    </button>
+                  </div>
+                  
+                  {showExcelUploader && <ExcelUploader onUploadSuccess={fetchUsers} onClose={() => setShowExcelUploader(false)} />}
+                  
+                  <UserForm userForm={userForm} formErrors={formErrors} handleInputChange={handleInputChange} editingUser={editingUser} handleUpdate={handleUpdate} handleSave={handleSave} cancelEdit={() => { setEditingUser(null); setUserForm({ nombres: '', apellidos: '', id: '', edad: '', fechaNacimiento: '', lugarNacimiento: '', telefono: '', direccion: '', nombreMadre: '', nombrePadre: '', email: '', grado: '', rol: 'Estudiante' }) }} />
+                  {saveMessage && <div className={`flash-message ${saveMessage.includes('Error') ? 'error' : ''}`} style={{ marginTop: '1rem' }}>{saveMessage}</div>}
+                  
+                  <div className="users-list-section" style={{ marginTop: '3rem' }}>
+                    <UserVerification 
+                      searchTerm={searchTerm} setSearchTerm={setSearchTerm} paginatedUsers={paginatedUsers} 
+                      currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage} 
+                      handleEdit={handleEdit} handleDelete={handleDelete} exportToCSV={exportToCSV} filteredUsers={filteredUsers} 
+                    />
+                  </div>
+                </div>
+              )}
 
-                {activeTab === 'creacion' && (
-                  <>
-                    <UserForm userForm={userForm} formErrors={formErrors} handleInputChange={handleInputChange} editingUser={editingUser} handleUpdate={handleUpdate} handleSave={handleSave} cancelEdit={() => { setEditingUser(null); setUserForm({ nombres: '', apellidos: '', id: '', edad: '', fechaNacimiento: '', lugarNacimiento: '', telefono: '', direccion: '', nombreMadre: '', nombrePadre: '', email: '', grado: '', rol: 'Estudiante' }) }} />
-                    {saveMessage && <div className={`save-message ${saveMessage.includes('Error') ? 'error' : 'success'}`}>{saveMessage}</div>}
-                    <div className="users-list-section">
-                      <h3 className="users-list-title">Últimos Creados</h3>
-                      <div className="users-table">
-                        <div className="users-table-header"><span>Nombre</span><span>Email</span><span>Rol</span><span>Acciones</span></div>
-                        {paginatedUsers.slice(0, 5).map(u => (
-                          <div key={u.id} className="users-table-row">
-                            <span>{u.name}</span><span>{u.email}</span><span>{u.role}</span>
-                            <span>
-                              <button className="action-btn-small view" onClick={() => setViewingUser(u)}>👁️</button>
-                              <button className="action-btn-small edit" onClick={() => handleEdit(u)}>Editar</button>
-                            </span>
-                          </div>
-                        ))}
+              {activeTab === 'alertas' && (
+                <div className="animate-fade-in">
+                  {!selectedAlert ? (
+                    <AlertList alerts={alerts} loadingAlerts={loadingAlerts} onSelectAlert={setSelectedAlert} />
+                  ) : (
+                    <div className="alert-details-pro">
+                      <button className="mgmt-tab" onClick={() => setSelectedAlert(null)} style={{ marginBottom: '1.5rem', borderRadius: '12px' }}>← Volver</button>
+                      <AlertDetails selectedAlert={selectedAlert} onBack={() => setSelectedAlert(null)} />
+                      <div style={{ marginTop: '2rem' }}>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '1rem' }}>Línea de Vida del Caso</h4>
+                        <CaseTimeline alertId={selectedAlert.id} token={token} />
                       </div>
                     </div>
-                  </>
-                )}
-
-                {activeTab === 'verificacion' && (
-                  <UserVerification 
-                    searchTerm={searchTerm} setSearchTerm={setSearchTerm} paginatedUsers={paginatedUsers} 
-                    currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage} 
-                    handleEdit={handleEdit} handleDelete={handleDelete} exportToCSV={exportToCSV} filteredUsers={filteredUsers} 
-                  />
-                )}
-              </div>
-
-              <div className="alerts-section">
-                <div className="alerts-tabs-row">
-                  {['alertas', 'asignacion', 'acciones', 'estadoProceso'].map(t => (
-                    <button key={t} className={`alert-tab-btn ${activeAlertTab === t ? 'active' : ''}`} onClick={() => setActiveAlertTab(t)}>{t.charAt(0).toUpperCase() + t.slice(1)}</button>
-                  ))}
-                </div>
-                <div className="alerts-content">
-                  {activeAlertTab === 'alertas' && (!selectedAlert ? <AlertList alerts={alerts} loadingAlerts={loadingAlerts} onSelectAlert={setSelectedAlert} /> : <AlertDetails selectedAlert={selectedAlert} onBack={() => setSelectedAlert(null)} />)}
-                  {activeAlertTab === 'asignacion' && <AlertAssignment selectedAlert={selectedAlert} fetchAlerts={fetchAlerts} onBack={() => { setActiveAlertTab('alertas'); setSelectedAlert(null); }} />}
-                  {activeAlertTab === 'acciones' && (
-                    selectedAlert ? 
-                    <CaseTimeline alertId={selectedAlert.id} token={token} /> :
-                    <div className="p-8 text-center text-gray-400">Selecciona un caso en la pestaña "Alertas" para ver sus acciones.</div>
-                  )}
-                  {activeAlertTab === 'estadoProceso' && (
-                    selectedAlert ?
-                    <div className="p-4" style={{ fontFamily: 'Inter, sans-serif' }}>
-                      <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-6" style={{ background: '#f8fafc' }}>
-                        <h4 className="font-bold text-gray-800 mb-2">Estado Actual del Proceso</h4>
-                        <div className="flex items-center gap-4">
-                          <div className={`px-4 py-2 rounded-full font-bold text-sm ${
-                            selectedAlert.status === 'Resuelta' ? 'bg-green-100 text-green-700' :
-                            selectedAlert.status === 'En Proceso' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700'
-                          }`}>
-                            {selectedAlert.status}
-                          </div>
-                          <span className="text-gray-500 text-sm">Responsable: <b>{selectedAlert.assignedTo || 'Sin asignar'}</b></span>
-                        </div>
-                      </div>
-                      <CaseTimeline alertId={selectedAlert.id} token={token} />
-                    </div> :
-                    <div className="p-8 text-center text-gray-400">Selecciona un caso para ver el flujo del proceso.</div>
                   )}
                 </div>
-              </div>
-              {viewingUser && <UserDetailsModal user={viewingUser} onClose={() => setViewingUser(null)} onEdit={handleEdit} />}
+              )}
+              
+              {activeTab === 'configuracion' && (
+                <div className="animate-fade-in" style={{ textAlign: 'center', padding: '4rem' }}>
+                  <Settings size={48} color="#94a3b8" style={{ marginBottom: '1.5rem' }} />
+                  <h3 style={{ fontSize: '1.5rem', fontWeight: '800' }}>Configuración Institucional</h3>
+                  <p style={{ color: '#64748b' }}>Módulo para la gestión de dependencias, roles avanzados y auditoría de sistema.</p>
+                </div>
+              )}
             </div>
           </main>
         </div>
       </div>
+      {viewingUser && <UserDetailsModal user={viewingUser} onClose={() => setViewingUser(null)} onEdit={handleEdit} />}
     </div>
   )
 }
