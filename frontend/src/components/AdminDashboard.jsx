@@ -182,7 +182,7 @@ function AdminDashboard({ user, onLogout }) {
 
       <div className="dashboard-container profesional-theme">
         <div className="dashboard-layout">
-          <AdminSidebar user={user} setActiveTab={switchTab} />
+          <AdminSidebar user={user} setActiveTab={switchTab} stats={stats} />
 
           <main className="dashboard-main">
             <div className="professional-header">
@@ -233,7 +233,8 @@ function AdminDashboard({ user, onLogout }) {
                     <UserVerification 
                       searchTerm={searchTerm} setSearchTerm={setSearchTerm} paginatedUsers={paginatedUsers} 
                       currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage} 
-                      handleEdit={handleEdit} handleDelete={handleDelete} exportToCSV={exportToCSV} filteredUsers={filteredUsers} 
+                      handleEdit={handleEdit} handleDelete={handleDelete} exportToCSV={exportToCSV} 
+                      filteredUsers={filteredUsers} fetchUsers={fetchUsers}
                     />
                   </div>
                 </div>

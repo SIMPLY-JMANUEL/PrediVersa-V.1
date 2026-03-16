@@ -10,19 +10,37 @@ const UserVerification = ({
   handleEdit, 
   handleDelete, 
   exportToCSV, 
-  filteredUsers 
+  filteredUsers,
+  fetchUsers
 }) => {
   return (
     <div className="verification-section">
-      <div className="search-box">
-        <input 
-          type="text" 
-          placeholder="Buscar por nombre, email, documento o rol..." 
-          value={searchTerm} 
-          onChange={(e) => setSearchTerm(e.target.value)} 
-          className="search-input" 
-        />
-        <button className="export-btn" onClick={() => exportToCSV(filteredUsers)}>Exportar CSV</button>
+      <div className="search-box" style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div style={{ flex: 1, position: 'relative' }}>
+          <input 
+            type="text" 
+            placeholder="Buscar por nombre, email, ID..." 
+            value={searchTerm} 
+            onChange={(e) => setSearchTerm(e.target.value)} 
+            className="search-input" 
+            style={{ width: '100%', paddingRight: '40px' }}
+          />
+        </div>
+        <button 
+          className="mgmt-tab active" 
+          onClick={fetchUsers}
+          style={{ 
+            borderRadius: '10px', 
+            padding: '10px 25px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px',
+            fontSize: '0.9rem'
+          }}
+        >
+          🔍 BUSCAR EN BD
+        </button>
+        <button className="export-btn" onClick={() => exportToCSV(filteredUsers)}>📥 Exportar CSV</button>
       </div>
       <div className="users-list-section">
         <div className="users-table full-list">

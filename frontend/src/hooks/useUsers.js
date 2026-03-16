@@ -37,10 +37,10 @@ export const useUsers = (token) => {
     if (searchTerm.trim() !== '') {
       const term = searchTerm.toLowerCase();
       result = result.filter(u => 
-        u.name?.toLowerCase().includes(term) ||
-        u.email?.toLowerCase().includes(term) ||
-        u.documentId?.toLowerCase().includes(term) ||
-        u.role?.toLowerCase().includes(term)
+        (u.name?.toLowerCase().includes(term)) ||
+        (u.email?.toLowerCase().includes(term)) ||
+        (u.documentId?.toLowerCase().includes(term)) ||
+        (u.role?.toLowerCase().includes(term))
       );
     }
     result.sort((a, b) => {
