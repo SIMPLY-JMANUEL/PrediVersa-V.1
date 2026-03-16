@@ -81,6 +81,13 @@ const createUser = async (userData) => {
       institutionalEmail, isVerified
     } = userData;
     
+    const valuesToInsert = [
+      documentId, email, password, name, role, phone, address, birthDate, edad, 
+      lugarNacimiento, nombrePadre, nombreMadre, grado, profilePicture,
+      repName, repDocType, repDocId, repRelationship, repPhone, 
+      repEmail, repAddress, institutionalEmail, isVerified
+    ].map(v => (v === undefined || v === '' || v === 'null') ? null : v);
+
     const [result] = await pool.execute(
       `INSERT INTO users (
         documentId, email, password, name, role, phone, address, birthDate, edad, 
@@ -89,12 +96,7 @@ const createUser = async (userData) => {
         institutionalEmail, isVerified, status
       ) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Activo')`,
-      [
-        documentId, email, password, name, role, phone || '', address || '', birthDate || null, edad || '', 
-        lugarNacimiento || '', nombrePadre || '', nombreMadre || '', grado || '', profilePicture || null,
-        repName || '', repDocType || '', repDocId || '', repRelationship || '', repPhone || '', 
-        repEmail || '', repAddress || '', institutionalEmail || '', isVerified || false
-      ]
+      valuesToInsert
     );
     
     // Retornar el usuario creado (sin contraseña)

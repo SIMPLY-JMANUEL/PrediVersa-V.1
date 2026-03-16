@@ -87,8 +87,9 @@
 /* TABS STYLES */
 .management-tabs {
     display: flex;
-    gap: 10px;
-    margin-bottom: -1px;
+    gap: 12px;
+    margin-bottom: 0;
+    padding-left: 10px;
     position: relative;
     z-index: 10;
 }
@@ -101,48 +102,103 @@
     background: #e2e8f0;
     border: none;
     border-radius: 12px 12px 0 0;
-    font-size: 0.9rem;
-    font-weight: 700;
+    font-size: 0.85rem;
+    font-weight: 600;
     color: #64748b;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-bottom: 3px solid transparent;
 }
 
 .mgmt-tab:hover {
-    background: #cbd5e1;
+    background: #f1f5f9;
     color: #1e293b;
 }
 
 .mgmt-tab.active {
     background: #fff;
     color: #0ea5e9;
-    box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+    border-bottom: 3px solid #0ea5e9;
+    box-shadow: 0 -10px 15px -3px rgba(0,0,0,0.05);
 }
 
 .mgmt-content {
-    border-radius: 0 16px 16px 16px !important;
-    padding: 2.5rem !important;
-    min-height: 500px;
+    border-radius: 16px !important;
+    padding: 3rem !important;
+    min-height: 600px;
+    margin-top: -3px; /* Pequeño ajuste para que ensamble bien con el borde inferior de la pestaña activa */
+    background: #fff;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    z-index: 5;
+    position: relative;
+}
+
+/* BUTTON STANDARDIZATION */
+.btn-primary-pro {
+    background: linear-gradient(135deg, #0c4a6e 0%, #075985 100%);
+    color: white;
+    padding: 10px 22px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    font-weight: 500;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 6px -1px rgba(12, 74, 110, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-primary-pro:hover {
+    background: linear-gradient(135deg, #075985 0%, #0c4a6e 100%);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 12px 20px -5px rgba(12, 74, 110, 0.4);
+}
+
+.btn-primary-pro:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.btn-secondary-pro {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 14px 28px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary-pro:hover {
+    background: #e2e8f0;
+    color: #1e293b;
 }
 
 /* PANELS & HEADERS */
 .professional-header {
-    margin-bottom: 2.5rem;
+    margin-bottom: 3rem;
+    padding: 1rem 0;
 }
 
 .page-title {
-    font-size: 1.75rem;
-    font-weight: 800;
+    font-size: 1.25rem;
+    font-weight: 900;
     color: #1e293b;
     margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
 }
 
 /* ANIMATIONS */
 @keyframes animate-fade-in {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(15px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fade-in {
-    animation: animate-fade-in 0.4s ease-out;
+    animation: animate-fade-in 0.5s ease-out;
 }

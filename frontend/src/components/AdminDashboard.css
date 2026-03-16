@@ -40,21 +40,21 @@
   padding: 0.25rem 0;
   font-size: 0.95rem;
   min-width: 0;
-  color: #2A4E5F;
+  color: #0284c7;
 }
 
 .input-wrapper:has(input:focus) {
-  border-bottom: 2px solid #3A6F85;
+  border-bottom: 2px solid #0ea5e9;
 }
 
 /* Select Dropdown Style */
 .action-select {
   border: none;
-  background: #F2F9FC;
+  background: #f0f9ff;
   padding: 0.6rem;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #3A6F85;
+  color: #0ea5e9;
   cursor: pointer;
   outline: none;
   border-left: 1px solid rgba(142, 207, 234, 0.4);
@@ -65,23 +65,47 @@
   background: #EAF4F8;
 }
 
-/* Form Field */
+/* Form Field Layout - Uniform and Full Width */
 .form-field {
   display: flex;
-  align-items: center;
-  margin-bottom: 0.6rem;
+  flex-direction: column;
+  align-items: stretch; /* Cubriendo todo el ancho */
+  margin-bottom: 1.5rem;
+  width: 100%;
 }
 
 .form-field label {
-  width: 5.5rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-  flex-shrink: 0;
+  width: 100%;
+  font-weight: 800;
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.form-field span {
-  margin: 0 0.25rem;
-  flex-shrink: 0;
+.input-wrapper {
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.pro-field-input {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 1rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pro-field-input:focus {
+  border-color: #0c4a6e;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(12, 74, 110, 0.1);
+  transform: translateY(-1px);
 }
 
 /* Section Titles */
@@ -167,14 +191,14 @@
   font-weight: 600;
   font-size: 0.95rem;
   background: white;
-  color: #3A6F85;
+  color: #0ea5e9;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 
 .logout-btn-top:hover {
-  background: #F2F9FC;
+  background: #f0f9ff;
   transform: translateY(-1px);
 }
 
@@ -204,24 +228,24 @@
   padding: 0.6rem 1.5rem;
   border-radius: 8px;
   background: white;
-  color: #3A6F85;
+  color: #0ea5e9;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .tab-btn.active {
-  background: #3A6F85;
+  background: #0ea5e9;
   color: white;
-  border-color: #3A6F85;
+  border-color: #0ea5e9;
 }
 
 .tab-btn.inactive {
-  background: #F2F9FC;
+  background: #f0f9ff;
   color: #7A9FAF;
 }
 
 .tab-btn:hover:not(.active) {
-  background: #F2F9FC;
+  background: #f0f9ff;
 }
 
 .user-form-grid {
@@ -260,11 +284,11 @@
 
 .action-value {
   padding: 0.6rem 1rem;
-  background: #F2F9FC;
+  background: #f0f9ff;
   border-left: 1px solid rgba(142, 207, 234, 0.4);
   display: flex;
   align-items: center;
-  color: #3A6F85;
+  color: #0ea5e9;
 }
 
 .action-box.flex-1 {
@@ -283,7 +307,7 @@
   padding: 0.7rem 1.5rem;
   font-weight: 600;
   font-size: 0.9rem;
-  background: #3A6F85;
+  background: #0ea5e9;
   color: white;
   cursor: pointer;
   transition: all 0.2s;
@@ -291,7 +315,7 @@
 }
 
 .save-btn:hover {
-  background: #2A4E5F;
+  background: #0284c7;
   transform: translateY(-2px);
 }
 
@@ -327,7 +351,7 @@
   font-size: 1.25rem;
   font-weight: 700;
   margin: 0 0 1.5rem 0;
-  color: #2A4E5F;
+  color: #0284c7;
 }
 
 .users-table {
@@ -341,11 +365,11 @@
 .users-table-header {
   display: grid;
   grid-template-columns: 2fr 2fr 1.5fr 1fr 1.5fr;
-  background: #F2F9FC;
+  background: #f0f9ff;
   padding: 1rem;
   font-weight: 600;
   font-size: 0.9rem;
-  color: #3A6F85;
+  color: #0ea5e9;
   border-bottom: 2px solid #E5E7EB;
 }
 
@@ -418,7 +442,7 @@
   padding: 0.7rem 1.5rem;
   font-weight: 600;
   font-size: 0.9rem;
-  background: #3A6F85;
+  background: #0ea5e9;
   color: white;
   cursor: pointer;
   box-shadow: 0 4px 10px rgba(58, 111, 133, 0.15);
@@ -426,7 +450,7 @@
 }
 
 .update-btn:hover {
-  background: #2A4E5F;
+  background: #0284c7;
   transform: translateY(-2px);
 }
 
@@ -443,8 +467,8 @@
 }
 
 .cancel-btn:hover {
-  background: #F2F9FC;
-  color: #3A6F85;
+  background: #f0f9ff;
+  color: #0ea5e9;
 }
 
 /* Verification Section */
@@ -478,7 +502,7 @@
 
 .search-input:focus {
   outline: none;
-  border-color: #8ECFEA;
+  border-color: #7dd3fc;
   box-shadow: 0 0 0 3px rgba(142, 207, 234, 0.15);
 }
 
@@ -521,7 +545,7 @@
   font-size: 1.25rem;
   font-weight: 700;
   margin: 0 0 1.5rem 0;
-  color: #2A4E5F;
+  color: #0284c7;
 }
 
 .stats-grid {
@@ -553,9 +577,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #F2F9FC;
+  background: #f0f9ff;
   border-radius: 10px;
-  color: #3A6F85;
+  color: #0ea5e9;
 }
 
 .stat-card-large.success .stat-icon {
@@ -656,7 +680,7 @@
 }
 
 .sortable:hover {
-  color: #3A6F85;
+  color: #0ea5e9;
 }
 
 /* Pagination */
@@ -718,7 +742,7 @@
   border: 1px solid rgba(142, 207, 234, 0.4);
   padding: 0.6rem 2rem;
   border-radius: 8px 8px 0 0;
-  background: #F2F9FC;
+  background: #f0f9ff;
   cursor: pointer;
   color: #7A9FAF;
   transition: all 0.2s;
@@ -727,7 +751,7 @@
 .alert-tab-btn.active {
   background: #EAF4F8;
   border-bottom: 1px solid #EAF4F8;
-  color: #3A6F85;
+  color: #0ea5e9;
   position: relative;
   z-index: 10;
   padding-bottom: calc(0.6rem + 1px);
@@ -786,11 +810,11 @@
 
 .alert-select {
   border: none;
-  background: #F2F9FC;
+  background: #f0f9ff;
   padding: 0.6rem;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #3A6F85;
+  color: #0ea5e9;
   cursor: pointer;
   border-left: 1px solid rgba(142, 207, 234, 0.4);
 }
@@ -874,12 +898,12 @@
   font-size: 0.9rem;
   resize: vertical;
   transition: all 0.2s;
-  color: #2A4E5F;
+  color: #0284c7;
 }
 
 .wireframe-textarea:focus {
   outline: none;
-  border-color: #8ECFEA;
+  border-color: #7dd3fc;
   box-shadow: 0 0 0 3px rgba(142, 207, 234, 0.15);
 }
 
@@ -1416,7 +1440,7 @@
 
 
 .action-btn-small {
-  background: #3A6F85;
+  background: #0ea5e9;
   color: white;
   border: none;
   padding: 6px 12px;
@@ -1427,7 +1451,7 @@
   transition: background 0.2s;
 }
 .action-btn-small:hover {
-  background: #2A4E5F;
+  background: #0284c7;
 }
 .wireframe-input {
   width: 100%;
@@ -1436,10 +1460,10 @@
   border-radius: 8px;
   outline: none;
   font-size: 0.9rem;
-  color: #2A4E5F;
+  color: #0284c7;
 }
 .wireframe-input:focus {
-  border-color: #8ECFEA;
+  border-color: #7dd3fc;
   box-shadow: 0 0 0 3px rgba(142, 207, 234, 0.15);
 }
 .wireframe-textarea {
@@ -1449,11 +1473,11 @@
   border-radius: 8px;
   outline: none;
   font-size: 0.9rem;
-  color: #2A4E5F;
+  color: #0284c7;
   resize: vertical;
 }
 .wireframe-textarea:focus {
-  border-color: #8ECFEA;
+  border-color: #7dd3fc;
   box-shadow: 0 0 0 3px rgba(142, 207, 234, 0.15);
 }
 

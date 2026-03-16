@@ -1,21 +1,18 @@
 import { useState, useEffect } from 'react'
 import DashboardHeader from './DashboardHeader'
-import { FileSpreadsheet, Users, Bell, BarChart3, Settings } from 'lucide-react'
+import { FileSpreadsheet, Users, Bell, Settings } from 'lucide-react'
 import ExcelUploader from './ExcelUploader'
 import { useUserPhoto } from '../hooks/useUserPhoto'
 import { useUsers } from '../hooks/useUsers'
 import { useAlerts } from '../hooks/useAlerts'
 
-import AdminStats from './admin/AdminStats'
 import AlertList from './admin/AlertList'
-import AlertDetails from './admin/AlertDetails'
-import AlertAssignment from './admin/AlertAssignment'
+import AlertCaseView from './admin/AlertCaseView'
 import UserForm from './admin/UserForm'
 import UserDetailsModal from './admin/UserDetailsModal'
 import UserVerification from './admin/UserVerification'
 import VersaNotifications from './admin/VersaNotifications'
 import AdminSidebar from './admin/AdminSidebar'
-import CaseTimeline from './admin/CaseTimeline'
 
 import '../ProfessionalTheme.css'
 import './AdminDashboard.css'
@@ -51,7 +48,7 @@ function AdminDashboard({ user, onLogout }) {
     alerts, loadingAlerts, notifVersa, setNotifVersa, notifVisible, setNotifVisible, fetchAlerts 
   } = useAlerts(token)
 
-  const [activeTab, setActiveTab] = useState('dashboard')
+  const [activeTab, setActiveTab] = useState('usuarios')
   const [selectedAlert, setSelectedAlert] = useState(null)
   const [showExcelUploader, setShowExcelUploader] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
@@ -74,9 +71,19 @@ function AdminDashboard({ user, onLogout }) {
 
   const handleSave = async () => {
     try {
+      // Generar email automáticamente si no existe (al igual que en la vista visual)
+      let finalEmail = userForm.email;
+      if (!finalEmail && userForm.nombres) {
+        const parts = userForm.nombres.toLowerCase().split(' ');
+        const first = parts[0] || '';
+        const last = parts[1] || '';
+        const docSuffix = (userForm.id || '').slice(-4);
+        finalEmail = `${first}${last ? '.' + last : ''}${docSuffix}@prediversa.edu.co`;
+      }
+
       // Validación básica
-      if (!userForm.nombres || !userForm.id || !userForm.email) {
-        setSaveMessage('Error: Nombres, ID y Email son obligatorios');
+      if (!userForm.nombres || !userForm.id || !finalEmail) {
+        setSaveMessage('Error: Nombres y N° Documento (ID) son obligatorios');
         return;
       }
 
@@ -86,7 +93,7 @@ function AdminDashboard({ user, onLogout }) {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
           documentId: userForm.id, 
-          email: userForm.email, 
+          email: finalEmail, 
           name: `${userForm.nombres} ${userForm.apellidos}`,
           role: userForm.rol, 
           phone: userForm.telefono, 
@@ -160,10 +167,24 @@ function AdminDashboard({ user, onLogout }) {
           nombres: '', apellidos: '', id: '', edad: '', fechaNacimiento: '', lugarNacimiento: '', 
           telefono: '', direccion: '', nombreMadre: '', nombrePadre: '', email: '', grado: '', rol: 'Estudiante',
           repName: '', repDocType: 'CC', repDocId: '', repRelationship: '', repPhone: '', repEmail: '', repAddress: ''
-        })
+        }); setFormErrors({});
       }
-    } catch (error) { console.error(error) }
-    setTimeout(() => setSaveMessage(''), 3000)
+    } catch (error) { 
+      console.error(error); setSaveMessage('❌ Error de conexión');
+    }
+    setTimeout(() => setSaveMessage(''), 4000)
+  }
+  
+  const handleClear = (e) => {
+    if (e) e.preventDefault();
+    setEditingUser(null);
+    setSaveMessage('');
+    setUserForm({ 
+      nombres: '', apellidos: '', id: '', edad: '', fechaNacimiento: '', lugarNacimiento: '', 
+      telefono: '', direccion: '', nombreMadre: '', nombrePadre: '', email: '', grado: '', rol: 'Estudiante',
+      repName: '', repDocType: 'CC', repDocId: '', repRelationship: '', repPhone: '', repEmail: '', repAddress: ''
+    });
+    setFormErrors({});
   }
 
   const handleDelete = async (id) => {
@@ -187,12 +208,11 @@ function AdminDashboard({ user, onLogout }) {
           <main className="dashboard-main">
             <div className="professional-header">
               <h2 className="page-title">Panel de Administración</h2>
-              <p style={{ color: '#64748b', fontSize: '1rem' }}>Gestión global de la plataforma PrediVersa.</p>
+              <p style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: '500' }}>Gestión global de la plataforma PrediVersa.</p>
             </div>
 
             <div className="management-tabs">
               {[
-                { id: 'dashboard', label: 'Dashboard', icon: <BarChart3 size={18} /> },
                 { id: 'usuarios', label: 'Usuarios', icon: <Users size={18} /> },
                 { id: 'alertas', label: 'Centro de Alertas', icon: <Bell size={18} /> },
                 { id: 'configuracion', label: 'Estructura', icon: <Settings size={18} /> }
@@ -208,28 +228,45 @@ function AdminDashboard({ user, onLogout }) {
               ))}
             </div>
             
-            <div className="dashboard-card mgmt-content">
-              {activeTab === 'dashboard' && (
-                <div className="animate-fade-in">
-                  <AdminStats stats={stats} />
-                </div>
-              )}
 
+            <div className="dashboard-card mgmt-content">
               {activeTab === 'usuarios' && (
                 <div className="animate-fade-in">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: '#1e293b' }}>Gestión de Personal</h3>
-                    <button className="mgmt-tab active" onClick={() => setShowExcelUploader(true)} style={{ borderRadius: '12px', padding: '10px 20px' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    marginBottom: '2.5rem',
+                    padding: '10px 0',
+                    borderBottom: '1.5px solid #f1f5f9'
+                  }}>
+                    <div>
+                      <h3 style={{ fontSize: '1.25rem', fontWeight: '900', color: '#1e293b', margin: 0, letterSpacing: '-0.02em' }}>Gestión de Personal</h3>
+                      <p style={{ color: '#64748b', fontSize: '0.8rem', marginTop: '4px', fontWeight: '600' }}>Administra los perfiles y accesos de la comunidad educativa.</p>
+                    </div>
+                    <button 
+                      className="btn-primary-pro" 
+                      onClick={() => setShowExcelUploader(true)} 
+                    >
                       <FileSpreadsheet size={16} /> Carga Masiva (Excel)
                     </button>
                   </div>
                   
                   {showExcelUploader && <ExcelUploader onUploadSuccess={fetchUsers} onClose={() => setShowExcelUploader(false)} />}
                   
-                  <UserForm userForm={userForm} formErrors={formErrors} handleInputChange={handleInputChange} editingUser={editingUser} handleUpdate={handleUpdate} handleSave={handleSave} cancelEdit={() => { setEditingUser(null); setUserForm({ nombres: '', apellidos: '', id: '', edad: '', fechaNacimiento: '', lugarNacimiento: '', telefono: '', direccion: '', nombreMadre: '', nombrePadre: '', email: '', grado: '', rol: 'Estudiante' }) }} />
+                   <UserForm 
+                     userForm={userForm} 
+                     formErrors={formErrors} 
+                     handleInputChange={handleInputChange} 
+                     editingUser={editingUser} 
+                     handleUpdate={handleUpdate} 
+                     handleSave={handleSave} 
+                     handleClear={handleClear}
+                     cancelEdit={handleClear} 
+                   />
                   {saveMessage && <div className={`flash-message ${saveMessage.includes('Error') ? 'error' : ''}`} style={{ marginTop: '1rem' }}>{saveMessage}</div>}
                   
-                  <div className="users-list-section" style={{ marginTop: '3rem' }}>
+                  <div className="users-list-section" style={{ marginTop: '1.5rem' }}>
                     <UserVerification 
                       searchTerm={searchTerm} setSearchTerm={setSearchTerm} paginatedUsers={paginatedUsers} 
                       currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage} 
@@ -242,49 +279,15 @@ function AdminDashboard({ user, onLogout }) {
 
               {activeTab === 'alertas' && (
                 <div className="animate-fade-in">
-                  <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>
-                    <button 
-                      className={`mgmt-tab-small ${!selectedAlert ? 'active' : ''}`}
-                      onClick={() => setSelectedAlert(null)}
-                    >
-                      Resumen y Listado
-                    </button>
-                    {selectedAlert && (
-                      <>
-                        <button className="mgmt-tab-small active">Detalles del Caso</button>
-                        <button 
-                          className="mgmt-tab-small" 
-                          onClick={() => {
-                            // Cambiar a vista de asignación si es necesario (el componente AlertAssignment lo maneja)
-                            const assignmentSection = document.getElementById('assignment-section');
-                            if (assignmentSection) assignmentSection.scrollIntoView({ behavior: 'smooth' });
-                          }}
-                        >
-                          Remisión Directa
-                        </button>
-                      </>
-                    )}
-                  </div>
-
                   {!selectedAlert ? (
                     <AlertList alerts={alerts} loadingAlerts={loadingAlerts} onSelectAlert={setSelectedAlert} />
                   ) : (
-                    <div className="alert-details-pro">
-                      <AlertDetails selectedAlert={selectedAlert} onBack={() => setSelectedAlert(null)} />
-                      
-                      <div id="assignment-section" style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '2px dashed #e2e8f0' }}>
-                        <AlertAssignment 
-                          selectedAlert={selectedAlert} 
-                          fetchAlerts={fetchAlerts} 
-                          onBack={() => setSelectedAlert(null)} 
-                        />
-                      </div>
-
-                      <div style={{ marginTop: '2rem' }}>
-                        <h4 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '1rem', color: '#1e293b' }}>Línea de Vida del Caso</h4>
-                        <CaseTimeline alertId={selectedAlert.id} token={token} />
-                      </div>
-                    </div>
+                    <AlertCaseView
+                      selectedAlert={selectedAlert}
+                      onBack={() => setSelectedAlert(null)}
+                      fetchAlerts={fetchAlerts}
+                      token={token}
+                    />
                   )}
                 </div>
               )}
