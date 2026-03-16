@@ -8,17 +8,7 @@ const { createAlert } = require('../db/users');
 // ─────────────────────────────────────────────────────
 // SSE — Clientes admin conectados en tiempo real
 // ─────────────────────────────────────────────────────
-const adminClients = new Set();
-
-const notificarAdmins = (evento) => {
-  if (adminClients.size === 0) return;
-  const data = `data: ${JSON.stringify(evento)}\n\n`;
-  adminClients.forEach((client) => {
-    try { client.write(data); }
-    catch (e) { adminClients.delete(client); }
-  });
-  console.log(`📡 Alerta enviada a ${adminClients.size} admin(s) en tiempo real: [${evento.nivel?.toUpperCase()}] ${evento.nombre}`);
-};
+const { adminClients, notificarAdmins } = require('../utils/notificaciones');
 
 // GET /api/chatbot/stream — Admin se conecta para recibir alertas en tiempo real
 router.get('/stream', verifyToken, (req, res) => {
@@ -177,13 +167,61 @@ Donde nivel_riesgo debe ser: "bajo", "medio" o "alto"`;
         }
       });
     }
-  } catch (error) {
+    } catch (error) {
     console.error('❌ Error en /analizar:', error.message);
     return res.json({
       success: true,
       fuente: 'fallback_seguro',
       data: { nivel_riesgo: 'medio', keywords_encontradas: [], tiene_alerta_critica: false, tipos_violencia: [], score: 50, resumen_patron: 'Error en análisis, asumiendo riesgo medio por seguridad' }
     });
+  }
+});
+
+// ─────────────────────────────────────────────────────
+// POST /api/chatbot/chat-ia
+// Genera una respuesta empática y conversacional usando Gemini
+// ─────────────────────────────────────────────────────
+router.post('/chat-ia', async (req, res) => {
+  try {
+    const { mensaje, nivelRiesgo, historial = [] } = req.body;
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    if (!apiKey) throw new Error('No API Key for Gemini');
+
+    // Construir contexto de la conversación
+    let contextHistory = historial.map(m => `${m.type === 'user' ? 'Estudiante' : 'Versa'}: ${m.text}`).join('\n');
+
+    let promptContexto = `Eres Versa, un asistente virtual empático, amable y adolescente de "PrediVersa" (un sistema de bienestar para colegios en Colombia).
+Tu objetivo es responder de manera muy natural, breve (máximo 2-3 líneas), amigable y sin sonar como robot. Usa emojis.
+Trata al usuario con confianza. Si se despide, despídete bien. Si saluda, saluda cálidamente y pregúntale cómo se siente.
+Si el usuario menciona que está aburrido, feliz, triste, adapta tu empatía.
+NO des diagnósticos médicos. NO pidas mucha información de golpe.
+
+Nivel de riesgo detectado en este input por el motor interno: ${nivelRiesgo.toUpperCase()}.
+
+Historial reciente de la charla:
+${contextHistory}
+Estudiante: ${mensaje}
+Versa:`;
+
+    const geminiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptContexto }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 150 }
+        })
+      }
+    );
+
+    const geminiData = await geminiRes.json();
+    const rawText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'Entiendo lo que me dices. Aquí estoy para apoyarte. 💙';
+    
+    return res.json({ success: true, respuesta: rawText.trim() });
+  } catch (error) {
+    console.error('❌ Error en /chat-ia:', error.message);
+    return res.json({ success: false, respuesta: 'Te entiendo. Sabes que cuentas conmigo para lo que necesites platicar. 💙' });
   }
 });
 
@@ -395,6 +433,132 @@ ${descripcion}`;
   } catch (error) {
     console.error('❌ Error en /chatbot/alerta:', error.message);
     return res.status(500).json({ success: false, message: 'Error al registrar alerta', error: error.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────
+// POST /api/chatbot/denuncia
+// Guarda denuncia manual de Denuncia Fácil
+// ─────────────────────────────────────────────────────
+router.post('/denuncia', async (req, res) => {
+  try {
+    const {
+      estudiante_id, anonimo, tipo_violencia, descripcion, fecha_hecho, 
+      lugar, involucrados, nombre_contacto, email_contacto, telefono_contacto
+    } = req.body;
+
+    if (!descripcion || !tipo_violencia) {
+      return res.status(400).json({ success: false, message: 'Faltan campos requeridos' });
+    }
+
+    const now = new Date();
+    const ticketNumber = `DEN-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+
+    const nombreMostrado = anonimo ? 'Denuncia Anónima' : (nombre_contacto || 'Usuario Identificado');
+    
+    const descripcionCompleta = `🛡️ [DENUNCIA FÁCIL] ${anonimo ? '(ANÓNIMA)' : ''}
+Tipo: ${tipo_violencia} | Fecha Hecho: ${fecha_hecho || 'N/A'}
+Lugar: ${lugar || 'N/A'}
+Involucrados: ${involucrados || 'Ninguno'}
+${anonimo ? '' : `Contacto: ${email_contacto || ''} - ${telefono_contacto || ''}`}
+
+Descripción:
+${descripcion}`;
+
+    await createAlert({
+      studentName: nombreMostrado,
+      studentUsername: anonimo ? 'anonimo' : (estudiante_id || ''),
+      alertType: 'Advertencia',
+      description: descripcionCompleta,
+      ticketNumber: ticketNumber,
+      alertDate: now.toISOString().split('T')[0],
+      alertTime: now.toTimeString().slice(0, 5),
+      status: 'Pendiente'
+    });
+
+    notificarAdmins({
+      tipo: 'denuncia_facil',
+      nivel: 'alto',
+      prioridad: 'ALTA',
+      nombre: nombreMostrado,
+      tipo_violencia: tipo_violencia,
+      ticket: ticketNumber,
+      descripcion: descripcion?.substring(0, 120) + (descripcion?.length > 120 ? '...' : ''),
+      timestamp: new Date().toISOString()
+    });
+
+    return res.json({ success: true, message: 'Denuncia enviada con éxito', ticket: ticketNumber });
+  } catch (error) {
+    console.error('❌ Error en /denuncia:', error.message);
+    return res.status(500).json({ success: false, message: 'Error interno' });
+  }
+});
+
+// ─────────────────────────────────────────────────────
+// POST /api/chatbot/test-result
+// Almacena y levanta alertas según el resultado del test
+// ─────────────────────────────────────────────────────
+router.post('/test-result', async (req, res) => {
+  try {
+    const {
+      estudianteId,
+      nombre,
+      testId,
+      testTitle,
+      score,
+      nivel,
+      colorClass
+    } = req.body;
+
+    const now = new Date();
+    const ticketNumber = `TST-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+
+    // Si el test arroja un resultado preocupante (.rs-alto-negativo o .rs-bajo-negativo), 
+    // se fuerza la alerta crítica. De lo contrario, solo preventiva de registro.
+    const isCritical = colorClass.includes('negativo') || colorClass.includes('rs-alto-negativo');
+    const alertType = isCritical ? 'Critica' : 'Preventiva';
+    const status = isCritical ? 'Urgente' : 'Completado';
+    const emoji = isCritical ? '🔴' : '🟢';
+
+    const descripcionCompleta = `📋 [RESULTADO TEST VERSA]
+${emoji} Módulo: ${testTitle} (ID: ${testId})
+Puntaje Obtenido: ${score}/25
+Diagnóstico Semáforo: NIVEL ${nivel.toUpperCase()}
+
+⚠️ Interpretación del Motor:
+El estudiante ha completado un módulo de evaluación continua con resultados ${isCritical ? 'PREOCUPANTES' : 'NORMALES'}.
+Se requiere revisión de perfil psicosocial.`;
+
+    // 1. Crear registro en BD Alerts
+    await createAlert({
+      studentName: nombre || 'Estudiante Anónimo',
+      studentUsername: estudianteId || '',
+      alertType: alertType,
+      description: descripcionCompleta,
+      ticketNumber: ticketNumber,
+      alertDate: now.toISOString().split('T')[0],
+      alertTime: now.toTimeString().slice(0, 5),
+      status: status
+    });
+
+    // 2. Si es crítico, hacer sonar el panel de Admin
+    if (isCritical) {
+      notificarAdmins({
+        tipo: 'test_psicosocial',
+        nivel: 'alto',
+        prioridad: 'ALTA',
+        nombre: nombre || 'Estudiante Anónimo',
+        tipo_violencia: `Alerta Psicológica: ${testTitle}`,
+        ticket: ticketNumber,
+        descripcion: `El estudiante obtuvo nivel ${nivel.toUpperCase()} en Riesgo. Test: ${testTitle}.`,
+        timestamp: now.toISOString()
+      });
+    }
+
+    return res.json({ success: true, message: 'Resultado de test guardado exitosamente', ticket: ticketNumber, isCritical });
+  } catch (error) {
+    console.error('❌ Error en /test-result:', error.message);
+    return res.status(500).json({ success: false, message: 'Error interno en Test API' });
   }
 });
 

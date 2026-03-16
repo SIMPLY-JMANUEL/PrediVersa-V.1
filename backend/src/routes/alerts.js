@@ -12,6 +12,7 @@ const {
   getActionsByAlertId
 } = require('../db/users');
 const { verifyToken, authorizeRoles } = require('../middleware/auth');
+const { notificarAdmins } = require('../utils/notificaciones');
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'tu_secreto_super_seguro_123';
@@ -127,6 +128,23 @@ router.post('/actions', verifyToken, async (req, res) => {
     const actionData = req.body;
     console.log('📝 Registrando acción profesional:', actionData.category);
     const actionId = await createCaseAction(actionData);
+
+    // Triangulación: Notificar al Administrador de que el colaborador ha intervenido.
+    try {
+      const alertData = await getAlertById(actionData.alertId);
+      if (alertData) {
+        notificarAdmins({
+          tipo: 'colaborador_accion',
+          nivel: 'medio',
+          prioridad: 'MEDIA',
+          nombre: alertData.studentName,
+          ticket: alertData.ticketNumber,
+          descripcion: `Colaborador ${actionData.responsibleName || 'N/A'} registró actividad: ${actionData.actionType}.`,
+          timestamp: new Date().toISOString()
+        });
+      }
+    } catch(e) { console.error('Error enviando notificación SSE al admin:', e); }
+
     res.status(201).json({ success: true, message: 'Seguimiento registrado con éxito', actionId });
   } catch (error) {
     console.error('❌ Error detallado al registrar seguimiento:', error.message);

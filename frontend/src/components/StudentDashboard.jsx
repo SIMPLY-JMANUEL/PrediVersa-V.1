@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import DashboardHeader from './DashboardHeader'
 import { UserCircle, Scale, Newspaper, ClipboardList, AlertTriangle, Info, MessageSquare } from 'lucide-react'
-import StudentChatbot from './StudentChatbot'
+import ChatbotVersa from './ChatbotVersa'
+import DenunciaFacil from './DenunciaFacil'
+import Normatividad from './Normatividad'
+import TestVersa from './TestVersa'
 import { useUserPhoto } from '../hooks/useUserPhoto'
 import '../ProfessionalTheme.css'
 import './StudentDashboard.css'
@@ -100,38 +103,20 @@ function StudentDashboard({ user, onLogout }) {
             <div className="dashboard-card mgmt-content">
               {activeMenu === 'chat' && (
                 <div className="animate-fade-in" style={{ height: '500px', display: 'flex', flexDirection: 'column' }}>
-                  <StudentChatbot user={user} />
+                  <ChatbotVersa user={user} />
                 </div>
               )}
               
               {activeMenu === 'denuncia' && (
-                <div className="animate-fade-in" style={{ textAlign: 'center', padding: '4rem' }}>
-                  <div style={{ width: '80px', height: '80px', background: '#fef2f2', color: '#ef4444', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
-                    <AlertTriangle size={40} />
-                  </div>
-                  <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#1e293b' }}>Denuncia Fácil</h3>
-                  <p style={{ maxWidth: '500px', margin: '0 auto', color: '#475569', lineHeight: '1.6' }}>Utiliza el Chatbot Evalúa para reportar situaciones de forma segura. El sistema te guiará paso a paso para asegurar que tu voz sea escuchada.</p>
-                </div>
+                <DenunciaFacil user={user} />
               )}
 
               {activeMenu === 'normatividad' && (
-                <div className="animate-fade-in" style={{ textAlign: 'center', padding: '4rem' }}>
-                  <div style={{ width: '80px', height: '80px', background: '#f0f9ff', color: '#0ea5e9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
-                    <Scale size={40} />
-                  </div>
-                  <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#1e293b' }}>Guía de Normatividad</h3>
-                  <p style={{ maxWidth: '500px', margin: '0 auto', color: '#475569', lineHeight: '1.6' }}>Consulta tus derechos y deberes. El marco legal institucional está disponible para proteger tu integridad y procesos académicos.</p>
-                </div>
+                <Normatividad />
               )}
 
               {activeMenu === 'test' && (
-                <div className="animate-fade-in" style={{ textAlign: 'center', padding: '4rem' }}>
-                  <div style={{ width: '80px', height: '80px', background: '#f5f3ff', color: '#8b5cf6', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto' }}>
-                    <ClipboardList size={40} />
-                  </div>
-                  <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#1e293b' }}>Test de Orientación</h3>
-                  <p style={{ maxWidth: '500px', margin: '0 auto', color: '#475569', lineHeight: '1.6' }}>Realiza las evaluaciones asignadas para que nuestros colaboradores puedan brindarte una atención más personalizada y efectiva.</p>
-                </div>
+                <TestVersa user={user} />
               )}
             </div>
           </main>

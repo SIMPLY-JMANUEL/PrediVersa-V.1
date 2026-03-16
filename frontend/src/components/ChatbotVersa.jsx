@@ -104,7 +104,19 @@ export default function ChatbotVersa({ user }) {
 
   const handleNoMuyBien = async () => {
     setInputDisabled(true)
-    await versa('Lamento que no estés del todo bien. 💙 Por favor, cuéntame con confianza qué está pasando, te escucho.', 700)
+    await versa('Lamento leer eso... 💙 A veces hay días pesados y es normal no sentirse del todo bien.', 800)
+    await delay(500)
+    await versa('Si te sientes cómodo/a, me gustaría escucharte. ¿Pasó algo en particular hoy o es algo que vienes sintiendo hace días?', 1000)
+    setEstado('indagacion_inicial')
+    setInputDisabled(false)
+    textareaRef.current?.focus()
+  }
+
+  const despuesIndagacionInicial = async (txt) => {
+    setInputDisabled(true)
+    await versa('Entiendo. Gracias por tener la confianza de compartirlo conmigo. A veces poner las cosas en palabras ayuda a aliviar un poco la carga. 🫂', 800)
+    await delay(500)
+    await versa('Para poder entenderte mejor, cuéntame un poco más de los detalles de lo que está sucediendo. Aquí nadie te juzgará.', 1000)
     setEstado('reporte_desc')
     setInputDisabled(false)
     textareaRef.current?.focus()
@@ -275,41 +287,100 @@ export default function ChatbotVersa({ user }) {
         if (nivel === 'alto') await responderAlto()
         else await responderMedio()
       } else {
-        await responderBajo()
+        // Conversación dinámica IA para riego bajo o charla natural
+        await responderConversacional(mensaje, nivel)
       }
     } catch {
       setIsTyping(false)
       setNivelRiesgo('medio')
-      await responderMedio()
+      await responderConversacional(mensaje, 'medio')
     }
   }
 
   // ── RESPUESTAS ───────────────────────────────────────────────
-  const responderBajo = async () => {
-    setEstado('riesgo_bajo')
-    await versa('Gracias por informarme. 💙 He tomado nota de lo que me dijiste. ¿Quieres que hablemos con el equipo de orientación?', 900)
-    setOpciones([
-      { label: '👩‍🏫 Sí, me gustaría', value: 'orientador' },
-      { label: '🏠 No, está bien así', value: 'fin' },
-    ])
-    setInputDisabled(true)
+  const responderConversacional = async (mensaje, nivel) => {
+    setIsTyping(true)
+    try {
+      // Tomamos últimos 6 mensajes del historial
+      const historialReciente = messages.slice(-6).map(m => ({ text: m.text, type: m.type }));
+      
+      const res = await fetch(`${API}/chat-ia`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mensaje, nivelRiesgo: nivel, historial: historialReciente }),
+      });
+      const data = await res.json();
+      setIsTyping(false);
+
+      if (data.success && data.respuesta) {
+        await versa(data.respuesta, 500);
+      } else {
+        // Fallback natural
+        await versa('Entiendo perfectamente cómo te sientes. 💙 A veces las cosas diarias nos frustran. Aquí cuentas conmigo.', 900);
+      }
+      
+      // Mantenemos el input abierto para que siga conversando libremente
+      setEstado('inicio_abierto');
+      setInputDisabled(false);
+      textareaRef.current?.focus();
+    } catch(e) {
+      setIsTyping(false);
+      await versa('Te entiendo, a veces es difícil poner esto en palabras. Aquí estaré para cuando quieras hablar. 💙', 900);
+      setEstado('inicio_abierto');
+      setInputDisabled(false);
+    }
   }
 
+
   const responderMedio = async () => {
-    setEstado('riesgo_medio')
-    await versa('Gracias por tu valentía al contarme esto. 💙 Ya he informado al equipo de bienestar del colegio para que podamos apoyarte de forma privada. No estás solo/a.', 1000)
-    setOpciones([
-      { label: '👩‍🏫 Contactar orientador ahora', value: 'orientador' },
-      { label: '🏠 Volver', value: 'menu' },
-    ])
+    setEstado('medio_indagacion_1')
+    await versa('Gracias por tu valentía al contarme esto. 💙 Escucharlo me hace pensar en lo difícil que debe ser para ti afrontar esto en el colegio.', 1000)
+    await delay(600)
+    await versa('¿Hay alguien más en el colegio (un amigo o profesor) que sepa de esto o soy la primera persona a la que le cuentas?', 900)
+    setInputDisabled(false)
+    textareaRef.current?.focus()
+  }
+
+  const medioIndagacion2 = async () => {
+    setEstado('medio_indagacion_2')
     setInputDisabled(true)
+    await versa('Comprendo totalmente. Es normal sentirse así de abrumado/a y tener miedo o recelo de hablarlo con otros. 🫂', 1000)
+    await delay(500)
+    await versa('Quería preguntarte... ¿cómo te ha estado afectando esto en tu sueño, tu apetito o en tus clases estos últimos días?', 1000)
+    setInputDisabled(false)
+    textareaRef.current?.focus()
+  }
+
+  const medioCierre = async () => {
+    setEstado('riesgo_medio')
+    setInputDisabled(true)
+    await versa('Te escucho y de verdad quiero ayudarte. Nadie debería tener que cargar con ese peso en soledad. 💙', 900)
+    await delay(500)
+    await versa('He guardado esto de forma confidencial. Para poder darte un apoyo real y ayudarte a que la situación mejore, me gustaría muchísimo que conectaras con nuestro equipo de orientación. Son súper comprensivos. ¿Te animarías?', 1200)
+    setOpciones([
+      { label: '👩‍🏫 Sí, quiero hablar con ellos', value: 'orientador' },
+      { label: '🤔 Aún no estoy seguro/a', value: 'duda_orientador' },
+      { label: '🏠 Prefiero no hacerlo hoy', value: 'fin' }
+    ])
+  }
+
+  const dudaOrientador = async () => {
+    setInputDisabled(true)
+    await versa('Es súper válido tener dudas. 💙 Te prometo que hablar con ellos no te meterá en problemas, su único trabajo es escucharte y buscar formas de que te sientas seguro/a y tranquilo/a en el colegio.', 1200)
+    await delay(400)
+    await versa('¿Te animas a ver sus datos de contacto por si decides escribirles luego una vez te sientas listo/a, o prefieres que agendemos una cita directamente?', 1000)
+    setOpciones([
+      { label: '📞 Ver contacto', value: 'contacto' },
+      { label: '📅 Solicitar cita', value: 'reunion' },
+      { label: '🏠 Mejor en otro momento', value: 'fin' }
+    ])
   }
 
   const responderAlto = async () => {
-    setEstado('riesgo_alto')
-    await versa('🚨 He recibido tu mensaje y es muy importante. Ya activé una alerta prioritaria en el sistema para que recibas ayuda lo más pronto posible.', 1000)
+    setEstado('alto_indagacion')
+    await versa('Lo que me cuentas es muy doloroso e importante. Siento mucho de corazón que estés pasando por una situación tan difícil. 💙 No estás solo/a en esto.', 1000)
     await delay(500)
-    await versa('¿Estás en un lugar seguro en este momento?', 800)
+    await versa('Quiero asegurarme de que estás a salvo en este instante. ¿Estás en un lugar seguro ahora mismo?', 800)
     setOpciones([
       { label: '✅ Sí, estoy a salvo', value: 'escalar_seguro' },
       { label: '😰 No me siento seguro/a', value: 'escalar_urgente' },
@@ -320,12 +391,30 @@ export default function ChatbotVersa({ user }) {
   const responderAltoContinuacion = async (seguro) => {
     setInputDisabled(true)
     if (!seguro) {
-      await versa('Por favor, busca a un adulto de confianza o contacta a las líneas de emergencia (123). Un profesional del colegio ya está siendo notificado. 💙', 900)
+      await versa('Por favor, busca a un adulto de confianza inmediatamente o contacta a las líneas de emergencia (123). Tu seguridad es lo más importante en este instante. 💙', 1000)
     } else {
-      await versa('Me alegra que estés seguro/a. Mantente así mientras el equipo revisa tu caso con prioridad máxima. 💙', 700)
+      await versa('Me da mucha tranquilidad saber que estás en un sitio seguro temporalmente. 💙', 700)
+      await delay(500)
+      await versa('Debido a la situación que me cuentas, he activado una alerta silenciosa y prioritaria en el colegio para poder intervenir a tiempo y protegerte. ¿Podrías decirme si alguien más corre peligro en este momento?', 1000)
+      setEstado('alto_indagacion_2')
+      setInputDisabled(false)
+      textareaRef.current?.focus()
+      return;
     }
     await delay(300)
-    await irAOrientador()
+    await altoCierre()
+  }
+
+  const altoCierre = async () => {
+    setEstado('riesgo_alto')
+    setInputDisabled(true)
+    await versa('Gracias por decírmelo. Eres tremendamente valiente. 🫂', 800)
+    await delay(500)
+    await versa('El equipo de bienestar psicosocial ya está al tanto de tu reporte con prioridad máxima. Mientras ellos actúan, me gustaría dejarte los números de contacto para hablar directamente con nuestra psicóloga. Tu bienestar es nuestra única prioridad. 💙', 1200)
+    setOpciones([
+      { label: '📅 Solicitar Cita Urgente', value: 'reunion' },
+      { label: '📞 Ver Contacto Directo', value: 'contacto' }
+    ])
   }
 
   // ── DISPATCHER ───────────────────────────────────────────────
@@ -354,6 +443,7 @@ export default function ChatbotVersa({ user }) {
       case 'reunion':           return irAReunion()
       case 'menu':              return mostrarMenu()
       case 'fin':               return terminar()
+      case 'duda_orientador':   return dudaOrientador()
       case 'escalar_seguro':    return responderAltoContinuacion(true)
       case 'escalar_urgente':   return responderAltoContinuacion(false)
       default: break
@@ -370,6 +460,12 @@ export default function ChatbotVersa({ user }) {
 
     if (estado === 'reunion_nombre') return handleNombreReunion(txt);
     if (estado === 'reunion_fecha') return handleFechaReunion(txt);
+    
+    if (estado === 'indagacion_inicial') return despuesIndagacionInicial(txt);
+    if (estado === 'medio_indagacion_1') return medioIndagacion2();
+    if (estado === 'medio_indagacion_2') return medioCierre();
+    if (estado === 'alto_indagacion_2') return altoCierre();
+
     if (estado === 'reporte_desc' || estado === 'urgente_descripcion' || estado.includes('_descripcion')) {
       datos.current.userMessage = txt;
       return analizarRiesgo(txt);
@@ -381,13 +477,13 @@ export default function ChatbotVersa({ user }) {
   const detectarIntencion = async (t) => {
     const txt = t.toLowerCase()
     
-    // 1. PRIMERA CAPA: ¿Hay riesgo evidente en el mensaje inicial?
+    // 1. PRIMERA CAPA: Filtro de emergencia absoluta y rápida
     if (txt.length > 15 || /pega|violen|amenaza|triste|muert|abus|toca|paila|casca/.test(txt)) {
       console.log("🔍 Análisis proactivo detectado por contenido del mensaje");
-      return analizarRiesgo(t);
+      return analizarRiesgo(t); // Delega la carga pesada a la API predictiva
     }
 
-    // 2. SEGUNDA CAPA: Detección de palabras clave para agrupar
+    // 2. SEGUNDA CAPA: Navegación simple y fluida sin sobrecargar motor IA
     if (/bien|feliz|genial|chévere|contento|buen/.test(txt)) return handleBien()
     if (/urgente|emergencia|peligro|ayuda|ahora|auxilio/.test(txt)) return handleUrgente()
     if (/casa|familia|papá|mamá|padrastro|madrastra|tío|tía|primo|prima/.test(txt)) return irAContexto('violencia_familiar', '¿Qué sucede en tu hogar? Puedes contarme con total confianza. ✍️')
@@ -400,7 +496,8 @@ export default function ChatbotVersa({ user }) {
     if (/comida|hambre|solo|sola|no me cuidan|negligencia/.test(txt)) return irAContexto('negligencia', '¿Sientes que te falta apoyo o cuidado en casa o en el colegio? ✍️')
     if (/triste|lloro|ganas de morir|solo|ayuda|mal/.test(txt)) return irAContexto('emocional', 'Lamento que te sientas así. 💙 Por favor, dime qué te tiene así de triste. ✍️')
     
-    // Si no detecta nada claro, pasar al análisis profundo
+    // 3. CAPA FINAL: Si es texto conversacional pero no encaja arriba, se fuerza el pase por el Motor Predictivo
+    // para capturar sentimientos sutiles o lenguaje coloquial con historial.
     datos.current.userMessage = t;
     return analizarRiesgo(t);
   }

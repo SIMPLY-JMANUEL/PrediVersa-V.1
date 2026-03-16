@@ -8,6 +8,7 @@ import { useAlerts } from '../hooks/useAlerts'
 
 import AlertList from './admin/AlertList'
 import AlertCaseView from './admin/AlertCaseView'
+import InstitutionalConfig from './admin/InstitutionalConfig'
 import UserForm from './admin/UserForm'
 import UserDetailsModal from './admin/UserDetailsModal'
 import UserVerification from './admin/UserVerification'
@@ -293,10 +294,8 @@ function AdminDashboard({ user, onLogout }) {
               )}
               
               {activeTab === 'configuracion' && (
-                <div className="animate-fade-in" style={{ textAlign: 'center', padding: '4rem' }}>
-                  <Settings size={48} color="#94a3b8" style={{ marginBottom: '1.5rem' }} />
-                  <h3 style={{ fontSize: '1.5rem', fontWeight: '800' }}>Configuración Institucional</h3>
-                  <p style={{ color: '#64748b' }}>Módulo para la gestión de dependencias, roles avanzados y auditoría de sistema.</p>
+                <div className="animate-fade-in">
+                  <InstitutionalConfig />
                 </div>
               )}
             </div>

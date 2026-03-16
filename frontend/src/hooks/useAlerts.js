@@ -24,7 +24,7 @@ export const useAlerts = (token) => {
   useEffect(() => {
     if (!token) return;
     
-    const source = new EventSource('http://localhost:5000/api/chatbot/stream');
+    const source = new EventSource(`http://localhost:5000/api/chatbot/stream?token=${token}`);
     source.onmessage = (e) => {
       try {
         const data = JSON.parse(e.data);

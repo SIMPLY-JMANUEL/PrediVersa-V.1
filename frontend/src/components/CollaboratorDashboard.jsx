@@ -32,10 +32,9 @@ function CollaboratorDashboard({ user, onLogout }) {
       })
       const data = await res.json()
       if (data.success) {
+        // Validación estricta: Solamente mostrar casos expresamente asignados a este colaborador por el Administrador.
         const myAlerts = data.alerts.filter(a => 
-          a.assignedTo?.toLowerCase().includes(user?.name?.toLowerCase()) || 
-          a.assignedTo?.toLowerCase().includes('todos') ||
-          a.assignedTo === ''
+          a.assignedTo && a.assignedTo.toLowerCase() === user?.name?.toLowerCase()
         )
         setAssignedAlerts(myAlerts)
       }
