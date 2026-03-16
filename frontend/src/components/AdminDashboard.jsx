@@ -41,6 +41,12 @@ function AdminDashboard({ user, onLogout }) {
     loadingUsers, searchTerm, setSearchTerm, paginatedUsers, totalPages, stats, 
     fetchUsers, currentPage, setCurrentPage, filteredUsers 
   } = useUsers(token)
+  
+  // Sincronizar pestañas con el Sidebar
+  const switchTab = (tabId) => {
+    setActiveTab(tabId);
+    if (tabId !== 'alertas') setSelectedAlert(null);
+  };
   const { 
     alerts, loadingAlerts, notifVersa, setNotifVersa, notifVisible, setNotifVisible, fetchAlerts 
   } = useAlerts(token)
@@ -68,31 +74,56 @@ function AdminDashboard({ user, onLogout }) {
 
   const handleSave = async () => {
     try {
+      // Validación básica
+      if (!userForm.nombres || !userForm.id || !userForm.email) {
+        setSaveMessage('Error: Nombres, ID y Email son obligatorios');
+        return;
+      }
+
+      setSaveMessage('Guardando...');
       const response = await fetch('http://localhost:5000/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
-          documentId: userForm.id, email: userForm.email, name: `${userForm.nombres} ${userForm.apellidos}`,
-          role: userForm.rol, phone: userForm.telefono, address: userForm.direccion,
-          birthDate: userForm.fechaNacimiento || null, password: 'Predi123!',
-          edad: userForm.edad, lugarNacimiento: userForm.lugarNacimiento,
-          nombrePadre: userForm.nombrePadre, nombreMadre: userForm.nombreMadre, grado: userForm.grado,
-          repName: userForm.repName, repDocType: userForm.repDocType, repDocId: userForm.repDocId,
-          repRelationship: userForm.repRelationship, repPhone: userForm.repPhone,
-          repEmail: userForm.repEmail, repAddress: userForm.repAddress
+          documentId: userForm.id, 
+          email: userForm.email, 
+          name: `${userForm.nombres} ${userForm.apellidos}`,
+          role: userForm.rol, 
+          phone: userForm.telefono, 
+          address: userForm.direccion,
+          birthDate: userForm.fechaNacimiento || null, 
+          password: 'Predi123!',
+          edad: userForm.edad, 
+          lugarNacimiento: userForm.lugarNacimiento,
+          nombrePadre: userForm.nombrePadre, 
+          nombreMadre: userForm.nombreMadre, 
+          grado: userForm.grado,
+          repName: userForm.repName, 
+          repDocType: userForm.repDocType, 
+          repDocId: userForm.repDocId,
+          repRelationship: userForm.repRelationship, 
+          repPhone: userForm.repPhone,
+          repEmail: userForm.repEmail, 
+          repAddress: userForm.repAddress
         })
       })
       const data = await response.json()
       if (data.success) {
-        setSaveMessage('Usuario creado exitosamente'); fetchUsers();
+        setSaveMessage('✅ Usuario creado exitosamente'); 
+        fetchUsers();
         setUserForm({ 
           nombres: '', apellidos: '', id: '', edad: '', fechaNacimiento: '', lugarNacimiento: '', 
           telefono: '', direccion: '', nombreMadre: '', nombrePadre: '', email: '', grado: '', rol: 'Estudiante',
           repName: '', repDocType: 'CC', repDocId: '', repRelationship: '', repPhone: '', repEmail: '', repAddress: ''
         })
+      } else {
+        setSaveMessage('❌ ' + (data.message || 'Error al guardar'));
       }
-    } catch (error) { console.error(error) }
-    setTimeout(() => setSaveMessage(''), 3000)
+    } catch (error) { 
+      console.error(error);
+      setSaveMessage('❌ Error de conexión con el servidor');
+    }
+    setTimeout(() => setSaveMessage(''), 4000)
   }
 
   const handleEdit = (u) => {
@@ -151,7 +182,7 @@ function AdminDashboard({ user, onLogout }) {
 
       <div className="dashboard-container profesional-theme">
         <div className="dashboard-layout">
-          <AdminSidebar user={user} />
+          <AdminSidebar user={user} setActiveTab={switchTab} />
 
           <main className="dashboard-main">
             <div className="professional-header">
@@ -210,14 +241,46 @@ function AdminDashboard({ user, onLogout }) {
 
               {activeTab === 'alertas' && (
                 <div className="animate-fade-in">
+                  <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>
+                    <button 
+                      className={`mgmt-tab-small ${!selectedAlert ? 'active' : ''}`}
+                      onClick={() => setSelectedAlert(null)}
+                    >
+                      Resumen y Listado
+                    </button>
+                    {selectedAlert && (
+                      <>
+                        <button className="mgmt-tab-small active">Detalles del Caso</button>
+                        <button 
+                          className="mgmt-tab-small" 
+                          onClick={() => {
+                            // Cambiar a vista de asignación si es necesario (el componente AlertAssignment lo maneja)
+                            const assignmentSection = document.getElementById('assignment-section');
+                            if (assignmentSection) assignmentSection.scrollIntoView({ behavior: 'smooth' });
+                          }}
+                        >
+                          Remisión Directa
+                        </button>
+                      </>
+                    )}
+                  </div>
+
                   {!selectedAlert ? (
                     <AlertList alerts={alerts} loadingAlerts={loadingAlerts} onSelectAlert={setSelectedAlert} />
                   ) : (
                     <div className="alert-details-pro">
-                      <button className="mgmt-tab" onClick={() => setSelectedAlert(null)} style={{ marginBottom: '1.5rem', borderRadius: '12px' }}>← Volver</button>
                       <AlertDetails selectedAlert={selectedAlert} onBack={() => setSelectedAlert(null)} />
+                      
+                      <div id="assignment-section" style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '2px dashed #e2e8f0' }}>
+                        <AlertAssignment 
+                          selectedAlert={selectedAlert} 
+                          fetchAlerts={fetchAlerts} 
+                          onBack={() => setSelectedAlert(null)} 
+                        />
+                      </div>
+
                       <div style={{ marginTop: '2rem' }}>
-                        <h4 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '1rem' }}>Línea de Vida del Caso</h4>
+                        <h4 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '1rem', color: '#1e293b' }}>Línea de Vida del Caso</h4>
                         <CaseTimeline alertId={selectedAlert.id} token={token} />
                       </div>
                     </div>

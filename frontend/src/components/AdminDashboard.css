@@ -1456,3 +1456,49 @@
   border-color: #8ECFEA;
   box-shadow: 0 0 0 3px rgba(142, 207, 234, 0.15);
 }
+
+/* Sub-pestañas de gestión interna */
+.mgmt-tab-small {
+    padding: 8px 20px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mgmt-tab-small:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+.mgmt-tab-small.active {
+    background: #0ea5e9;
+    color: #fff;
+    border-color: #0ea5e9;
+    box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);
+}
+
+/* Tarjetas Clicables del Sidebar */
+.clickable-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
+    background: #fff;
+    border-color: #0ea5e9 !important;
+}
+
+.clickable-card:active {
+    transform: translateY(0);
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}

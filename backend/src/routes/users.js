@@ -119,6 +119,50 @@ router.post('/bulk', async (req, res) => {
 });
 
 /**
+ * @route POST /api/users
+ * @desc Crear un nuevo usuario individualmente
+ */
+router.post('/', async (req, res) => {
+  try {
+    const body = req.body;
+    
+    // Verificar duplicados
+    const emailDuplicated = await emailExists(body.email);
+    const docDuplicated = await documentIdExists(body.documentId);
+
+    if (emailDuplicated || docDuplicated) {
+      return res.status(409).json({ 
+        success: false, 
+        message: 'El Documento o Email ya se encuentra registrado' 
+      });
+    }
+
+    // Generación automática de correo institucional
+    if (!body.institutionalEmail) {
+      const nameParts = body.name.toLowerCase().split(' ');
+      const firstName = nameParts[0] || 'usuario';
+      const lastName = nameParts[1] || '';
+      const docSuffix = body.documentId.slice(-4);
+      body.institutionalEmail = `${firstName}${lastName ? '.' + lastName : ''}${docSuffix}@prediversa.edu.co`;
+    }
+    
+    // Cifrar contraseña por defecto si no viene
+    const hashedPassword = await bcrypt.hash(body.password || 'Predi123!', 10);
+    
+    const newUser = await createUser({ ...body, password: hashedPassword });
+    
+    res.status(201).json({
+      success: true,
+      message: 'Usuario creado exitosamente con correo institucional',
+      user: newUser
+    });
+  } catch (error) {
+    console.error('❌ Error al crear usuario:', error);
+    res.status(500).json({ success: false, message: 'Error interno al crear usuario' });
+  }
+});
+
+/**
  * @route PUT /api/users/:id
  * @desc Actualizar datos de un usuario por su ID
  */

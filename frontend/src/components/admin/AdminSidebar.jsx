@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { UserCircle, ShieldCheck } from 'lucide-react';
 import { useUserPhoto } from '../../hooks/useUserPhoto';
 
-const AdminSidebar = ({ user }) => {
+const AdminSidebar = ({ user, setActiveTab }) => {
   const [photo, setPhoto] = useUserPhoto();
   const [isUploading, setIsUploading] = useState(false);
 
@@ -53,12 +53,21 @@ const AdminSidebar = ({ user }) => {
         </div>
       </div>
 
-      <div className="dashboard-card" style={{ padding: '1.5rem' }}>
+      <div 
+        className="dashboard-card clickable-card" 
+        onClick={() => setActiveTab && setActiveTab('dashboard')}
+        style={{ 
+          padding: '1.5rem', 
+          cursor: 'pointer',
+          transition: 'transform 0.2s, box-shadow 0.2s'
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#0c4a6e', marginBottom: '1rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.5rem' }}>
           <ShieldCheck size={18} />
           <h4 style={{ fontSize: '0.9rem', fontWeight: '800', margin: 0 }}>PANEL DE CONTROL</h4>
         </div>
         <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0 }}>Gestión integral Evalúa: Usuarios, Alertas y Auditoría.</p>
+        <p style={{ fontSize: '0.7rem', color: '#0ea5e9', marginTop: '10px', fontWeight: '700' }}>→ IR AL DASHBOARD</p>
       </div>
     </aside>
   );
