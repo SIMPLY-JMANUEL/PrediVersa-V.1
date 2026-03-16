@@ -33,7 +33,7 @@ function AppRoutes({ user, isLoginOpen, setIsLoginOpen, handleLogin, handleLogou
           </RoleProtectedRoute>
         } />
         <Route path="/collaborator" element={
-          <RoleProtectedRoute user={user} allowedRoles={['Colaboradores']}>
+          <RoleProtectedRoute user={user} allowedRoles={['Colaborador', 'Colaboradores']}>
             <CollaboratorDashboard user={user} onLogout={handleLogout} />
           </RoleProtectedRoute>
         } />

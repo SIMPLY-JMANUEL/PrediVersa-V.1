@@ -69,7 +69,7 @@ function StudentDashboard({ user, onLogout }) {
           {/* Panel Central: Chat y Menús */}
           <main className="dashboard-main">
             <div className="dashboard-card chat-card" style={{ padding: 0, overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-              <StudentChatbot />
+              <StudentChatbot user={user} />
             </div>
 
             <div className="menu-section">

@@ -37,7 +37,7 @@ function Reports({ onClose }) {
   const fetchStats = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`${baseUrl}/api/auth/stats`)
+      const response = await fetch(`${baseUrl}/api/users/stats`)
       const data = await response.json()
       
       if (data.success) {

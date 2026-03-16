@@ -1334,11 +1334,118 @@
   }
 }
 
+
+  .users-list-section, .alerts-section, .user-creation-section, .stats-section, .admin-data-section {
+    padding: 1rem;
+  }
+}
+/* Nuevos Estilos para Alertas */
+
+.alerts-list-full {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.alerts-table-full {
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.alerts-table-header, .alerts-table-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1.5fr 1fr 1fr 1fr 1fr;
+  padding: 12px 16px;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.alerts-table-header {
+  font-weight: 700;
+  border-bottom: 2px solid #E2E8F0;
+}
+
+.alerts-table-row {
+  border-bottom: 1px solid #E2E8F0;
+  transition: background-color 0.2s;
+}
+
+.alerts-table-row:hover {
+  background-color: #F8FBFD;
+}
+
+.alerts-table-row:last-child {
+  border-bottom: none;
+}
+
+.alert-details-view {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.dashboard-card {
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.action-history-card {
+  min-height: 150px;
+  background: white;
+}
+
+
 @media (max-width: 480px) {
   .tab-btn {
     flex: 1 1 100%;
   }
+@media (max-width: 480px) {
   .users-list-section, .alerts-section, .user-creation-section, .stats-section, .admin-data-section {
     padding: 1rem;
   }
+}
+
+
+.action-btn-small {
+  background: #3A6F85;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+.action-btn-small:hover {
+  background: #2A4E5F;
+}
+.wireframe-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  outline: none;
+  font-size: 0.9rem;
+  color: #2A4E5F;
+}
+.wireframe-input:focus {
+  border-color: #8ECFEA;
+  box-shadow: 0 0 0 3px rgba(142, 207, 234, 0.15);
+}
+.wireframe-textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  outline: none;
+  font-size: 0.9rem;
+  color: #2A4E5F;
+  resize: vertical;
+}
+.wireframe-textarea:focus {
+  border-color: #8ECFEA;
+  box-shadow: 0 0 0 3px rgba(142, 207, 234, 0.15);
 }

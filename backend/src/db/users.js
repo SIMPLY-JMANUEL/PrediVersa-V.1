@@ -369,7 +369,7 @@ const createAlert = async (alertData) => {
         deadline, assignedTo, status, createdBy) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [userId || null, studentName || '', studentDocumentId || '', studentAge || '', 
-       studentGrade || '', studentUsername || '', alertType || 'General', description || '', 
+       studentGrade || '', studentUsername || '', alertType || 'Informativa', description || '', 
        ticketNumber || '', alertDate || '', alertTime || '', deadline || '', 
        assignedTo || '', status || 'Pendiente', createdBy || null]
     );
@@ -501,6 +501,62 @@ const getAlertStats = async () => {
   }
 };
 
+// ==================== FUNCIONES DE SEGUIMIENTO (ACCIONES) ====================
+
+/**
+ * Registrar una acción (Remisión o Actuación) sobre una alerta
+ */
+const createCaseAction = async (actionData) => {
+  try {
+    const { 
+      alertId, collaboratorId, category, actionType, 
+      responsibleName, description, area, urgency, actionDate,
+      result: actionResult, fileName, fileUrl, normType, normArticle 
+    } = actionData;
+    
+    const [result] = await pool.execute(
+      `INSERT INTO case_actions 
+       (alertId, collaboratorId, category, actionType, responsibleName, description, area, urgency, actionDate, result, fileName, fileUrl, normType, normArticle) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [alertId, collaboratorId, category, actionType, 
+       responsibleName || '', description || '', area || '', urgency || '', actionDate || new Date(),
+       actionResult || '', fileName || '', fileUrl || '', normType || '', normArticle || '']
+    );
+    
+    // Si la acción fue de tipo "Cierre del caso", actualizar el estado de la alerta
+    if (actionType === 'Cierre del caso' || actionType === 'Cierre') {
+      await pool.execute("UPDATE alerts SET status = 'Resuelta' WHERE id = ?", [alertId]);
+    } else if (actionType === 'Escalamiento' || category === 'Remision') {
+      await pool.execute("UPDATE alerts SET status = 'En Proceso' WHERE id = ?", [alertId]);
+    }
+    
+    return result.insertId;
+  } catch (error) {
+    console.error('❌ Error al crear acción de caso:', error.message);
+    throw error;
+  }
+};
+
+/**
+ * Obtener todas las acciones registradas para una alerta específica
+ */
+const getActionsByAlertId = async (alertId) => {
+  try {
+    const [rows] = await pool.execute(
+      `SELECT ca.*, u.name as collaboratorName 
+       FROM case_actions ca 
+       LEFT JOIN users u ON ca.collaboratorId = u.id 
+       WHERE ca.alertId = ? 
+       ORDER BY ca.actionDate DESC`,
+      [alertId]
+    );
+    return rows;
+  } catch (error) {
+    console.error('❌ Error al obtener acciones por AlertId:', error.message);
+    throw error;
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -518,5 +574,8 @@ module.exports = {
   createAlert,
   updateAlert,
   deleteAlert,
-  getAlertStats
+  getAlertStats,
+  // Seguimiento
+  createCaseAction,
+  getActionsByAlertId
 };

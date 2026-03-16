@@ -31,10 +31,12 @@ function UserManagement({ onClose }) {
 
   const baseUrl = 'http://localhost:5000'
 
+  const token = localStorage.getItem('token')
+
   // Cargar usuarios al montar el componente
   useEffect(() => {
-    fetchUsers()
-  }, [])
+    if (token) fetchUsers()
+  }, [token])
 
   // Aplicar filtros cuando cambian
   useEffect(() => {
@@ -44,7 +46,9 @@ function UserManagement({ onClose }) {
   const fetchUsers = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`${baseUrl}/api/auth/users`)
+      const response = await fetch(`${baseUrl}/api/users`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
       const data = await response.json()
       
       if (data.success) {
@@ -105,7 +109,7 @@ function UserManagement({ onClose }) {
 
     try {
       const url = editingUser 
-        ? `${baseUrl}/api/auth/users/${editingUser.id}`
+        ? `${baseUrl}/api/users/${editingUser.id}`
         : `${baseUrl}/api/auth/register`
       
       const method = editingUser ? 'PUT' : 'POST'
@@ -121,6 +125,7 @@ function UserManagement({ onClose }) {
         method,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(bodyData)
       })
@@ -146,8 +151,9 @@ function UserManagement({ onClose }) {
     }
 
     try {
-      const response = await fetch(`${baseUrl}/api/auth/users/${userId}`, {
-        method: 'DELETE'
+      const response = await fetch(`${baseUrl}/api/users/${userId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
       })
 
       const data = await response.json()

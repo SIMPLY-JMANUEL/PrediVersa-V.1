@@ -13,7 +13,8 @@ const pool = mysql.createPool({
   queueLimit: 0,
   enableKeepAlive: true,
   keepAliveInitialDelay: 0,
-  charset: 'utf8mb4'
+  charset: 'utf8mb4',
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined
 });
 
 // Función auxiliar para queries
@@ -101,7 +102,7 @@ const initializeDatabase = async () => {
         alertTime TIME DEFAULT NULL,
         deadline VARCHAR(50) DEFAULT '',
         assignedTo VARCHAR(100) DEFAULT '',
-        status ENUM('Pendiente', 'En Proceso', 'Resuelta', 'Cerrada') DEFAULT 'Pendiente',
+        status ENUM('Pendiente', 'En Proceso', 'Resuelta', 'Cerrada', 'Urgente') DEFAULT 'Pendiente',
         createdBy INT DEFAULT NULL,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -113,17 +114,128 @@ const initializeDatabase = async () => {
 
     console.log('✅ Tabla de alertas verificada/creada correctamente');
 
+    // ─────────────────────────────────────────────────────
+    // TABLAS DEL CHATBOT PREDICTIVO
+    // ─────────────────────────────────────────────────────
+
+    // Tabla para reportes del chatbot (riesgo bajo y medio)
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS chatbot_reportes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        estudiante_id VARCHAR(100) NOT NULL DEFAULT 'anonimo',
+        nombre VARCHAR(200) NOT NULL DEFAULT 'Anónimo',
+        descripcion TEXT NOT NULL,
+        tipo_violencia VARCHAR(100) DEFAULT 'no_especificado',
+        frecuencia VARCHAR(50) DEFAULT 'no_especificado',
+        nivel_riesgo ENUM('bajo','medio','alto') NOT NULL DEFAULT 'medio',
+        keywords JSON DEFAULT NULL,
+        sentiment_score DECIMAL(5,2) DEFAULT 0,
+        resumen_patron TEXT DEFAULT NULL,
+        ticket_number VARCHAR(30) DEFAULT NULL,
+        estado ENUM('pendiente','en_proceso','resuelto','cerrado') DEFAULT 'pendiente',
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_estudiante (estudiante_id),
+        INDEX idx_nivel_riesgo (nivel_riesgo),
+        INDEX idx_estado (estado),
+        INDEX idx_createdAt (createdAt)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+    console.log('✅ Tabla chatbot_reportes verificada/creada');
+
+    // Tabla para alertas críticas del chatbot (riesgo alto)
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS chatbot_alertas_criticas (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        estudiante_id VARCHAR(100) NOT NULL DEFAULT 'anonimo',
+        nombre VARCHAR(200) NOT NULL DEFAULT 'Anónimo',
+        descripcion TEXT NOT NULL,
+        tipo_violencia VARCHAR(100) DEFAULT 'no_especificado',
+        frecuencia VARCHAR(50) DEFAULT 'no_especificado',
+        nivel_riesgo VARCHAR(10) DEFAULT 'alto',
+        prioridad VARCHAR(20) DEFAULT 'URGENTE',
+        keywords_criticas JSON DEFAULT NULL,
+        reporte_pdf_url VARCHAR(500) DEFAULT NULL,
+        ticket_number VARCHAR(30) DEFAULT NULL,
+        estado ENUM('pendiente','en_proceso','resuelto','cerrado') DEFAULT 'pendiente',
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_estudiante (estudiante_id),
+        INDEX idx_estado (estado),
+        INDEX idx_createdAt (createdAt)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+    console.log('✅ Tabla chatbot_alertas_criticas verificada/creada');
+
+    // Tabla para reuniones agendadas desde el chatbot
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS chatbot_reuniones (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        estudiante_id VARCHAR(100) NOT NULL DEFAULT 'anonimo',
+        nombre VARCHAR(200) NOT NULL,
+        fecha_reunion DATETIME DEFAULT NULL,
+        motivo TEXT DEFAULT NULL,
+        estado ENUM('pendiente','confirmada','cancelada','completada') DEFAULT 'pendiente',
+        fecha_solicitud TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_estudiante (estudiante_id),
+        INDEX idx_estado (estado),
+        INDEX idx_fecha_reunion (fecha_reunion)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+    console.log('✅ Tabla chatbot_reuniones verificada/creada');
+
+    // Tabla para actuaciones y remisiones (Seguimiento de casos extendido)
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS case_actions (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        alertId INT NOT NULL,
+        collaboratorId INT NOT NULL,
+        category ENUM('Remision', 'Actuacion', 'Soporte', 'Normatividad') NOT NULL,
+        actionType VARCHAR(100) NOT NULL,
+        responsibleName VARCHAR(100),
+        description TEXT,
+        area VARCHAR(100),
+        urgency VARCHAR(20),
+        result VARCHAR(255),
+        fileName VARCHAR(255),
+        fileUrl VARCHAR(500),
+        normType VARCHAR(100),
+        normArticle VARCHAR(100),
+        actionDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_alert (alertId),
+        INDEX idx_collaborator (collaboratorId),
+        INDEX idx_category (category)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+    // Tabla para ajustes manuales de la IA (Feedback/ML)
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS chatbot_ajustes_ia (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        mensaje_original TEXT NOT NULL,
+        nivel_original ENUM('bajo','medio','alto') NOT NULL,
+        nivel_corregido ENUM('bajo','medio','alto') NOT NULL,
+        razon_ajuste TEXT,
+        admin_id INT,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+    console.log('✅ Tabla chatbot_ajustes_ia verificada/creada');
+
+    console.log('✅ Tabla case_actions verificada/creada');
+
     // Verificar si hay usuarios, si no, insertar datos de prueba
     const [rows] = await connection.execute('SELECT COUNT(*) as count FROM users');
     if (rows[0].count === 0) {
       const bcrypt = require('bcryptjs');
       const saltRounds = 10;
-      
+
       // Generar hashes para las contraseñas
       const estudianteHash = await bcrypt.hash('Estudiante123!', saltRounds);
       const adminHash = await bcrypt.hash('Admin123!', saltRounds);
       const colaboradorHash = await bcrypt.hash('Colaborador123!', saltRounds);
-      
+
       await connection.execute(`
         INSERT INTO users (documentId, email, password, name, role, phone, address, birthDate, status, createdAt) VALUES
         (?, ?, ?, ?, ?, ?, ?, ?, ?, ?),

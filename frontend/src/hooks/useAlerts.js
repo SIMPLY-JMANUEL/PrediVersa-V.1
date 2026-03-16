@@ -1,0 +1,50 @@
+import { useState, useEffect } from 'react';
+
+export const useAlerts = (token) => {
+  const [alerts, setAlerts] = useState([]);
+  const [loadingAlerts, setLoadingAlerts] = useState(false);
+  const [notifVersa, setNotifVersa] = useState([]);
+  const [notifVisible, setNotifVisible] = useState(false);
+
+  const fetchAlerts = async () => {
+    setLoadingAlerts(true);
+    try {
+      const response = await fetch('http://localhost:5000/api/alerts', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.success) setAlerts(data.alerts);
+    } catch (error) {
+      console.error('Error fetching alerts:', error);
+    } finally {
+      setLoadingAlerts(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!token) return;
+    
+    const source = new EventSource('http://localhost:5000/api/chatbot/stream');
+    source.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        if (data.tipo === 'conexion') return;
+        setNotifVersa(prev => [data, ...prev].slice(0, 20));
+        setNotifVisible(true);
+        fetchAlerts(); // Recargar alertas cuando llegue una nueva notif
+      } catch { /* silent */ }
+    };
+    source.onerror = () => source.close();
+    return () => source.close();
+  }, [token]);
+
+  return {
+    alerts,
+    loadingAlerts,
+    notifVersa,
+    setNotifVersa,
+    notifVisible,
+    setNotifVisible,
+    fetchAlerts
+  };
+};

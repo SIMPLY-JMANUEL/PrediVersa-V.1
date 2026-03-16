@@ -1,6 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/users');
+const alertRoutes = require('./routes/alerts');
+const chatbotRoutes = require('./routes/chatbot');
 
 const app = express();
 
@@ -11,6 +14,10 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/alerts', alertRoutes);
+app.use('/api/chatbot', chatbotRoutes);
+
 
 // Health check
 app.get('/api/health', (req, res) => {

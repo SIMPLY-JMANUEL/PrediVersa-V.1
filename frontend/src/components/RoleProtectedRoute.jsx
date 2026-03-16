@@ -14,6 +14,7 @@ function RoleProtectedRoute({ children, user, allowedRoles }) {
         return <Navigate to="/student" replace />
       case 'Administrador':
         return <Navigate to="/admin" replace />
+      case 'Colaborador':
       case 'Colaboradores':
         return <Navigate to="/collaborator" replace />
       default:
