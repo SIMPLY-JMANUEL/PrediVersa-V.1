@@ -15,6 +15,7 @@ import UserVerification from './admin/UserVerification'
 import VersaNotifications from './admin/VersaNotifications'
 import AdminSidebar from './admin/AdminSidebar'
 
+import { apiFetch, BASE_URL } from '../utils/api' // FIX A-1: centralizar URL base
 import '../ProfessionalTheme.css'
 import './AdminDashboard.css'
 
@@ -39,12 +40,6 @@ function AdminDashboard({ user, onLogout }) {
     loadingUsers, searchTerm, setSearchTerm, paginatedUsers, totalPages, stats, 
     fetchUsers, currentPage, setCurrentPage, filteredUsers 
   } = useUsers(token)
-  
-  // Sincronizar pestañas con el Sidebar
-  const switchTab = (tabId) => {
-    setActiveTab(tabId);
-    if (tabId !== 'alertas') setSelectedAlert(null);
-  };
   const { 
     alerts, loadingAlerts, notifVersa, setNotifVersa, notifVisible, setNotifVisible, fetchAlerts 
   } = useAlerts(token)
@@ -55,6 +50,12 @@ function AdminDashboard({ user, onLogout }) {
   const [saveMessage, setSaveMessage] = useState('')
   const [editingUser, setEditingUser] = useState(null)
   const [viewingUser, setViewingUser] = useState(null)
+
+  // FIX A-3: switchTab declarado DESPUÉS de useState para evitar referencia temprana a setActiveTab
+  const switchTab = (tabId) => {
+    setActiveTab(tabId);
+    if (tabId !== 'alertas') setSelectedAlert(null);
+  };
 
   const [userForm, setUserForm] = useState({
     nombres: '', apellidos: '', id: '', edad: '', fechaNacimiento: '', lugarNacimiento: '',
@@ -88,10 +89,11 @@ function AdminDashboard({ user, onLogout }) {
         return;
       }
 
+      // FIX A-5: Generar contraseña aleatoria segura en lugar de hardcodeada 'Predi123!'
+      const randomPass = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-4).toUpperCase() + '!';
       setSaveMessage('Guardando...');
-      const response = await fetch('http://localhost:5000/api/users', {
+      const response = await apiFetch('/api/users', { // FIX A-1: usar apiFetch
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
           documentId: userForm.id, 
           email: finalEmail, 
@@ -100,7 +102,7 @@ function AdminDashboard({ user, onLogout }) {
           phone: userForm.telefono, 
           address: userForm.direccion,
           birthDate: userForm.fechaNacimiento || null, 
-          password: 'Predi123!',
+          password: randomPass,
           edad: userForm.edad, 
           lugarNacimiento: userForm.lugarNacimiento,
           nombrePadre: userForm.nombrePadre, 
@@ -115,9 +117,9 @@ function AdminDashboard({ user, onLogout }) {
           repAddress: userForm.repAddress
         })
       })
-      const data = await response.json()
+      const data = response
       if (data.success) {
-        setSaveMessage('✅ Usuario creado exitosamente'); 
+        setSaveMessage(`✅ Usuario creado. Contraseña temporal: ${randomPass}`); // FIX A-5: mostrar la contraseña generada al admin 
         fetchUsers();
         setUserForm({ 
           nombres: '', apellidos: '', id: '', edad: '', fechaNacimiento: '', lugarNacimiento: '', 
@@ -150,8 +152,8 @@ function AdminDashboard({ user, onLogout }) {
   const handleUpdate = async () => {
     if (!editingUser) return
     try {
-      const response = await fetch(`http://localhost:5000/api/users/${editingUser.id}`, {
-        method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      const response = await apiFetch(`/api/users/${editingUser.id}`, { // FIX A-1: usar apiFetch
+        method: 'PUT',
         body: JSON.stringify({
           documentId: userForm.id, email: userForm.email, name: `${userForm.nombres} ${userForm.apellidos}`,
           role: userForm.rol, phone: userForm.telefono, address: userForm.direccion,
@@ -161,7 +163,7 @@ function AdminDashboard({ user, onLogout }) {
           repEmail: userForm.repEmail, repAddress: userForm.repAddress
         })
       })
-      const data = await response.json()
+      const data = response // apiFetch ya retorna JSON
       if (data.success) {
         setSaveMessage('Actualizado exitosamente'); setEditingUser(null); fetchUsers();
         setUserForm({ 
@@ -191,8 +193,8 @@ function AdminDashboard({ user, onLogout }) {
   const handleDelete = async (id) => {
     if (!confirm('¿Eliminar usuario?')) return
     try {
-      await fetch(`http://localhost:5000/api/users/${id}`, {
-        method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
+      await apiFetch(`/api/users/${id}`, { // FIX A-1: usar apiFetch
+        method: 'DELETE'
       }); fetchUsers()
     } catch (error) { console.error(error) }
   }
@@ -221,7 +223,7 @@ function AdminDashboard({ user, onLogout }) {
                 <button 
                   key={tab.id}
                   className={`mgmt-tab ${activeTab === tab.id ? 'active' : ''}`}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => switchTab(tab.id)} // FIX A-4: usar switchTab para limpiar selectedAlert
                 >
                   {tab.icon}
                   {tab.label}
@@ -266,6 +268,7 @@ function AdminDashboard({ user, onLogout }) {
                       currentPage={currentPage} totalPages={totalPages} setCurrentPage={setCurrentPage} 
                       handleEdit={handleEdit} handleDelete={handleDelete} exportToCSV={exportToCSV} 
                       filteredUsers={filteredUsers} fetchUsers={fetchUsers}
+                      onViewDetails={setViewingUser}
                     />
                   </div>
                 </div>

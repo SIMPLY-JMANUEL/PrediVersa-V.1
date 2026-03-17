@@ -61,6 +61,17 @@ function App() {
       setUser(JSON.parse(storedUser))
     }
     setIsLoading(false)
+
+    // FIX E-3: Escuchar el evento de sesión expirada disparado por apiFetch o useAlerts
+    const handleAuthExpired = () => {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      setUser(null)
+      setIsLoginOpen(true) // Abrir el modal de login automáticamente
+      console.warn('⚠️ Sesión expirada. Redirigiendo al login...')
+    }
+    window.addEventListener('auth:expired', handleAuthExpired)
+    return () => window.removeEventListener('auth:expired', handleAuthExpired)
   }, [])
 
   const handleLogin = (userData) => {

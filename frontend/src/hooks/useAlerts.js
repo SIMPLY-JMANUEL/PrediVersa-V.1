@@ -12,6 +12,11 @@ export const useAlerts = (token) => {
       const response = await fetch('http://localhost:5000/api/alerts', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      // FIX E-3: detectar sesión expirada globalmente
+      if (response.status === 401) {
+        window.dispatchEvent(new Event('auth:expired'));
+        return;
+      }
       const data = await response.json();
       if (data.success) setAlerts(data.alerts);
     } catch (error) {
@@ -23,19 +28,39 @@ export const useAlerts = (token) => {
 
   useEffect(() => {
     if (!token) return;
-    
-    const source = new EventSource(`http://localhost:5000/api/chatbot/stream?token=${token}`);
-    source.onmessage = (e) => {
-      try {
-        const data = JSON.parse(e.data);
-        if (data.tipo === 'conexion') return;
-        setNotifVersa(prev => [data, ...prev].slice(0, 20));
-        setNotifVisible(true);
-        fetchAlerts(); // Recargar alertas cuando llegue una nueva notif
-      } catch { /* silent */ }
+
+    let source;
+    let reconnectTimeout;
+
+    // FIX AL-3: función de conexión SSE con reconexión automática
+    const conectarSSE = () => {
+      source = new EventSource(`http://localhost:5000/api/chatbot/stream?token=${token}`);
+      source.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (data.tipo === 'conexion') return;
+          setNotifVersa(prev => [data, ...prev].slice(0, 20));
+          setNotifVisible(true);
+          fetchAlerts();
+        } catch { /* silent */ }
+      };
+      source.onerror = () => {
+        source.close();
+        // Reconectar después de 5 segundos
+        reconnectTimeout = setTimeout(() => {
+          console.log('🔄 Reconectando SSE...');
+          conectarSSE();
+        }, 5000);
+      };
     };
-    source.onerror = () => source.close();
-    return () => source.close();
+
+    conectarSSE();
+    fetchAlerts();
+
+    return () => {
+      source?.close();
+      clearTimeout(reconnectTimeout);
+    };
   }, [token]);
 
   return {

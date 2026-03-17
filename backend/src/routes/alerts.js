@@ -35,7 +35,7 @@ router.get('/', verifyToken, async (req, res) => {
  * @route GET /api/alerts/stats
  * @desc Estadísticas de alertas por tipo y estado
  */
-router.get('/stats', verifyToken, async (req, res) => {
+router.get('/stats', verifyToken, authorizeRoles('Administrador', 'Colaboradores', 'Colaborador'), async (req, res) => { // FIX AL-5
   try {
     const stats = await getAlertStats();
     res.json({ success: true, stats });
@@ -80,7 +80,7 @@ router.post('/analyze', async (req, res) => {
       return res.status(400).json({ success: false, message: 'studentName es requerido' });
     }
 
-    const analisis = analyzeText(mensaje, tipoViolencia, '', 0);
+    const analisis = analyzeText(mensaje, tipoViolencia, '', []); // FIX M-1: era 0, debe ser []
 
     const alertTypeMap = { 'bajo': 'Informativa', 'medio': 'Advertencia', 'alto': 'Critica' };
     const finalAlertType = analisis.es_emergencia ? 'Critica' : alertTypeMap[analisis.nivel_riesgo];

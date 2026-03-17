@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ClipboardList, ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { apiFetch } from '../utils/api'; // FIX A-1: Usar utilitario centralizado
 import './TestVersa.css';
 
 export default function TestVersa({ user }) {
@@ -145,12 +146,8 @@ export default function TestVersa({ user }) {
 
     // Enviar resultado al Dashboard Administrativo (Backend)
     try {
-      fetch('http://localhost:5000/api/chatbot/test-result', {
+      apiFetch('/api/chatbot/test-result', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
         body: JSON.stringify({
           estudianteId: user?.documentId || user?.id,
           nombre: user?.name,

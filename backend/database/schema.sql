@@ -89,7 +89,11 @@ CREATE TABLE IF NOT EXISTS alerts (
   deadline VARCHAR(50) DEFAULT '' COMMENT 'Plazo para responder',
   assignedTo VARCHAR(100) DEFAULT '' COMMENT 'Usuario asignado para atender la alerta',
   
-  status ENUM('Pendiente', 'En Proceso', 'Resuelta', 'Cerrada') DEFAULT 'Pendiente' COMMENT 'Estado de la alerta',
+  -- FIX AL-4: Se agrega 'Urgente' al ENUM para cubrir alertas de riesgo alto de TestVersa
+  status ENUM('Pendiente', 'En Proceso', 'Resuelta', 'Cerrada', 'Urgente') DEFAULT 'Pendiente' COMMENT 'Estado de la alerta',
+  
+  -- FIX AL-6: Campo ID para asignación precisa (evita ruptura por cambio de nombre)
+  assignedToId INT DEFAULT NULL COMMENT 'ID del usuario colaborador asignado',
   
   createdBy INT DEFAULT NULL COMMENT 'ID del admin que creó la alerta',
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de creación',
@@ -101,9 +105,92 @@ CREATE TABLE IF NOT EXISTS alerts (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='Tabla de alertas del sistema PrediVersa';
 
+-- Migración en caliente para BD existente (ejecutar si la tabla ya existe)
+ALTER TABLE alerts
+  MODIFY COLUMN status ENUM('Pendiente', 'En Proceso', 'Resuelta', 'Cerrada', 'Urgente') DEFAULT 'Pendiente',
+  ADD COLUMN IF NOT EXISTS assignedToId INT DEFAULT NULL COMMENT 'ID del colaborador asignado';
+
 -- Insertar alertas de ejemplo
 INSERT INTO alerts (studentName, studentDocumentId, studentAge, studentGrade, alertType, description, ticketNumber, alertDate, alertTime, deadline, assignedTo, status) VALUES
 ('Juan Díaz', '12345678', '15', '10A', 'Informativa', 'Se le solicita de manera inmediata al funcionario tomar acciones con el fin de identificar la conducta y prevenir cualquier alteración.', 'TKT-001', '2024-01-15', '09:30:00', '24 horas', 'María Pérez', 'Pendiente'),
 ('Carlos Gómez', '87654321', '14', '9B', 'Preventiva', 'Se requiere revisión de comportamiento en clase de matemáticas.', 'TKT-002', '2024-01-14', '14:20:00', '48 horas', 'Ana López', 'En Proceso'),
 ('María López', '11223344', '16', '11C', 'Advertencia', 'Seguimiento a situación reportada anteriormente.', 'TKT-003', '2024-01-13', '10:00:00', '72 horas', 'Pedro Sánchez', 'Resuelta')
 ON DUPLICATE KEY UPDATE studentName = VALUES(studentName);
+
+-- ================================================================================
+-- FIX AL-7: Tablas del Chatbot FALTANTES en schema original
+-- ================================================================================
+
+-- Tabla de reportes del chatbot (riesgo bajo/medio)
+CREATE TABLE IF NOT EXISTS chatbot_reportes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  estudiante_id VARCHAR(50) DEFAULT 'anonimo' COMMENT 'ID o username del estudiante',
+  nombre VARCHAR(100) DEFAULT 'Anónimo' COMMENT 'Nombre del estudiante',
+  descripcion TEXT NOT NULL COMMENT 'Mensaje reportado por el estudiante',
+  tipo_violencia VARCHAR(80) DEFAULT 'no_especificado' COMMENT 'Tipo de violencia identificado',
+  frecuencia VARCHAR(50) DEFAULT 'no_especificado' COMMENT 'Frecuencia del evento',
+  nivel_riesgo ENUM('bajo', 'medio', 'alto') DEFAULT 'medio' COMMENT 'Nivel de riesgo asignado',
+  keywords JSON DEFAULT NULL COMMENT 'Palabras clave detectadas',
+  resumen_patron TEXT DEFAULT NULL COMMENT 'Resumen del patrón detectado por el motor',
+  ticket_number VARCHAR(30) DEFAULT '' COMMENT 'Número de ticket generado',
+  sentiment_score INT DEFAULT 0 COMMENT 'Puntuación de sentimiento',
+  estado ENUM('pendiente', 'en_proceso', 'completado', 'cerrado') DEFAULT 'pendiente',
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_estudiante (estudiante_id),
+  INDEX idx_nivel (nivel_riesgo),
+  INDEX idx_estado (estado),
+  INDEX idx_created (createdAt)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT='Reportes de riesgo registrados por el chatbot Versa';
+
+-- Tabla de alertas críticas del chatbot (riesgo alto)
+CREATE TABLE IF NOT EXISTS chatbot_alertas_criticas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  estudiante_id VARCHAR(50) DEFAULT 'anonimo',
+  nombre VARCHAR(100) DEFAULT 'Anónimo',
+  descripcion TEXT NOT NULL,
+  tipo_violencia VARCHAR(80) DEFAULT 'no_especificado',
+  frecuencia VARCHAR(50) DEFAULT 'no_especificado',
+  nivel_riesgo VARCHAR(20) DEFAULT 'alto',
+  prioridad VARCHAR(20) DEFAULT 'URGENTE',
+  keywords_criticas JSON DEFAULT NULL COMMENT 'Keywords críticas con metadatos',
+  reporte_pdf_url VARCHAR(500) DEFAULT '' COMMENT 'URL del PDF adjunto si existe',
+  ticket_number VARCHAR(30) DEFAULT '',
+  estado ENUM('pendiente', 'en_proceso', 'completado', 'cerrado') DEFAULT 'pendiente',
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_estudiante (estudiante_id),
+  INDEX idx_prioridad (prioridad),
+  INDEX idx_created (createdAt)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT='Alertas críticas de riesgo alto generadas por el chatbot Versa';
+
+-- Tabla de reuniones solicitadas desde el chatbot
+CREATE TABLE IF NOT EXISTS chatbot_reuniones (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  estudiante_id VARCHAR(50) DEFAULT 'anonimo',
+  nombre VARCHAR(100) NOT NULL COMMENT 'Nombre del estudiante',
+  fecha_reunion VARCHAR(200) NOT NULL COMMENT 'Fecha y hora solicitada (texto libre)',
+  motivo TEXT DEFAULT NULL COMMENT 'Motivo de la reunión',
+  estado ENUM('Pendiente', 'Confirmada', 'Cancelada', 'Realizada') DEFAULT 'Pendiente',
+  fecha_solicitud TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha en que se hizo la solicitud',
+  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_estado (estado),
+  INDEX idx_fecha_solicitud (fecha_solicitud)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT='Reuniones con orientador solicitadas desde el chatbot Versa';
+
+-- Tabla de ajustes / correcciones de IA del administrador
+CREATE TABLE IF NOT EXISTS chatbot_ajustes_ia (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  mensaje_original TEXT NOT NULL COMMENT 'Mensaje original del estudiante',
+  nivel_original VARCHAR(20) COMMENT 'Nivel asignado originalmente por el motor',
+  nivel_corregido VARCHAR(20) COMMENT 'Nivel corregido manualmente por el admin',
+  razon_ajuste TEXT DEFAULT NULL COMMENT 'Razón de la corrección',
+  admin_id INT DEFAULT NULL COMMENT 'ID del administrador que realizó la corrección',
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_admin (admin_id),
+  INDEX idx_created (createdAt)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT='Correcciones manuales de IA para mejora del modelo Versa';

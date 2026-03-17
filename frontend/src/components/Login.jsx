@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { apiFetch } from '../utils/api' // FIX A-1: Centralizar URL
 import './Login.css'
 
 function Login({ isOpen, onClose, onLoginSuccess }) {
@@ -21,16 +22,12 @@ function Login({ isOpen, onClose, onLoginSuccess }) {
     setLoading(true)
 
     try {
-      const baseUrl = 'http://localhost:5000'
-      const response = await fetch(`${baseUrl}/api/auth/login`, {
+      const response = await apiFetch('/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ email, password })
       })
 
-      const data = await response.json()
+      const data = response;
 
       if (data.success) {
         // Guardar token y datos del usuario

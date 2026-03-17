@@ -244,7 +244,7 @@ function analyzeText(texto, tipoViolencia = '', frecuencia = '', historial = [])
   }
 
   // Normalizar
-  const norm = (str) => str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  // Normalizar usando la función global definida al inicio del módulo
   const textoNorm = norm(texto)
 
   let score = 0
@@ -355,7 +355,7 @@ function analyzeText(texto, tipoViolencia = '', frecuencia = '', historial = [])
     keywords_detectadas: [...new Set(keywordsDetectadas)].slice(0, 10),
     tipos_violencia: [...new Set(tiposViolenciaDetectados)],
     patrones: patronesDetectados,
-    requiere_gemini: score >= 30 && score <= 68,
+    requiere_gemini: score >= 30 && score < 67, // FIX M-2: era <= 68; evitamos llamar Gemini para niveles 'alto' ya confirmados
     resumen: `Score: ${score}/100 | Contexto: ${numReportes} msgs | Nivel: ${nivel_riesgo.toUpperCase()}`,
     sentimiento: sentimentScore
   }

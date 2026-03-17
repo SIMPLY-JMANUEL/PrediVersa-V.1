@@ -34,7 +34,7 @@ function CollaboratorDashboard({ user, onLogout }) {
       if (data.success) {
         // Validación estricta: Solamente mostrar casos expresamente asignados a este colaborador por el Administrador.
         const myAlerts = data.alerts.filter(a => 
-          a.assignedTo && a.assignedTo.toLowerCase() === user?.name?.toLowerCase()
+          a.assignedTo && a.assignedTo.toLowerCase().trim() === user?.name?.toLowerCase().trim() // FIX C-1: trim() para robustez
         )
         setAssignedAlerts(myAlerts)
       }
@@ -44,7 +44,7 @@ function CollaboratorDashboard({ user, onLogout }) {
 
   useEffect(() => {
     fetchAssignedAlerts()
-    const source = new EventSource('http://localhost:5000/api/chatbot/stream')
+    const source = new EventSource(`http://localhost:5000/api/chatbot/stream?token=${token}`) // FIX C-2: pasar token en URL como el admin
     source.onmessage = (e) => {
       try {
         const data = JSON.parse(e.data)
@@ -93,7 +93,7 @@ function CollaboratorDashboard({ user, onLogout }) {
         area: forms.remision.area,
         responsibleName: forms.remision.responsable,
         description: forms.remision.motivo,
-        urgency: forms.remision.urgency,
+        urgency: forms.remision.urgencia, // FIX C-4: era urgencia, debe ser urgency (consistente con backend)
         result: forms.remision.observaciones,
         actionDate: forms.remision.fecha
       }

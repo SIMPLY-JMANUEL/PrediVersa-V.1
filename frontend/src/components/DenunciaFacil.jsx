@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ShieldAlert, Info, UploadCloud, CheckCircle2 } from 'lucide-react';
 import './DenunciaFacil.css';
 
-const API = 'http://localhost:5000/api/chatbot';
+import { apiFetch, API_CHATBOT as API } from '../utils/api'; // FIX A-1: Usar utilitario centralizado
 
 export default function DenunciaFacil({ user }) {
   const [anonimo, setAnonimo] = useState(false);
@@ -30,12 +30,8 @@ export default function DenunciaFacil({ user }) {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API}/denuncia`, {
+      const response = await apiFetch(`${API}/denuncia`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
         body: JSON.stringify({
           estudiante_id: user?.documentId || user?.id || 'anonimo',
           anonimo,
@@ -50,7 +46,7 @@ export default function DenunciaFacil({ user }) {
         })
       });
 
-      const data = await response.json();
+      const data = response;
       
       if (data.success) {
         setSuccessTicket(data.ticket);

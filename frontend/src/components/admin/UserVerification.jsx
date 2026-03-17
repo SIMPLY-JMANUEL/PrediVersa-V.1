@@ -11,7 +11,8 @@ const UserVerification = ({
   handleDelete, 
   exportToCSV, 
   filteredUsers,
-  fetchUsers
+  fetchUsers,
+  onViewDetails
 }) => {
   return (
     <div className="verification-section">
@@ -128,6 +129,13 @@ const UserVerification = ({
                     </span>
                   </span>
                   <span style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                    <button 
+                      className="view-btn-s" 
+                      onClick={() => onViewDetails(u)}
+                      style={{ background: '#f0f9ff', color: '#0369a1', border: '1.5px solid #bae6fd', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: '700', fontSize: '0.8rem' }}
+                    >
+                      Detalles
+                    </button>
                     <button 
                       className="edit-btn-s" 
                       onClick={() => handleEdit(u)}

@@ -8,10 +8,12 @@ const {
   emailExists,
   documentIdExists
 } = require('../db/users');
+const { verifyToken, authorizeRoles } = require('../middleware/auth');
 const { pool } = require('../db/connection');
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'tu_secreto_super_seguro_123';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) console.error('❌ CRÍTICO: JWT_SECRET no configurado en .env');
 
 /**
  * @route POST /api/auth/login
@@ -140,8 +142,9 @@ router.get('/me', async (req, res) => {
 /**
  * @route POST /api/auth/repair
  * @desc Endpoint de emergencia para reparar credenciales de colaborador
+ * @access Solo Administradores autenticados (FIX S-2)
  */
-router.post('/repair', async (req, res) => {
+router.post('/repair', verifyToken, authorizeRoles('Administrador'), async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash('Colaborador123!', 10);
     const [result] = await pool.execute(

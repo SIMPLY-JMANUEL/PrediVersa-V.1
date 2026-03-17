@@ -41,7 +41,7 @@ router.get('/stream', verifyToken, (req, res) => {
 // POST /api/chatbot/analizar
 // Motor Versa: 5 capas + Gemini solo si score ambiguo
 // ─────────────────────────────────────────────────────
-router.post('/analizar', async (req, res) => {
+router.post('/analizar', verifyToken, async (req, res) => { // FIX CH-1: agregado verifyToken
   try {
     const { mensaje, tipo_violencia, frecuencia, estudiante_id } = req.body;
 
@@ -141,7 +141,7 @@ router.post('/analizar', async (req, res) => {
 // POST /api/chatbot/chat-ia
 // Genera una respuesta empática y conversacional usando Gemini
 // ─────────────────────────────────────────────────────
-router.post('/chat-ia', async (req, res) => {
+router.post('/chat-ia', verifyToken, async (req, res) => { // FIX CH-1: agregado verifyToken
   try {
     const { mensaje, nivelRiesgo, historial = [] } = req.body;
     
@@ -180,7 +180,7 @@ const verificarBotpress = (req, res, next) => {
 // POST /api/chatbot/reporte
 // Guarda reporte (riesgo medio) desde Botpress
 // ─────────────────────────────────────────────────────
-router.post('/reporte', async (req, res) => {
+router.post('/reporte', verifyToken, async (req, res) => { // FIX CH-1: agregado verifyToken
   try {
     const {
       estudiante_id,
@@ -278,7 +278,7 @@ ${descripcion}`;
 // POST /api/chatbot/alerta
 // Guarda alerta CRÍTICA (riesgo alto) desde Botpress
 // ─────────────────────────────────────────────────────
-router.post('/alerta', async (req, res) => {
+router.post('/alerta', verifyToken, async (req, res) => { // FIX CH-1: agregado verifyToken
   try {
     const {
       estudiante_id,
@@ -375,7 +375,7 @@ ${descripcion}`;
 // POST /api/chatbot/denuncia
 // Guarda denuncia manual de Denuncia Fácil
 // ─────────────────────────────────────────────────────
-router.post('/denuncia', async (req, res) => {
+router.post('/denuncia', verifyToken, async (req, res) => { // FIX CH-1: agregado verifyToken
   try {
     const {
       estudiante_id, anonimo, tipo_violencia, descripcion, fecha_hecho, 
@@ -433,7 +433,7 @@ ${descripcion}`;
 // POST /api/chatbot/test-result
 // Almacena y levanta alertas según el resultado del test
 // ─────────────────────────────────────────────────────
-router.post('/test-result', async (req, res) => {
+router.post('/test-result', verifyToken, async (req, res) => { // FIX CH-1: agregado verifyToken
   try {
     const {
       estudianteId,
@@ -452,7 +452,7 @@ router.post('/test-result', async (req, res) => {
     // se fuerza la alerta crítica. De lo contrario, solo preventiva de registro.
     const isCritical = colorClass.includes('negativo') || colorClass.includes('rs-alto-negativo');
     const alertType = isCritical ? 'Critica' : 'Preventiva';
-    const status = isCritical ? 'Urgente' : 'Completado';
+    const status = isCritical ? 'Pendiente' : 'Completado'; // FIX AL-4: era 'Urgente', no existe en ENUM
     const emoji = isCritical ? '🔴' : '🟢';
 
     const descripcionCompleta = `📋 [RESULTADO TEST VERSA]
@@ -501,7 +501,7 @@ Se requiere revisión de perfil psicosocial.`;
 // POST /api/chatbot/reunion
 // Agenda reunión con orientador desde Botpress
 // ─────────────────────────────────────────────────────
-router.post('/reunion', async (req, res) => {
+router.post('/reunion', verifyToken, async (req, res) => { // FIX CH-1: agregado verifyToken
   try {
     const { nombre, estudiante_id, fecha, motivo } = req.body;
 

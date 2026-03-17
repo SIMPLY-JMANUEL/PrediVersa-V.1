@@ -21,19 +21,19 @@ class CentralAIService {
     }
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.model = this.genAI.getGenerativeModel({ 
-      model: "gemini-2.0-flash",
+      model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
       generationConfig: {
         temperature: 0.1,
         maxOutputTokens: 800,
         topP: 0.8,
         topK: 40,
       },
-      // Configuración de seguridad para evitar bloqueos en temas sensibles del colegio
+      // FIX M-4: Safety settings ajustados - BLOCK_NONE solo para contenido relevante al contexto escolar
       safetySettings: [
-        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
+        { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+        { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
       ]
     });
     this.initialized = true;
@@ -127,8 +127,7 @@ class CentralAIService {
     const { mensaje, nivelRiesgo, historial = [] } = datos;
 
     try {
-      const chatModel = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-      
+      // FIX M-3: Reutilizar this.model en lugar de crear nueva instancia chatModel
       let chatHistory = historial.map(m => `${m.type === 'user' ? 'Estudiante' : 'Versa'}: ${m.text}`).join('\n');
 
       const prompt = `
@@ -149,15 +148,29 @@ class CentralAIService {
         VERSA RESPONDE:
       `;
 
-
-      const result = await chatModel.generateContent({
+      const result = await this.model.generateContent({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
         generationConfig: { temperature: 0.7, maxOutputTokens: 200 }
       });
       const response = await result.response;
       return response.text().trim();
     } catch (error) {
-      console.error('❌ Error API Gemini:', error.message);
+      // FIX M-5: Intentar con modelo alternativo si el principal falla
+      if (error.message?.includes('404') || error.message?.includes('not found') || error.message?.includes('503')) {
+        try {
+          console.warn('⚠️ gemini-2.0-flash inaccesible, intentando con gemini-1.5-flash...');
+          const fallbackModel = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+          const result = await fallbackModel.generateContent({
+            contents: [{ role: 'user', parts: [{ text: `Eres Versa, orientador empático de PrediVersa. El estudiante dice: "${mensaje}". Responde de forma corta, empática y en español colombiano. RIESGO: ${nivelRiesgo.toUpperCase()}` }] }],
+            generationConfig: { temperature: 0.7, maxOutputTokens: 200 }
+          });
+          return result.response.text().trim();
+        } catch(e2) {
+          console.error('❌ Ambos modelos Gemini fallaron:', e2.message);
+        }
+      } else {
+        console.error('❌ Error API Gemini:', error.message);
+      }
       
       // Respuestas locales variadas según riesgo
       const msgLow = mensaje.toLowerCase();

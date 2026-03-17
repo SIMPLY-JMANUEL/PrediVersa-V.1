@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-import { API_CHATBOT as API } from '../utils/api';
+import { API_CHATBOT as API, getAuthHeaders } from '../utils/api'; // FIX CH-1: importar getAuthHeaders para JWT
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export const MENU_TEMAS = [
@@ -43,7 +43,7 @@ export const useChatbot = (user) => {
     userMessage: '', tipoViolencia: '', frecuencia: '',
     keywords: [], tiposDetectados: [], nombre: '', fecha: '',
     nivelPendiente: null,
-    alertaEnviada: false,
+    alertaEnviada: false, // FIX CH-3: flag para prevenir doble envío de alertas
   });
   
   const initialized = useRef(false);
@@ -234,7 +234,7 @@ export const useChatbot = (user) => {
   const mostrarMenu = async () => {
     setNivelRiesgo(null);
     setScoreActual(null);
-    datos.current = { userMessage: '', tipoViolencia: '', frecuencia: '', keywords: [], tiposDetectados: [], nombre: '', fecha: '' };
+    datos.current = { userMessage: '', tipoViolencia: '', frecuencia: '', keywords: [], tiposDetectados: [], nombre: '', fecha: '', alertaEnviada: false }; // FIX CH-4: incluir alertaEnviada en reset
     await versa('¿En qué más te puedo ayudar?', 500);
     setOpciones(MENU_TEMAS);
     setEstado('menu_principal');
@@ -255,13 +255,20 @@ export const useChatbot = (user) => {
     setEstado('analizando');
     setIsTyping(true);
 
+    // FIX CH-3: Prevenir doble envío de alertas
+    if (datos.current.alertaEnviada) {
+      setIsTyping(false);
+      await responderConversacional(mensaje, nivelRiesgo || 'bajo');
+      return;
+    }
+
     const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 12000);
+    const id = setTimeout(() => controller.abort(), 20000); // FIX CH-2: era 12000ms, aumentado a 20s
 
     try {
       const res = await fetch(`${API}/analizar`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(), // FIX CH-1: JWT en header
         body: JSON.stringify({ 
           mensaje, 
           tipo_violencia: datos.current.tipoViolencia, 
@@ -285,10 +292,11 @@ export const useChatbot = (user) => {
       setScoreActual(score);
 
       if (nivel === 'alto' || nivel === 'medio') {
+        datos.current.alertaEnviada = true; // FIX CH-3: marcar como enviada
         const endpoint = nivel === 'alto' ? '/alerta' : '/reporte';
         await fetch(`${API}${endpoint}`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAuthHeaders(), // FIX CH-1: JWT en header
           body: JSON.stringify({
             estudiante_id: user?.documentId || user?.id || 'anonimo',
             nombre: user?.name || 'Anónimo',
@@ -308,8 +316,12 @@ export const useChatbot = (user) => {
       } else {
         await responderConversacional(mensaje, nivel);
       }
-    } catch {
+    } catch(e) {
       setIsTyping(false);
+      if (e.name === 'AbortError') {
+        // FIX CH-2: mensaje amigable cuando se supera el tiempo de espera
+        await versa('Tardé un poco más de lo esperado, pero ya registré tu mensaje. 💙 Estás en buenas manos.', 500);
+      }
       setNivelRiesgo('medio');
       await responderConversacional(mensaje, 'medio');
     }
@@ -325,7 +337,7 @@ export const useChatbot = (user) => {
       
       const res = await fetch(`${API}/chat-ia`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(), // FIX CH-1: JWT en header
         body: JSON.stringify({ mensaje, nivelRiesgo: nivel, historial: historialReciente }),
         signal: controller.signal
       });
