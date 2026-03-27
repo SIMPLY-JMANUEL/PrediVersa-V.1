@@ -59,7 +59,7 @@ const AnalyticsDashboard = ({ stats }) => {
 
       <div className="charts-grid">
         {/* TENDENCIA TEMPORAL */}
-        <div className="chart-card">
+        <div className="chart-card" style={{ minHeight: '350px' }}>
           <h3><TrendingUp size={18} /> Línea de Vida Institucional</h3>
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>
@@ -84,7 +84,7 @@ const AnalyticsDashboard = ({ stats }) => {
         </div>
 
         {/* RADAR DE TIPOLOGÍAS */}
-        <div className="chart-card">
+        <div className="chart-card" style={{ minHeight: '350px' }}>
           <h3><PieIcon size={18} /> Top 5 Riesgos Detectados</h3>
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>

@@ -98,8 +98,16 @@ router.post('/message', verifyToken, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ Error en unified /message:', error.message);
-    return res.status(500).json({ success: false, message: 'Error procesando mensaje' });
+    console.error('❌ ERROR CRÍTICO EN CHATBOT /message:', {
+      mensaje: error.message,
+      stack: error.stack,
+      request: { text: req.body.text, user: req.user?.id }
+    });
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Error procesando mensaje: ' + error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
