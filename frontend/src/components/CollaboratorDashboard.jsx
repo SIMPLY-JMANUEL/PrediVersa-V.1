@@ -134,7 +134,7 @@ function CollaboratorDashboard({ user, onLogout }) {
   }
 
   return (
-    <div className="dashboard-wrapper">
+    <div className="dashboard-wrapper profesional-theme">
       <DashboardHeader user={user} onLogout={onLogout} />
       
       <div className="dashboard-container profesional-theme">

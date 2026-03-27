@@ -8,10 +8,16 @@ function AmazonLexChat({ user }) {
   ])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
-  const messagesEndRef = useRef(null)
+  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   }
 
   useEffect(() => {
@@ -80,7 +86,7 @@ function AmazonLexChat({ user }) {
         </div>
       </div>
 
-      <div className="lex-chat-messages">
+      <div className="lex-chat-messages" ref={messagesContainerRef}>
         {messages.map(msg => (
           <div key={msg.id} className={`lex-message ${msg.sender}`}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>

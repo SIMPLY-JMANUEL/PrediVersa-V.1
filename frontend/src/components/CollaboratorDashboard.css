@@ -1,7 +1,12 @@
-/* PROFESIONAL THEME - COLLABORATOR DASHBOARD */
 .profesional-theme {
-    background: #f1f5f9;
+    background: linear-gradient(rgba(241, 245, 249, 0.85), rgba(241, 245, 249, 0.85)), 
+                url('../assets/images/8068.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    min-height: 100vh;
     padding-top: 2rem;
+    padding-bottom: 2rem;
 }
 
 .professional-header {
