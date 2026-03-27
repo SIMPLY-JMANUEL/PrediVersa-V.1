@@ -9,7 +9,6 @@ import AdminDashboard from './components/AdminDashboard'
 import CollaboratorDashboard from './components/CollaboratorDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 import RoleProtectedRoute from './components/RoleProtectedRoute'
-import Chatbot from './components/Chatbot'
 
 function AppRoutes({ user, isLoginOpen, setIsLoginOpen, handleLogin, handleLogout }) {
   const location = useLocation()
@@ -96,11 +95,6 @@ function App() {
         setIsLoginOpen={setIsLoginOpen}
         handleLogin={handleLogin}
         handleLogout={handleLogout}
-      />
-      <Chatbot 
-        isAuthenticated={!!user} 
-        isLoginOpen={isLoginOpen} 
-        user={user} 
       />
     </Router>
   )

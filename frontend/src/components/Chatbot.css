@@ -1,8 +1,0 @@
-/* Opcioón Nuclear: Ocultar TODO lo que inyecten scripts de terceros fuera del root de React cuando no corresponda mostrarlo */
-body.hide-botpress > *:not(#root) {
-	display: none !important;
-	opacity: 0 !important;
-	visibility: hidden !important;
-	pointer-events: none !important;
-	z-index: -99999 !important;
-}

@@ -4,6 +4,7 @@ import { UserCircle, Scale, Newspaper, ClipboardList, AlertTriangle, Info, Messa
 import DenunciaFacil from './DenunciaFacil'
 import Normatividad from './Normatividad'
 import TestVersa from './TestVersa'
+import AmazonLexChat from './AmazonLexChat'
 import { useUserPhoto } from '../hooks/useUserPhoto'
 import '../ProfessionalTheme.css'
 import './StudentDashboard.css'
@@ -74,21 +75,12 @@ function StudentDashboard({ user, onLogout }) {
             
             <div className="dashboard-card mgmt-content">
               {activeMenu === 'chat' && (
-                <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem 0' }}>
-                  <div className="chatbot-beast-container">
-                    <iframe
-                      src={`https://cdn.botpress.cloud/webchat/v3.6/shareable.html?configUrl=https://files.bpcontent.cloud/2026/03/23/16/20260323162234-TS1HU82E.json`}
-                      width="100%"
-                      height="600"
-                      style={{ border: 'none', display: 'block' }}
-                      allow="microphone"
-                      title="Asistente Versa"
-                    />
-                  </div>
+                <div className="animate-fade-in" style={{ padding: '0.5rem 0' }}>
+                  <AmazonLexChat user={user} />
                   
                   <div className="chatbot-footer-hint">
                     <div className="dot-online"></div>
-                    <span>Conexión Protegida — Motor Versa IA Activo</span>
+                    <span>Conexión Protegida — Amazon Lex & Motor Versa IA</span>
                   </div>
                 </div>
               )}
