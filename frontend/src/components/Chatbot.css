@@ -1,11 +1,123 @@
-/* Ocultar Botpress cuando no corresponde mostrarlo */
-body.hide-botpress [class*="bpw-"] ,
-body.hide-botpress [id^="bp-"] ,
-body.hide-botpress .bpw-widget,
-body.hide-botpress .bpw-chat-bubble,
-body.hide-botpress #bp-web-widget-container,
-body.hide-botpress iframe[src*="botpress"] {
-	display: none !important;
-	visibility: hidden !important;
-	pointer-events: none !important;
+/* Estilos de Chatbot "Modern Composer" similares al diseño solicitado */
+
+.chatbot-wrapper {
+  width: 100%;
+  max-width: 880px;
+  margin: 20px auto;
+  background: #f9fafb; /* neutral-50 */
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 500px; /* Tamaño del chat integrado */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  font-family: 'Inter', sans-serif;
+}
+
+/* Area de Mensajes */
+.chat-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background-color: white;
+}
+
+.message {
+  max-width: 80%;
+  padding: 12px 18px;
+  border-radius: 20px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.message.bot {
+  background: #f3f4f6;
+  color: #1f2937;
+  border-bottom-left-radius: 4px;
+  align-self: flex-start;
+}
+
+.message.user {
+  background: #3b82f6;
+  color: white;
+  border-bottom-right-radius: 4px;
+  align-self: flex-end;
+}
+
+/* El "Composer" (Donde se escribe) */
+.chat-composer-container {
+  padding: 20px;
+  background: white;
+  border-top: 1px solid #f3f4f6;
+}
+
+.chat-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 24px;
+  padding: 5px 15px;
+  transition: all 0.2s;
+}
+
+.chat-input-wrapper:focus-within {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.chat-input-wrapper textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 10px;
+  resize: none;
+  font-size: 15px;
+  outline: none;
+  min-height: 24px;
+  max-height: 120px;
+}
+
+.icon-button {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s, color 0.2s;
+}
+
+.icon-button:hover {
+  background: #f3f4f6;
+  color: #3b82f6;
+}
+
+.send-button {
+  background: #3b82f6;
+  color: white !important;
+}
+
+.send-button:hover {
+  background: #2563eb;
+}
+
+.powered-by {
+  font-size: 11px;
+  color: #9ca3af;
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+.powered-by span {
+  font-weight: bold;
+  color: #3b82f6;
 }

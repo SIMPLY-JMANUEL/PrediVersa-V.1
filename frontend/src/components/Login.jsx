@@ -21,7 +21,7 @@ function Login({ isOpen, onClose, onLoginSuccess }) {
     setLoading(true)
 
     try {
-      const baseUrl = 'http://localhost:5000'
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000'
       const response = await fetch(`${baseUrl}/api/auth/login`, {
         method: 'POST',
         headers: {
@@ -62,7 +62,7 @@ function Login({ isOpen, onClose, onLoginSuccess }) {
         setError(data.message || 'Error al iniciar sesión')
       }
     } catch (err) {
-      setError('Error de conexión. Asegúrate que el backend esté corriendo en http://localhost:5001')
+      setError('Error de conexión. Verifica que el servidor backend esté encendido.')
       console.error('Error:', err)
     } finally {
       setLoading(false)

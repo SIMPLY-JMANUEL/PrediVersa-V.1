@@ -83,9 +83,8 @@ PrediVersa-V.1/
 - **@vitejs/plugin-react** ^4.2.1 - Plugin para React
 
 ### Integraciones Externas
-- **Botpress** - Plataforma de chatbot con dos instancias:
-  - Pública (homepage): https://files.bpcontent.cloud/2026/02/01/22/20260201225345-6RFZIFLO.js
-  - Estudiante: https://files.bpcontent.cloud/2026/02/04/01/20260204011551-9Y10Y2F8.js
+- **Amazon Lex (En Migración)**: Plataforma de chatbot nativa de AWS para PrediVersa.
+- **Motor Versa**: Lógica de análisis de riesgo implementada en AWS Lambda.
 
 ---
 
@@ -231,16 +230,6 @@ const response = await fetch('http://localhost:5000/api/auth/login', {
 const data = await response.json()
 ```
 
-### Herramientas de Integración
-
-**1. Botpress - Script Injection**
-```javascript
-// frontend/src/components/Chatbot.jsx
-const script1 = document.createElement('script')
-script1.id = 'bp-inject-script-public'
-script1.src = 'https://cdn.botpress.cloud/webchat/v3.5/inject.js'
-script1.async = true
-document.body.appendChild(script1)
 
 const script2 = document.createElement('script')
 script2.id = 'bp-config-script-public'
@@ -624,7 +613,7 @@ npm start      # Ejecuta con node (no nodemon)
 ✅ Autenticación por email/password con JWT
 ✅ Tres tipos de dashboards según rol
 ✅ Rutas protegidas con verificación de rol
-✅ Chatbot Botpress integrado (público y para estudiantes)
+🚧 Chatbot en migración de Botpress a Amazon Lex
 ✅ Responsive design en todos los componentes
 ✅ LocalStorage para persistencia de sesión
 ✅ Logout con limpieza de datos
@@ -632,65 +621,19 @@ npm start      # Ejecuta con node (no nodemon)
 
 ---
 
-## 🤖 VERIFICACIÓN DE CHATBOTS - ESTADO FUNCIONAL
+---
 
-### ✅ AMBOS CHATBOTS TRABAJANDO CON NORMALIDAD
+## 🤖 MIGRACIÓN A AMAZON LEX - PLAN OPERATIVO
 
-**1. Chatbot Público (Homepage)**
-- **Ubicación**: Ruta "/" (página de inicio)
-- **Condición**: Se muestra cuando el usuario NO está autenticado
-- **Script Inyectado**:
-  - Inject: https://cdn.botpress.cloud/webchat/v3.5/inject.js
-  - Config: https://files.bpcontent.cloud/2026/02/01/22/20260201225345-6RFZIFLO.js
-- **ID Único**: `bp-inject-script-public` y `bp-config-script-public`
-- **Comportamiento**: Visible como burbuja flotante en homepage
-- **Limpieza**: Se elimina al hacer login o navegar a rutas protegidas
+El sistema de chatbot está siendo migrado desde Botpress hacia una solución nativa basada en **Amazon Lex v2** para mayor seguridad, control de datos y escalabilidad en **AWS**.
 
-**2. Chatbot Estudiante (Dashboard)**
-- **Ubicación**: Ruta "/student" (dashboard estudiante)
-- **Condición**: Se muestra SOLO si está autenticado Y en ruta /student
-- **Script Inyectado**:
-  - Inject: https://cdn.botpress.cloud/webchat/v3.5/inject.js
-  - Config: https://files.bpcontent.cloud/2026/02/04/01/20260204011551-9Y10Y2F8.js
-- **ID Único**: `bp-inject-script-student` y `bp-config-script-student`
-- **Comportamiento**: Visible como burbuja flotante en dashboard de estudiantes
-- **Limpieza**: Se elimina al hacer logout o navegar a otras rutas
-
-**3. Ocultamiento Automático**
-- ✅ Se oculta cuando modal de login está abierto (`isLoginOpen={true}`)
-- ✅ Se oculta cuando usuario navega a /admin o /collaborator
-- ✅ Se oculta cuando usuario intenta acceder a /student sin autenticación
-- ✅ Se limpia el DOM completamente para evitar conflictos
-
-**4. Sistema de Limpieza**
-```javascript
-removeBotpressElements() {
-  // Elimina contenedores Botpress
-  // Elimina widgets y burbujas
-  // Elimina iframes
-}
-
-removeBotpressScripts() {
-  // Elimina scripts por ID único
-  // Evita duplicación de instancias
-  // Previene conflictos entre chatbots
-}
-```
-
-**5. Lógica de Detección**
-- `useLocation()` - Detecta cambios de ruta
-- `isAuthenticated` - Valida si usuario está logueado
-- `isLoginOpen` - Detecta si modal de login está abierto
-- Dependencies: `[location.pathname, isAuthenticated, isLoginOpen]`
-
-**Conclusión**: Ambos chatbots están implementados correctamente con:
-- ✅ Inyección dinámica sin conflictos
-- ✅ IDs únicos por instancia
-- ✅ Visibilidad condicionada correcta
-- ✅ Limpieza de DOM al cambiar contextos
-- ✅ Compatible con sistema de rutas protegidas
+### Objetivos de la Migración:
+1. **Privacidad de Datos**: Mantener todas las conversaciones de los estudiantes dentro de la infraestructura de AWS.
+2. **Integración con Motor Versa**: Conectar directamente el chat con lógica de riesgo en AWS Lambda.
+3. **UI Nativa**: Reemplazar el widget externo por una ventana de chat integrada visualmente en el Dashboard de Estudiante.
 
 ---
+
 
 ## ⚠️ LIMITACIONES Y TODO
 
