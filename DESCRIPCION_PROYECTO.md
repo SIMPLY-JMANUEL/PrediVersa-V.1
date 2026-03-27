@@ -15,12 +15,13 @@ PrediVersa-V.1/
 │   │   ├── app.js             # Configuración de Express
 │   │   ├── server.js          # Punto de entrada del servidor
 │   │   ├── routes/
-│   │   │   └── auth.js        # Rutas de autenticación (login)
+│   │   │   └── auth.js        # Rutas de autenticación, usuarios y alertas
 │   │   ├── db/
-│   │   │   └── users.js       # Base de datos de usuarios (hardcoded)
-│   │   ├── controllers/       # (Vacío - para expansión futura)
-│   │   ├── middlewares/       # (Vacío - para expansión futura)
-│   │   └── services/          # (Vacío - para expansión futura)
+│   │   │   ├── connection.js  # Conexión a MySQL AWS RDS
+│   │   │   └── users.js       # CRUD de usuarios en MySQL
+│   │   └── database/
+│   │       ├── schema.sql     # Esquema de base de datos
+│   │       └── migrate_users.js  # Migración de columnas
 │   ├── .env                   # Configuración de entorno
 │   ├── package.json           # Dependencias del backend
 │   └── node_modules/          # Módulos instalados
@@ -55,6 +56,10 @@ PrediVersa-V.1/
     │       ├── CollaboratorDashboard.jsx  # Dashboard para colaboradores
     │       ├── CollaboratorDashboard.css
     │       ├── ProtectedRoute.jsx      # Componente para rutas protegidas
+    │       ├── UserManagement.jsx      # Gestión de usuarios
+    │       ├── UserManagement.css
+    │       ├── Reports.jsx             # Reportes
+    │       └── Reports.css
     │   ├── .env                # Configuración de entorno (VITE_API_URL)
     │   ├── vite.config.js      # Configuración de Vite
     │   ├── package.json        # Dependencias del frontend
@@ -83,8 +88,9 @@ PrediVersa-V.1/
 - **@vitejs/plugin-react** ^4.2.1 - Plugin para React
 
 ### Integraciones Externas
-- **Amazon Lex (En Migración)**: Plataforma de chatbot nativa de AWS para PrediVersa.
-- **Motor Versa**: Lógica de análisis de riesgo implementada en AWS Lambda.
+- **Botpress** - Plataforma de chatbot con dos instancias:
+  - Pública (homepage): https://files.bpcontent.cloud/2026/02/01/22/20260201225345-6RFZIFLO.js
+  - Estudiante: https://files.bpcontent.cloud/2026/02/04/01/20260204011551-9Y10Y2F8.js
 
 ---
 
@@ -230,6 +236,16 @@ const response = await fetch('http://localhost:5000/api/auth/login', {
 const data = await response.json()
 ```
 
+### Herramientas de Integración
+
+**1. Botpress - Script Injection**
+```javascript
+// frontend/src/components/Chatbot.jsx
+const script1 = document.createElement('script')
+script1.id = 'bp-inject-script-public'
+script1.src = 'https://cdn.botpress.cloud/webchat/v3.5/inject.js'
+script1.async = true
+document.body.appendChild(script1)
 
 const script2 = document.createElement('script')
 script2.id = 'bp-config-script-public'
@@ -515,6 +531,56 @@ Response (200):
 }
 ```
 
+### Usuarios (requiere JWT)
+```
+GET /api/auth/users
+GET /api/auth/users?documentId=123456  # Buscar por documento
+
+POST /api/auth/users
+Body:
+{
+  "documentId": "string",
+  "email": "string",
+  "password": "string",
+  "name": "string",
+  "role": "student|admin|collaborator",
+  "phone": "string",
+  "address": "string",
+  "birthDate": "string",
+  "edad": "number",
+  "lugarNacimiento": "string",
+  "nombrePadre": "string",
+  "nombreMadre": "string",
+  "grado": "string"
+}
+
+PUT /api/auth/users/:id
+DELETE /api/auth/users/:id
+```
+
+### Alertas (requiere JWT)
+```
+GET /api/auth/alerts
+
+POST /api/auth/alerts
+Body:
+{
+  "studentDocumentId": "string",
+  "studentName": "string",
+  "studentAge": "string",
+  "lugarNacimiento": "string",
+  "nombrePadre": "string",
+  "nombreMadre": "string",
+  "studentGrade": "string",
+  "studentUsername": "string",
+  "description": "string",
+  "status": "Pendiente|En Proceso|Resuelto"
+}
+
+PUT /api/auth/alerts/:id
+DELETE /api/auth/alerts/:id
+```
+
 ### Health Check
 ```
 GET /api/health
@@ -533,6 +599,10 @@ Response (200):
 PORT=5000
 NODE_ENV=development
 JWT_SECRET=tu_secreto_super_seguro_prediversa_123
+DB_HOST=prediversa-db.ce1qo0a0sygg.us-east-1.rds.amazonaws.com
+DB_USER=admin
+DB_PASSWORD=tu_password_mysql
+DB_DATABASE=PrediVersa
 ```
 
 ### Frontend (.env)
@@ -583,14 +653,46 @@ npm start      # Ejecuta con node (no nodemon)
 
 ## 📦 ESTRUCTURA DE DATOS
 
-### Usuario (Base de datos hardcoded)
+### Usuario (MySQL AWS RDS)
 ```javascript
 {
   id: number,
-  name: string,
+  documentId: string,
   email: string,
-  password: string,  // Sin encriptar (TODO: implementar bcrypt)
-  role: "student|admin|collaborator"
+  password: string (hash bcrypt),
+  name: string,
+  role: "student|admin|collaborator",
+  phone: string,
+  address: string,
+  birthDate: date,
+  edad: number,
+  lugarNacimiento: string,
+  nombrePadre: string,
+  nombreMadre: string,
+  grado: string,
+  status: "Activo|Inactivo",
+  createdAt: timestamp,
+  updatedAt: timestamp
+}
+```
+
+### Alerta (MySQL AWS RDS)
+```javascript
+{
+  id: number,
+  studentDocumentId: string,
+  studentName: string,
+  studentAge: string,
+  lugarNacimiento: string,
+  nombrePadre: string,
+  nombreMadre: string,
+  studentGrade: string,
+  studentUsername: string,
+  userId: number,
+  description: string,
+  status: "Pendiente|En Proceso|Resuelto",
+  createdAt: timestamp,
+  updatedAt: timestamp
 }
 ```
 
@@ -611,36 +713,92 @@ npm start      # Ejecuta con node (no nodemon)
 
 ✅ Página de inicio pública con hero section
 ✅ Autenticación por email/password con JWT
+✅ Base de datos MySQL AWS RDS
 ✅ Tres tipos de dashboards según rol
 ✅ Rutas protegidas con verificación de rol
-🚧 Chatbot en migración de Botpress a Amazon Lex
+✅ Chatbot Botpress integrado (público y para estudiantes)
 ✅ Responsive design en todos los componentes
 ✅ LocalStorage para persistencia de sesión
 ✅ Logout con limpieza de datos
 ✅ Health check del backend
 
----
+### AdminDashboard
+✅ CRUD completo de usuarios
+✅ CRUD completo de alertas
+✅ Autocompletado de datos del estudiante por documento
+✅ 4 pestañas: Alertas, Asignación, Acciones, Estado Proceso
+✅ Modal de detalles de usuario
+✅ Exportar usuarios a CSV
+✅ Actualizar estado de alertas (Pendiente → En Proceso → Resuelto)
 
 ---
 
-## 🤖 MIGRACIÓN A AMAZON LEX - PLAN OPERATIVO
+## 🤖 VERIFICACIÓN DE CHATBOTS - ESTADO FUNCIONAL
 
-El sistema de chatbot está siendo migrado desde Botpress hacia una solución nativa basada en **Amazon Lex v2** para mayor seguridad, control de datos y escalabilidad en **AWS**.
+### ✅ AMBOS CHATBOTS TRABAJANDO CON NORMALIDAD
 
-### Objetivos de la Migración:
-1. **Privacidad de Datos**: Mantener todas las conversaciones de los estudiantes dentro de la infraestructura de AWS.
-2. **Integración con Motor Versa**: Conectar directamente el chat con lógica de riesgo en AWS Lambda.
-3. **UI Nativa**: Reemplazar el widget externo por una ventana de chat integrada visualmente en el Dashboard de Estudiante.
+**1. Chatbot Público (Homepage)**
+- **Ubicación**: Ruta "/" (página de inicio)
+- **Condición**: Se muestra cuando el usuario NO está autenticado
+- **Script Inyectado**:
+  - Inject: https://cdn.botpress.cloud/webchat/v3.5/inject.js
+  - Config: https://files.bpcontent.cloud/2026/02/01/22/20260201225345-6RFZIFLO.js
+- **ID Único**: `bp-inject-script-public` y `bp-config-script-public`
+- **Comportamiento**: Visible como burbuja flotante en homepage
+- **Limpieza**: Se elimina al hacer login o navegar a rutas protegidas
+
+**2. Chatbot Estudiante (Dashboard)**
+- **Ubicación**: Ruta "/student" (dashboard estudiante)
+- **Condición**: Se muestra SOLO si está autenticado Y en ruta /student
+- **Script Inyectado**:
+  - Inject: https://cdn.botpress.cloud/webchat/v3.5/inject.js
+  - Config: https://files.bpcontent.cloud/2026/02/04/01/20260204011551-9Y10Y2F8.js
+- **ID Único**: `bp-inject-script-student` y `bp-config-script-student`
+- **Comportamiento**: Visible como burbuja flotante en dashboard de estudiantes
+- **Limpieza**: Se elimina al hacer logout o navegar a otras rutas
+
+**3. Ocultamiento Automático**
+- ✅ Se oculta cuando modal de login está abierto (`isLoginOpen={true}`)
+- ✅ Se oculta cuando usuario navega a /admin o /collaborator
+- ✅ Se oculta cuando usuario intenta acceder a /student sin autenticación
+- ✅ Se limpia el DOM completamente para evitar conflictos
+
+**4. Sistema de Limpieza**
+```javascript
+removeBotpressElements() {
+  // Elimina contenedores Botpress
+  // Elimina widgets y burbujas
+  // Elimina iframes
+}
+
+removeBotpressScripts() {
+  // Elimina scripts por ID único
+  // Evita duplicación de instancias
+  // Previene conflictos entre chatbots
+}
+```
+
+**5. Lógica de Detección**
+- `useLocation()` - Detecta cambios de ruta
+- `isAuthenticated` - Valida si usuario está logueado
+- `isLoginOpen` - Detecta si modal de login está abierto
+- Dependencies: `[location.pathname, isAuthenticated, isLoginOpen]`
+
+**Conclusión**: Ambos chatbots están implementados correctamente con:
+- ✅ Inyección dinámica sin conflictos
+- ✅ IDs únicos por instancia
+- ✅ Visibilidad condicionada correcta
+- ✅ Limpieza de DOM al cambiar contextos
+- ✅ Compatible con sistema de rutas protegidas
 
 ---
 
+## ⚠️ LIMITACIONES Y MEJORAS
 
-## ⚠️ LIMITACIONES Y TODO
-
-### 🔴 SEGURIDAD - CRÍTICO PARA PRODUCCIÓN
-
-- ❌ **Contraseñas almacenadas en texto plano** (backend/src/db/users.js)
-  - Necesita: Implementación de bcryptjs (ya disponible en package.json)
+### ✅ Implementado
+- Contraseñas hasheadas con bcryptjs
+- Base de datos MySQL AWS RDS
+- CRUD completo de usuarios y alertas
   - Acción: Hash de contraseñas en login y registro
   - Prioridad: ALTA
 

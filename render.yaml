@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: prediversa-api
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DB_HOST
+        value: "prediversa-db.ce1qo0a0sygg.us-east-1.rds.amazonaws.com"
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_DATABASE
+        value: "prediversa"
+      - key: DB_USER
+        value: "admin"
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_SSL
+        value: "true"
+      - key: BOTPRESS_SECRET
+        value: "prediversa_secret_2026"
+
+  - type: static
+    name: prediversa-frontend
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishDir: dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: prediversa-api
+          property: host
+

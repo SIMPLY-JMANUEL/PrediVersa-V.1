@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { apiFetch } from '../utils/api' // FIX A-1: Centralizar URL
 import './Login.css'
 
 function Login({ isOpen, onClose, onLoginSuccess }) {
@@ -21,23 +22,17 @@ function Login({ isOpen, onClose, onLoginSuccess }) {
     setLoading(true)
 
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000'
-      const response = await fetch(`${baseUrl}/api/auth/login`, {
+      const response = await apiFetch('/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ email, password })
       })
 
-      const data = await response.json()
+      const data = response;
 
       if (data.success) {
         // Guardar token y datos del usuario
         localStorage.setItem('token', data.token)
         localStorage.setItem('user', JSON.stringify(data.user))
-        
-        console.log('✓ Login exitoso:', data.user)
         
         // Notificar al App
         onLoginSuccess(data.user)
@@ -54,7 +49,7 @@ function Login({ isOpen, onClose, onLoginSuccess }) {
             navigate('/student')
           } else if (role === 'Administrador') {
             navigate('/admin')
-          } else if (role === 'Colaboradores') {
+          } else if (role === 'Colaborador' || role === 'Colaboradores') {
             navigate('/collaborator')
           }
         }, 500)
@@ -62,7 +57,7 @@ function Login({ isOpen, onClose, onLoginSuccess }) {
         setError(data.message || 'Error al iniciar sesión')
       }
     } catch (err) {
-      setError('Error de conexión. Verifica que el servidor backend esté encendido.')
+      setError('Error de conexión con el servidor. Por favor intenta de nuevo en unos segundos.')
       console.error('Error:', err)
     } finally {
       setLoading(false)
@@ -87,10 +82,10 @@ function Login({ isOpen, onClose, onLoginSuccess }) {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@email.com"
+              placeholder="tu_email@ejemplo.com"
               disabled={loading}
             />
-            <small>Prueba: estudiante@prediversa.com, admin@prediversa.com, colaborador@prediversa.com</small>
+            <small>Ingresa tu email registrado en el sistema</small>
           </div>
 
           <div className="form-group">
@@ -103,7 +98,7 @@ function Login({ isOpen, onClose, onLoginSuccess }) {
               placeholder="••••••••"
               disabled={loading}
             />
-            <small>Prueba: estudiante123, admin123, colaborador123</small>
+            <small>Ingresa tu contraseña registrada en el sistema</small>
           </div>
 
           {error && <p className="login-error">{error}</p>}

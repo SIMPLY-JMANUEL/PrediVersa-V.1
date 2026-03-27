@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import DashboardHeader from './DashboardHeader'
 import { UserCircle, Scale, Newspaper, ClipboardList, AlertTriangle, Info, MessageSquare } from 'lucide-react'
-import Chatbot from './Chatbot'
 import DenunciaFacil from './DenunciaFacil'
 import Normatividad from './Normatividad'
 import TestVersa from './TestVersa'
@@ -11,21 +10,7 @@ import './StudentDashboard.css'
 
 function StudentDashboard({ user, onLogout }) {
   const [activeMenu, setActiveMenu] = useState('chat')
-  const [photo, setPhoto] = useUserPhoto()
-  const [isUploading, setIsUploading] = useState(false)
-
-  const handlePhotoChange = async (e) => {
-    const file = e.target.files[0]
-    if (!file) return
-
-    setIsUploading(true)
-    const reader = new FileReader()
-    reader.onloadend = async () => {
-      await setPhoto(reader.result)
-      setIsUploading(false)
-    }
-    reader.readAsDataURL(file)
-  }
+  const [photo] = useUserPhoto()
 
   return (
     <div className="dashboard-wrapper profesional-theme">
@@ -45,19 +30,7 @@ function StudentDashboard({ user, onLogout }) {
                   </div>
                 )}
 
-                {isUploading && (
-                  <div style={{
-                    position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white',
-                    fontSize: '0.75rem', fontWeight: 'bold', borderRadius: '50%'
-                  }}>Cargando...</div>
-                )}
               </div>
-
-              <label className="photo-upload-btn">
-                <input type="file" onChange={handlePhotoChange} accept="image/*" hidden />
-                {photo ? 'Cambiar Foto' : 'Subir Foto'}
-              </label>
 
               <div className="profile-details">
                 <h3 className="user-name">{user?.name}</h3>
@@ -101,8 +74,22 @@ function StudentDashboard({ user, onLogout }) {
             
             <div className="dashboard-card mgmt-content">
               {activeMenu === 'chat' && (
-                <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', padding: '1rem 0' }}>
-                  <Chatbot user={user} isAuthenticated={true} />
+                <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem 0' }}>
+                  <div className="chatbot-beast-container">
+                    <iframe
+                      src={`https://cdn.botpress.cloud/webchat/v3.6/shareable.html?configUrl=https://files.bpcontent.cloud/2026/03/23/16/20260323162234-TS1HU82E.json`}
+                      width="100%"
+                      height="600"
+                      style={{ border: 'none', display: 'block' }}
+                      allow="microphone"
+                      title="Asistente Versa"
+                    />
+                  </div>
+                  
+                  <div className="chatbot-footer-hint">
+                    <div className="dot-online"></div>
+                    <span>Conexión Protegida — Motor Versa IA Activo</span>
+                  </div>
                 </div>
               )}
               

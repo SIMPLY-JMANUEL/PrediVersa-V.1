@@ -49,5 +49,14 @@ pnpm-lock.yaml
 
 # Python files (si aplica)
 __pycache__/
-*.py[cod]
 *$py.class
+
+# AI Assistant files
+.continue/
+.clinerules
+
+# Null/special files
+$null
+
+# Nested project directory
+PrediVersa-V.1-main/

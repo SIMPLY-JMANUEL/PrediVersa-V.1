@@ -1,130 +1,89 @@
-import { useState, useEffect, useRef } from 'react'
-import { LexRuntimeV2Client, RecognizeTextCommand } from "@aws-sdk/client-lex-runtime-v2"
+import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import './Chatbot.css'
 
-/**
- * PrediVersa Chatbot - Integrado en Dashboard
- * Conectado Nativamente a Amazon Lex V2
- */
-function Chatbot({ isAuthenticated, user }) {
-  const [messages, setMessages] = useState([
-    { id: 1, text: '¡Hola! Soy tu asistente de PrediVersa. ¿Cómo puedo ayudarte hoy?', type: 'bot' }
-  ])
-  const [inputValue, setInputValue] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [sessionId] = useState(`session-${Math.random().toString(36).substring(7)}`)
-  
-  const messagesEndRef = useRef(null)
+// ── Visibilidad del webchat ──
+function setBotpressVisibility(visible) {
+  if (window.botpress) {
+    window.botpress.sendEvent({ type: visible ? 'show' : 'hide' });
+  } else if (window.botpressWebChat) {
+    window.botpressWebChat.sendEvent({ type: visible ? 'show' : 'hide' });
+  }
+}
 
-  // Configuración de AWS Lex
-  const client = new LexRuntimeV2Client({
-    region: import.meta.env.VITE_AWS_REGION || 'us-east-1',
-    credentials: {
-      accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY_ID,
-      secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY,
-    },
-  })
+// ── Enviar datos del usuario logueado a Botpress ──
+function setBotpressUser(user) {
+  if (!user) return;
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  const userData = {
+    userId: String(user.id || user.documentId || 'anonimo'),
+    userName: user.name || 'Estudiante',
+    userEmail: user.email || '',
+    userRole: user.role || 'Estudiante',
+  };
 
-  if (!isAuthenticated) return null
+  // API Botpress v3.6
+  const trySet = () => {
+    if (window.botpress && window.botpress.setUser) {
+      window.botpress.setUser({
+        name: userData.userName,
+        email: userData.userEmail,
+        data: {
+          userId: userData.userId,
+          role: userData.userRole,
+        },
+      });
+      console.log('✅ Botpress: usuario configurado →', userData.userName);
+    } else if (window.botpressWebChat) {
+      // Fallback para versiones anteriores
+      window.botpressWebChat.sendEvent({
+        type: 'setUser',
+        user: userData,
+      });
+    }
+  };
 
-  const handleSend = async (e) => {
-    if (e) e.preventDefault()
-    if (!inputValue.trim() || loading) return
-
-    const userText = inputValue
-    setMessages(prev => [...prev, { id: Date.now(), text: userText, type: 'user' }])
-    setInputValue('')
-    setLoading(true)
-
-    try {
-      const command = new RecognizeTextCommand({
-        botId: import.meta.env.VITE_LEX_BOT_ID,
-        botAliasId: import.meta.env.VITE_LEX_BOT_ALIAS_ID,
-        localeId: import.meta.env.VITE_LEX_LOCALE_ID || "es_419",
-        sessionId: sessionId,
-        text: userText,
-      })
-
-      const response = await client.send(command)
-      
-      if (response.messages && response.messages.length > 0) {
-        response.messages.forEach((msg, index) => {
-          setMessages(prev => [...prev, { 
-            id: Date.now() + index + 1, 
-            text: msg.content, 
-            type: 'bot' 
-          }])
-        })
+  // Intentar inmediatamente o esperar a que el widget cargue
+  if (window.botpress || window.botpressWebChat) {
+    trySet();
+  } else {
+    const interval = setInterval(() => {
+      if (window.botpress || window.botpressWebChat) {
+        trySet();
+        clearInterval(interval);
       }
-    } catch (error) {
-      console.error("Error conectando con Lex:", error)
-      setMessages(prev => [...prev, { 
-        id: Date.now() + 1, 
-        text: "Hubo un problema de conexión con Amazon Lex. Verifica tus credenciales en el archivo .env.", 
-        type: 'bot' 
-      }])
-    } finally {
-      setLoading(false)
-    }
+    }, 500);
+    // Limpiar después de 10 segundos si no carga
+    setTimeout(() => clearInterval(interval), 10000);
   }
+}
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
+function Chatbot({ isAuthenticated, isLoginOpen, user }) {
+  const location = useLocation();
+
+  // Controlar visibilidad: Solo mostrar en Landing Page (/) y si no hay login abierto
+  useEffect(() => {
+    const isLanding = location.pathname === '/';
+    const shouldShow = isLanding && !isLoginOpen && !isAuthenticated;
+    
+    setBotpressVisibility(shouldShow);
+    
+    // Si no estamos en landing, intentamos forzar el ocultamiento 
+    // (algunas versiones de Botpress reactivan el botón solo)
+    if (!shouldShow) {
+      const interval = setInterval(() => setBotpressVisibility(false), 1000);
+      setTimeout(() => clearInterval(interval), 5000);
     }
-  }
+  }, [location.pathname, isAuthenticated, isLoginOpen]);
 
-  return (
-    <div className="chatbot-container-integrated">
-      <div className="chat-messages-area">
-        {messages.map((msg) => (
-          <div key={msg.id} className={`chat-bubble-wrapper ${msg.type === 'user' ? 'user-align' : 'bot-align'}`}>
-            <div className={`chat-bubble ${msg.type}`}>
-              {msg.text}
-            </div>
-          </div>
-        ))}
-        {loading && <div className="chat-bubble bot typing">Predi está procesando...</div>}
-        <div ref={messagesEndRef} />
-      </div>
+  // Pasar datos del usuario al bot cuando hay sesión
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      setBotpressUser(user);
+    }
+  }, [isAuthenticated, user]);
 
-      <div className="chat-composer">
-        <div className="composer-input-group">
-          <button className="composer-btn" title="Subir archivo">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 13v8"></path><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="m8 17 4-4 4 4"></path></svg>
-          </button>
-
-          <textarea 
-            placeholder="Escribe tu mensaje aquí..." 
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyPress}
-            disabled={loading}
-          />
-
-          <button className="composer-btn" title="Voz">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19v3"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><rect x="9" y="2" width="6" height="13" rx="3"></rect></svg>
-          </button>
-
-          <button 
-            className="composer-btn send-active" 
-            onClick={handleSend}
-            disabled={loading || !inputValue.trim()}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg>
-          </button>
-        </div>
-        <div className="composer-footer">
-          Asistente Inteligente de <span>PrediVersa</span>
-        </div>
-      </div>
-    </div>
-  )
+  return null;
 }
 
 export default Chatbot

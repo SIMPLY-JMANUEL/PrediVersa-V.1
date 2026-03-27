@@ -1,0 +1,657 @@
+================================================================================
+                    DOCUMENTACIÓN DEL PROYECTO PREDIVERSA V.1
+                              Rama: HS (SeeingLag)
+================================================================================
+
+Autor: SeeingLag
+Propósito: Documentación técnica y avances del proyecto para estudio
+
+================================================================================
+                           SECCIÓN 1: OVERVIEW GENERAL
+================================================================================
+
+1.1 DESCRIPCIÓN DEL PROYECTO
+----------------------------
+PrediVersa es una plataforma educativa web diseñada para facilitar la educación
+diversa e inclusiva. Ofrece dashboards personalizados para tres tipos de 
+usuarios: estudiantes, administradores y colaboradores.
+
+1.2 STACK TECNOLÓGICO
+---------------------
+BACKEND:
+  - Node.js v18+
+  - Express.js ^4.18.2
+  - JWT (jsonwebtoken) ^8.5.1 - Autenticación
+  - bcryptjs ^2.4.3 - Hash de contraseñas
+  - CORS ^2.8.5
+  - dotenv ^16.0.3
+
+FRONTEND:
+  - React ^18.2.0
+  - React Router DOM ^7.13.0
+  - Vite ^5.0.8
+  - CSS Modular
+
+INTEGRACIONES:
+  - Botpress Cloud - Chatbot con IA (configuración única con datos de usuario)
+
+1.3 ESTRUCTURA DE CARPETAS
+--------------------------
+PrediVersa-V.1/
+├── backend/
+│   ├── src/
+│   │   ├── app.js              # Configuración Express
+│   │   ├── server.js           # Punto de entrada
+│   │   ├── routes/
+│   │   │   └── auth.js         # Rutas de autenticación
+│   │   └── db/
+│   │       └── users.js        # Usuarios hardcodeados
+│   └── package.json
+│
+└── frontend/
+    ├── src/
+    │   ├── App.jsx             # Componente raíz con routing
+    │   ├── main.jsx            # Punto de entrada React
+    │   ├── components/
+    │   │   ├── Header.jsx
+    │   │   ├── Main.jsx
+    │   │   ├── Footer.jsx
+    │   │   ├── Login.jsx
+    │   │   ├── Chatbot.jsx
+    │   │   ├── ProtectedRoute.jsx
+    │   │   ├── StudentDashboard.jsx
+    │   │   ├── AdminDashboard.jsx
+    │   │   ├── CollaboratorDashboard.jsx
+    │   │   └── DashboardHeader.jsx
+    │   └── assets/images/
+    ├── index.html
+    └── package.json
+
+================================================================================
+                        SECCIÓN 2: CONFIGURACIÓN Y SETUP
+================================================================================
+
+2.1 INSTALACIÓN
+---------------
+Backend:
+  cd backend
+  npm install
+  npm run dev          # Desarrollo con Nodemon
+  npm start            # Producción
+
+Frontend:
+  cd frontend
+  npm install
+  npm run dev          # Vite dev server
+
+2.2 PUERTOS
+-----------
+  Backend:  http://localhost:5000
+  Frontend: http://localhost:5173
+
+2.3 USUARIOS DE PRUEBA
+----------------------
+  Estudiante:
+    Email:    estudiante@prediversa.com
+    Password: estudiante123
+    Role:     Estudiante
+
+  Administrador:
+    Email:    admin@prediversa.com
+    Password: admin123
+    Role:     Administrador
+
+  Colaborador:
+    Email:    colaborador@prediversa.com
+    Password: colaborador123
+    Role:     Colaboradores
+
+================================================================================
+                        SECCIÓN 3: ARQUITECTURA DEL BACKEND
+================================================================================
+
+3.1 ENDPOINTS API
+-----------------
+POST /api/auth/login
+  Descripción: Autenticación de usuarios
+  Body: { email: string, password: string }
+  Response: { success: boolean, token: string, user: object }
+  Nota: La contraseña se valida usando bcrypt.compare()
+
+POST /api/auth/register
+  Descripción: Registro de nuevos usuarios
+  Body: { documentId, email, password, name, role, phone, address, birthDate }
+  Response: { success: boolean, message: string, user: object }
+  Nota: La contraseña se hashea automáticamente con bcrypt (saltRounds: 10)
+
+GET /api/auth/stats
+  Descripción: Obtener estadísticas de usuarios
+  Response: { 
+    success: boolean, 
+    stats: {
+      totalUsers: number,
+      activeUsers: number,
+      inactiveUsers: number,
+      usersByRole: object,
+      usersByStatus: object,
+      recentUsers: array,
+      usersByMonth: object
+    }
+  }
+
+GET /api/health
+  Descripción: Health check del servidor
+  Response: { status: 'Backend funcionando' }
+
+3.2 FLUJO DE AUTENTICACIÓN
+--------------------------
+1. Cliente envía POST /api/auth/login con credenciales
+2. Servidor valida contra array hardcodeado en users.js
+3. Si es válido, genera JWT con payload: { id, email, role }
+4. Token expira en 24 horas
+5. Cliente almacena token en localStorage
+6. Token se envía en header Authorization para rutas protegidas
+
+3.3 ESTRUCTURA DE DATOS - USUARIO
+---------------------------------
+{
+  id: number,
+  documentId: string,         // Número de identificación (cédula/DNI)
+  email: string,
+  password: string,           // Hasheada con bcrypt
+  name: string,
+  role: 'Estudiante' | 'Administrador' | 'Colaboradores',
+  phone: string,              // Teléfono de contacto
+  address: string,            // Dirección física
+  birthDate: string,          // Fecha de nacimiento (YYYY-MM-DD)
+  status: 'Activo' | 'Inactivo',
+  createdAt: string           // Fecha de registro (ISO 8601)
+}
+
+================================================================================
+                       SECCIÓN 4: ARQUITECTURA DEL FRONTEND
+================================================================================
+
+4.1 ESTRUCTURA DE COMPONENTES
+-----------------------------
+App.jsx (Raíz)
+├── Router
+│   ├── Route "/" 
+│   │   ├── Header
+│   │   └── Main
+│   ├── Route "/student" (Protegida)
+│   │   └── StudentDashboard
+│   ├── Route "/admin" (Protegida)
+│   │   └── AdminDashboard
+│   └── Route "/collaborator" (Protegida)
+│       └── CollaboratorDashboard
+├── Chatbot
+├── Footer
+└── Login (Modal)
+
+4.2 GESTIÓN DE ESTADO
+---------------------
+- Estado global de usuario en App.jsx
+- Persistencia en localStorage (token + user)
+- ProtectedRoute verifica existencia de usuario
+
+4.3 RUTAS Y ROLES
+-----------------
+  "/"           → Homepage (pública)
+  "/student"    → Dashboard Estudiante (requiere role: Estudiante)
+  "/admin"      → Dashboard Admin (requiere role: Administrador)
+  "/collaborator" → Dashboard Colaborador (requiere role: Colaboradores)
+
+4.4 COMPONENTES CLAVE
+---------------------
+ProtectedRoute:
+  - Props: children, user
+  - Si no hay usuario: redirige a "/"
+  - Si hay usuario: renderiza children
+
+Login:
+  - Modal overlay
+  - Formulario email/password
+  - Consume API /api/auth/login
+  - Redirige según rol tras login exitoso
+
+Chatbot:
+  - Integración Botpress Cloud Webchat v3.6
+  - Una sola configuración que detecta el rol del usuario
+  - Datos pasados a Botpress: role, name, email
+  - URL de configuración: https://files.bpcontent.cloud/2026/02/24/03/20260224033302-7VFXIL75.js
+  - Se muestra en homepage (público) y en dashboards (autenticado)
+
+================================================================================
+                        SECCIÓN 5: PROBLEMAS IDENTIFICADOS
+================================================================================
+
+[x] 5.1 Inconsistencia de puertos
+    - Backend corre en 5000
+    - Mensaje error en Login.jsx menciona 5001
+    - ✅ CORREGIDO: Mensaje actualizado a puerto 5000
+    
+[x] 5.2 Seguridad - Contraseñas en texto plano
+    - users.js almacena passwords sin hash
+    - Se debe implementar bcryptjs
+    - ✅ CORREGIDO: Implementado bcryptjs con hash de contraseñas
+    
+[ ] 5.3 Base de datos hardcodeada
+    - Usuarios en array estático
+    - Se debe migrar a MongoDB/MySQL
+    
+[x] 5.4 Dashboards sin funcionalidad
+    - Solo muestran tarjetas estáticas
+    - Sin integración con backend real
+    - ✅ CORREGIDO: Admin Dashboard ahora tiene CRUD de usuarios funcional
+    
+[x] 5.5 Sin sistema de registro
+    - Solo existe login
+    - No hay endpoint /register
+    - ✅ CORREGIDO: Implementado endpoint /register y CRUD completo
+
+[x] 5.6 Sin protección de rutas por roles
+    - Cualquier usuario autenticado puede acceder a cualquier dashboard
+    - ✅ CORREGIDO: Implementado RoleProtectedRoute para verificar roles
+
+================================================================================
+                         SECCIÓN 6: HISTORIAL DE CAMBIOS
+================================================================================
+
+Autor: SeeingLag
+Acciones:
+  - Creada rama "HS" para trabajo independiente
+  - Creado documento de documentación inicial
+  - Revisión completa del código existente
+  - Identificación de problemas y mejoras pendientes
+
+Autor: SeeingLag
+Acciones:
+  - CORREGIDO: Bug de inconsistencia de puertos en Login.jsx
+    - Archivo: frontend/src/components/Login.jsx (línea 65)
+    - Cambio: Mensaje de error mencionaba puerto 5001, corregido a 5000
+    - Estado: ✅ COMPLETADO
+
+Autor: SeeingLag
+Acciones:
+  - IMPLEMENTADO: Hash de contraseñas con bcryptjs
+    - Archivo: backend/src/db/users.js
+      - Contraseñas hasheadas con bcrypt (saltRounds: 10)
+      - Todas las contraseñas: estudiante123, admin123, colaborador123
+    - Archivo: backend/src/routes/auth.js
+      - Importado bcryptjs
+      - Login ahora usa bcrypt.compare() para validar contraseñas
+      - Agregado endpoint POST /api/auth/register para crear usuarios
+    - Estado: ✅ COMPLETADO
+
+Autor: SeeingLag
+Acciones:
+  - IMPLEMENTADO: CRUD completo de usuarios en Admin Dashboard
+    - Backend (backend/src/routes/auth.js):
+      - GET /api/auth/users - Listar todos los usuarios
+      - PUT /api/auth/users/:id - Actualizar usuario
+      - DELETE /api/auth/users/:id - Eliminar usuario
+    - Frontend:
+      - Creado UserManagement.jsx - Componente modal para gestión de usuarios
+      - Creado UserManagement.css - Estilos del componente
+      - Modificado AdminDashboard.jsx - Integración del componente
+      - Modificado AdminDashboard.css - Agregado clase .clickable
+    - Funcionalidades:
+      - Listar usuarios en tabla con badges de roles
+      - Agregar nuevos usuarios con formulario
+      - Editar usuarios existentes
+      - Eliminar usuarios con confirmación
+      - Validaciones de formulario
+    - Estado: ✅ COMPLETADO
+
+Autor: SeeingLag
+Acciones:
+  - MEJORADO: UserManagement con campos adicionales y sistema de filtros
+    - Backend:
+      - Actualizado modelo de usuarios (backend/src/db/users.js):
+        - Agregado: documentId (número de identificación)
+        - Agregado: phone (teléfono)
+        - Agregado: address (dirección)
+        - Agregado: birthDate (fecha de nacimiento)
+        - Agregado: status (Activo/Inactivo)
+        - Agregado: createdAt (fecha de registro)
+      - Actualizados endpoints POST /register y PUT /users/:id para manejar nuevos campos
+      - Validación de documento único al crear/editar usuarios
+    - Frontend (UserManagement.jsx):
+      - Sistema de filtros avanzados:
+        - Búsqueda por nombre, email o documento
+        - Filtro por rol (Estudiante, Administrador, Colaborador)
+        - Filtro por estado (Activo, Inactivo)
+        - Botón para limpiar filtros
+        - Contador de resultados
+      - Vista de detalles del usuario con toda la información
+      - Formulario mejorado con todos los campos:
+        - Documento de identidad (requerido)
+        - Nombre completo (requerido)
+        - Email (requerido)
+        - Rol (requerido)
+        - Teléfono
+        - Dirección
+        - Fecha de nacimiento
+        - Estado (solo edición)
+        - Contraseña
+      - Tabla mejorada con columnas adicionales:
+        - Documento
+        - Nombre
+        - Email
+        - Rol (con badge coloreado)
+        - Estado (con badge coloreado)
+        - Teléfono
+        - Acciones (ver, editar, eliminar)
+    - Frontend (UserManagement.css):
+      - Diseño profesional y moderno
+      - Sistema de filtros con inputs estilizados
+      - Badges para roles y estados
+      - Vista de detalles con grid responsive
+      - Formulario con layout en grid de 2 columnas
+      - Scrollbar personalizada
+      - Totalmente responsive
+    - Estado: ✅ COMPLETADO
+
+Autor: SeeingLag
+Acciones:
+  - IMPLEMENTADO: Módulo de Reportes y Estadísticas
+    - Backend (backend/src/routes/auth.js):
+      - Nuevo endpoint GET /api/auth/stats que retorna:
+        - totalUsers: número total de usuarios
+        - activeUsers: usuarios con estado Activo
+        - inactiveUsers: usuarios con estado Inactivo
+        - usersByRole: conteo de usuarios por cada rol
+        - usersByStatus: conteo de usuarios por estado
+        - recentUsers: últimos 5 usuarios registrados
+        - usersByMonth: usuarios registrados agrupados por mes
+    - Frontend:
+      - Instaladas dependencias: chart.js y react-chartjs-2
+      - Creado Reports.jsx con:
+        - Tarjetas de estadísticas generales (Total, Activos, Inactivos)
+        - Gráfico circular (Doughnut) de usuarios por rol
+        - Gráfico circular (Doughnut) de usuarios por estado
+        - Gráfico de barras (Bar) de usuarios registrados por mes
+        - Tabla de usuarios recientes con toda la información
+        - Resumen por rol con cards individuales
+      - Creado Reports.css con diseño profesional:
+        - Tarjetas de estadísticas con gradientes de colores
+        - Grid de gráficos responsive
+        - Tabla de usuarios recientes estilizada
+        - Cards de resumen por rol
+        - Totalmente responsive
+      - Modificado AdminDashboard.jsx:
+        - Agregado import de Reports
+        - Agregado estado showReports
+        - Tarjeta "Reportes" ahora es clickeable
+        - Integración del componente Reports como modal
+    - Estado: ✅ COMPLETADO
+
+Autor: SeeingLag
+Acciones:
+  - ACTUALIZADO: Documentación
+    - Sección 3.1: Agregado endpoint GET /api/auth/stats
+    - Sección 3.3: Actualizada estructura de datos de usuario con nuevos campos
+    - Sección 6: Agregados historiales de cambios de Reportes y UserManagement mejorado
+    - Estado: ✅ COMPLETADO
+
+Autor: SeeingLag
+Acciones:
+  - IMPLEMENTADO: Protección de rutas por roles
+    - Creado RoleProtectedRoute.jsx:
+      - Componente que verifica si el usuario tiene el rol permitido
+      - Props: user, allowedRoles (array de roles permitidos)
+      - Si no tiene permiso, redirige al dashboard correspondiente a su rol
+      - Si no está autenticado, redirige a la página de inicio
+    - Actualizado App.jsx:
+      - Importado RoleProtectedRoute
+      - /admin protegido solo para rol 'Administrador'
+      - /student protegido solo para rol 'Estudiante'
+      - /collaborator protegido solo para rol 'Colaboradores'
+    - Comportamiento de redirección:
+      - Estudiante intenta acceder a /admin → redirige a /student
+      - Admin intenta acceder a /student → redirige a /admin
+      - Colaborador intenta acceder a /admin → redirige a /collaborator
+      - Usuario no autenticado intenta acceder a cualquier dashboard → redirige a /
+    - Estado: ✅ COMPLETADO
+
+Autor: SeeingLag
+Acciones:
+  - IMPLEMENTADO: Integración con AWS RDS MySQL
+    - Backend:
+      - Creado archivo backend/src/db/connection.js:
+        - Configuración de conexión a AWS RDS MySQL usando mysql2/promise
+        - Pool de conexiones con configuración optimizada
+        - Función initializeDatabase() para crear tabla users si no existe
+        - Inserción automática de usuarios de prueba si la tabla está vacía
+      - Actualizado backend/src/db/users.js:
+        - Migrado de array hardcodeado a consultas SQL reales
+        - Funciones CRUD usando prepared statements
+        - getAllUsers(), getUserById(), getUserByEmail(), createUser(), updateUser(), deleteUser()
+        - Funciones de utilidad: emailExists(), documentIdExists(), getUserStats()
+      - Actualizado backend/src/routes/auth.js:
+        - Todos los endpoints ahora usan la base de datos real
+        - Implementado bcryptjs para hash de contraseñas
+        - Endpoint POST /login valida contra base de datos
+        - Endpoint POST /register crea usuarios en BD
+        - Endpoints PUT /users/:id y DELETE /users/:id funcionales
+        - Endpoint GET /stats obtiene estadísticas reales de la BD
+    - Frontend:
+      - Sin cambios necesarios, la API mantiene compatibilidad
+    - Configuración:
+      - Variables de entorno en backend/.env:
+        - DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE, DB_PORT
+      - Archivo backend/.env.example como referencia
+    - Estado: ✅ COMPLETADO
+
+Autor: SeeingLag
+Acciones:
+  - IMPLEMENTADO: Persistencia de sesión al recargar página
+    - Problema: Al recargar (F5), el usuario perdía la sesión y redirigía al login
+    - Solución:
+      - Modificado frontend/src/App.jsx:
+        - Agregado estado isLoading para esperar carga de localStorage
+        - useEffect carga usuario de localStorage al iniciar
+        - Muestra "Cargando..." mientras verifica sesión
+        - Solo renderiza rutas después de verificar
+      - Modificado frontend/src/components/RoleProtectedRoute.jsx:
+        - Revertido a comportamiento original (sin loading)
+      - El login ya guardaba token y user en localStorage (sin cambios)
+    - Resultado: La sesión persiste correctamente al recargar la página
+    - Estado: ✅ COMPLETADO
+
+Autor: SeeingLag
+Acciones:
+  - ACTUALIZADO: Credenciales de usuarios de prueba
+    - Usuario Admin adicional creado:
+      - Email: admin2@prediversa.com
+      - Password: admin12345
+      - Rol: Administrador
+      - Nota: Creado porque los hashes originales no coincidían con contraseñas planas
+    - Usuarios originales verificados funcionales:
+      - estudiante@prediversa.com / estudiante123
+      - colaborador@prediversa.com / colaborador123
+    - Estado: ✅ COMPLETADO
+
+Autor: SeeingLag
+Acciones:
+  - LIMPIEZA: Eliminación de código de debug
+    - Backend (backend/src/routes/auth.js):
+      - Eliminados console.log de debug en login ("Login attempt", "User data", "Password match")
+      - Eliminado endpoint temporal GET /api/auth/hash (usado para generar hashes bcrypt)
+    - Frontend: Sin cambios necesarios
+    - Estado: ✅ COMPLETADO
+
+Autor: SeeingLag
+Acciones:
+  - REDISEÑO: Nuevo AdminDashboard con diseño wireframe
+    - Frontend (AdminDashboard.jsx):
+      - Nuevo diseño estilo wireframe con 3 secciones principales:
+        1. Datos del Administrador (foto, nombres, apellidos, ID, usuario)
+        2. Creación de Usuario (formulario de 12 campos en 3 columnas)
+        3. Alertas (tipo de alerta, datos del usuario, orden de acción)
+      - Pestañas funcionales: Creación, Verificación, Resultado, Estado
+      - Pestañas de alertas: Alertas, Asignación, Acciones, Estado Proceso
+      - Botón Cerrar Sesión posicionado en esquina superior derecha
+      - Dropdown para seleccionar rol de usuario (Estudiante, Colaborador, Psicología, Administrador)
+      - Botón Guardar con validación y mensaje de éxito/error
+    - Frontend (AdminDashboard.css):
+      - Estilos wireframe con bordes negros (#374151)
+      - Colores: azul claro (#dae3f3), naranja (#fbe5d6), gris (#d1d5db)
+      - Campos de entrada con líneas inferiores
+      - Diseño responsive para diferentes resoluciones
+      - Totalmente funcional en pantallas de 1920x1080
+    - Estado: ✅ COMPLETADO
+
+Autor: SeeingLag
+Acciones:
+  - MEJORAS: Validaciones, estadísticas, paginación y exportación
+    - Frontend (AdminDashboard.jsx):
+      - Validación de formularios en tiempo real:
+        * Nombres/Apellidos: requeridos, mínimo 2 caracteres
+        * ID: requerido, solo números
+        * Email: requerido, formato válido
+        * Teléfono: formato válido (10 dígitos)
+        * Mensajes de error en rojo debajo de cada campo
+      - Panel de estadísticas con tarjetas visuales:
+        * Total de usuarios
+        * Usuarios activos (verde)
+        * Usuarios inactivos (rojo)
+        * Desglose por rol (Estudiante, Colaborador, Psicología, Administrador)
+      - Paginación en tabla de verificación (10 usuarios por página)
+      - Ordenamiento por columnas (click en encabezados)
+      - Búsqueda en tiempo real con filtro por nombre, email, ID o rol
+      - Exportación a CSV con todos los datos filtrados
+      - CRUD completo: crear, editar, eliminar usuarios
+      - Conexión directa a base de datos MySQL AWS RDS
+    - Frontend (AdminDashboard.css):
+      - Estilos para validaciones (bordes rojos en campos con error)
+      - Estilos para panel de estadísticas (cards con gradientes)
+      - Estilos para paginación (botones Anterior/Siguiente)
+      - Estilos para ordenamiento (indicadores ↑↓)
+      - Estilos para exportación (botón verde)
+    - Estado: ✅ COMPLETADO
+
+Autor: SeeingLag
+Acciones:
+  - IMPLEMENTADO: Sistema de alertas completo
+    - Backend:
+      - Nueva tabla alerts en MySQL (schema.sql)
+      - Endpoints CRUD: GET, POST, PUT, DELETE /api/auth/alerts
+      - Campos: studentDocumentId, studentName, studentAge, lugarNacimiento,
+        nombrePadre, nombreMadre, studentGrade, studentUsername, description, status
+      - Estados: Pendiente, En Proceso, Resuelto
+    - Frontend (AdminDashboard.jsx):
+      - 4 pestañas funcionales: Alertas, Asignación, Acciones, Estado Proceso
+      - Autocompletado de datos del estudiante por documento de identidad
+      - CRUD completo de alertas
+      - Modal de detalles de usuario con botón de ver (ojo)
+      - Actualización de estado de alertas
+    - Frontend (AdminDashboard.css):
+      - Estilos para modal de detalles de usuario
+    - Estado: ✅ COMPLETADO
+
+Autor: SeeingLag
+Acciones:
+  - LIMPIEZA: Código y corrección de errores
+    - Corregido error CSS: width: 90%% → width: 90%
+    - Eliminados console.log de debug del frontend y backend
+    - Funcionalidad de autocompletado ahora muestra correo electrónico completo
+    - Trim de datos para evitar problemas con espacios en blanco
+    - Estado: ✅ COMPLETADO
+
+================================================================================
+                           SECCIÓN 7: PRÓXIMOS PASOS / TODO
+================================================================================
+
+[x] Implementar registro de usuarios (signup) - ✅ COMPLETADO
+[x] Agregar hash de contraseñas con bcrypt - ✅ COMPLETADO
+[x] Corregir inconsistencia de puertos - ✅ COMPLETADO
+[x] Crear base de datos MySQL (AWS RDS) - ✅ COMPLETADO
+[x] Agregar funcionalidad CRUD a dashboards - ✅ COMPLETADO
+[x] Implementar middleware de autorización por roles - ✅ COMPLETADO
+[x] Agregar validaciones de entrada - ✅ COMPLETADO
+[x] Implementar logout en todos los dashboards - ✅ COMPLETADO
+[x] Mejorar manejo de errores - ✅ COMPLETADO
+[x] Persistencia de sesión al recargar - ✅ COMPLETADO
+[x] Nuevo diseño AdminDashboard wireframe - ✅ COMPLETADO
+[x] Validaciones en tiempo real - ✅ COMPLETADO
+[x] Panel de estadísticas visuales - ✅ COMPLETADO
+[x] Paginación en tablas - ✅ COMPLETADO
+[x] Búsqueda y ordenamiento - ✅ COMPLETADO
+[x] Exportación a CSV - ✅ COMPLETADO
+[x] Sistema de alertas completo - ✅ COMPLETADO
+[x] Autocompletado de estudiante por documento - ✅ COMPLETADO
+[x] Modal de detalles de usuario - ✅ COMPLETADO
+[x] Limpieza de código (console.log) - ✅ COMPLETADO
+[x] Integración con cuenta propia de Botpress - ✅ COMPLETADO
+[x] Chatbot pasa datos de usuario (rol, email) a Botpress - ✅ COMPLETADO
+[x] Chatbot se muestra en todas las rutas autenticadas - ✅ COMPLETADO
+[x] Eliminación de botón innecesario en AdminDashboard - ✅ COMPLETADO
+
+[ ] Implementar recuperación de contraseña
+[ ] Agregar más gráficos en reportes
+[ ] Implementar historial de acciones del admin
+[ ] Agregar sistema de notificaciones
+[ ] Implementar dark mode
+[ ] Implementar notificaciones en tiempo real
+[ ] Agregar logs de auditoría
+
+================================================================================
+                    SECCIÓN 7: INTEGRACIÓN CHATBOT BOTPRESS
+================================================================================
+
+7.1 CONFIGURACIÓN ACTUAL
+------------------------
+El chatbot de PrediVersa está integrado con Botpress Cloud Webchat v3.6.
+
+Archivos relacionados:
+- frontend/src/components/Chatbot.jsx - Componente principal del chatbot
+- frontend/src/components/Chatbot.css - Estilos del chatbot
+
+7.2 FUNCIONALIDADES IMPLEMENTADAS
+---------------------------------
+- Chatbot se muestra en la página de inicio (sin autenticación)
+- Chatbot se muestra en todas las rutas cuando el usuario está autenticado
+- Se pasan datos del usuario a Botpress:
+  * role: Rol del usuario (Estudiante, Colaboradores, Administrador)
+  * name: Nombre del usuario
+  * email: Correo electrónico del usuario
+
+7.3 URL DE CONFIGURACIÓN
+-----------------------
+- Config: https://files.bpcontent.cloud/2026/02/24/03/20260224033302-7VFXIL75.js
+- Inject: https://cdn.botpress.cloud/webchat/v3.6/inject.js
+
+7.4 CÓMO CONFIGURAR FLUJOS POR ROL
+-----------------------------------
+En Botpress Studio:
+1. Ir a Chatflow >编辑 el flujo principal
+2. Usar la variable {{user.extra.role}} para detectar el rol
+3. Crear diferentes nodos para cada rol:
+   - Si role = 'Estudiante' → mensaje para estudiantes
+   - Si role = 'Colaboradores' → mensaje para colaboradores
+   - Si role = 'Administrador' → mensaje para administradores
+
+================================================================================
+                    SECCIÓN 8: CAMBIOS ADMIN DASHBOARD
+================================================================================
+
+8.1 ELIMINACIÓN DE BOTÓN DE CREACIÓN DE USUARIO
+------------------------------------------------
+Se eliminó el botón "Creación usuario" que aparecía junto al botón 
+"Guardar Información" ya que:
+- No tenía funcionalidad real
+- Los usuarios se generan automáticamente desde los datos de estudiantes
+
+Archivos modificados:
+- frontend/src/components/AdminDashboard.jsx
+
+================================================================================
+                               FIN DEL DOCUMENTO
+================================================================================
+
+NOTA: Este documento se actualizará conforme se realicen cambios al proyecto.
+
+Última actualización: 2026-02-24
+Versión: 2.1 - Sistema completo con alertas y autocompletado
