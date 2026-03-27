@@ -11,7 +11,21 @@ import './StudentDashboard.css'
 
 function StudentDashboard({ user, onLogout }) {
   const [activeMenu, setActiveMenu] = useState('chat')
-  const [photo] = useUserPhoto()
+  const [photo, setPhoto] = useUserPhoto()
+  const [isUploading, setIsUploading] = useState(false)
+
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    setIsUploading(true)
+    const reader = new FileReader()
+    reader.onloadend = async () => {
+      await setPhoto(reader.result)
+      setIsUploading(false)
+    }
+    reader.readAsDataURL(file)
+  }
 
   return (
     <div className="dashboard-wrapper profesional-theme">
@@ -31,7 +45,19 @@ function StudentDashboard({ user, onLogout }) {
                   </div>
                 )}
 
+                {isUploading && (
+                  <div style={{
+                    position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white',
+                    fontSize: '0.75rem', fontWeight: 'bold', borderRadius: '50%'
+                  }}>Cargando...</div>
+                )}
               </div>
+
+              <label className="photo-upload-btn">
+                <input type="file" onChange={handlePhotoChange} accept="image/*" hidden />
+                {photo ? 'Cambiar Foto' : 'Subir Foto'}
+              </label>
 
               <div className="profile-details">
                 <h3 className="user-name">{user?.name}</h3>
