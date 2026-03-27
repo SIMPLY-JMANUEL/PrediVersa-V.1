@@ -1,5 +1,6 @@
-Subir Foto// AWS RDS MySQL Database Configuration
+// AWS RDS MySQL Database Configuration
 const mysql = require('mysql2/promise');
+const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 // --- BLINDAJE DE SEGURIDAD: VALIDACIÓN DE VARIABLES ---
@@ -239,8 +240,20 @@ const initializeDatabase = async () => {
 
     console.log('✅ Tabla case_actions verificada/creada');
 
-    // Estructura de base de datos verificada.
-    console.log('✅ Estructura de base de datos lista. (Iniciado en Modo Limpio)');
+    // 🚀 SEMILLA AUTOMÁTICA: Asegurar que existe al menos un Administrador
+    const [adminCheck] = await connection.execute("SELECT id FROM users WHERE role = 'Administrador' LIMIT 1");
+    if (adminCheck.length === 0) {
+      console.log('🛠️ Base de datos vacía o sin Admin. Creando usuario inicial...');
+      const adminHashed = await bcrypt.hash('admin123', 10);
+      await connection.execute(
+        `INSERT INTO users (documentId, email, password, name, role, status) 
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        ['ADMIN-001', 'admin@prediversa.com', adminHashed, 'Administrador Inicial', 'Administrador', 'Activo']
+      );
+      console.log('✅ Admin creado: admin@prediversa.com / admin123');
+    }
+
+    console.log('✅ Estructura de base de datos lista. (Iniciado en Modo Seguro)');
 
     connection.release();
     return true;

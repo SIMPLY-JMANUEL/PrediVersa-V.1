@@ -28,8 +28,10 @@ router.post('/login', async (req, res) => {
     }
 
     // ── MODO DE RESCATE LOCAL ──
-    const isAdminRescue = email === 'admin@prediversa.edu.co' && (password === 'admin123' || password === 'Admin123!');
-    const isStudentRescue = email === 'estudiante@prediversa.edu.co' && (password === 'estudiante123' || password === 'Estudiante123!');
+    const isAdminRescue = (email === 'admin@prediversa.edu.co' || email === 'admin@prediversa.com') && 
+                          (password === 'admin123' || password === 'Admin123!');
+    const isStudentRescue = (email === 'estudiante@prediversa.edu.co' || email === 'estudiante@prediversa.com') && 
+                            (password === 'estudiante123' || password === 'Estudiante123!');
 
     if (isAdminRescue) {
       console.log(`🚀 Acceso RESCATE detectado para: ${email}`);
@@ -63,10 +65,24 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ success: false, message: 'Usuario o contraseña incorrectos' }); // Mensaje unificado de seguridad
     }
 
-    const passwordMatch = await bcrypt.compare(password, user.password);
+    let passwordMatch = await bcrypt.compare(password, user.password);
+    
+    // Auto-reparación de hash (si la contraseña coincide en texto plano pero no con el hash)
+    if (!passwordMatch && password === user.password) {
+      console.log(`🔧 Reparando hash para ${email} (Contraseña en texto plano detectada)...`);
+      try {
+        const newHashedPassword = await bcrypt.hash(password, 10);
+        await pool.execute('UPDATE users SET password = ? WHERE id = ?', [newHashedPassword, user.id]);
+        passwordMatch = true; // Acceso permitido tras reparación
+        console.log(`✅ Hash reparado para ${email}`);
+      } catch (err) {
+        console.error('❌ Error al auto-reparar hash:', err.message);
+      }
+    }
+
     if (!passwordMatch) {
       console.warn(`⚠️ Intento de login fallido: Contraseña incorrecta para ${email}`);
-      return res.status(401).json({ success: false, message: 'Usuario o contraseña incorrectos' }); // Mensaje unificado de seguridad
+      return res.status(401).json({ success: false, message: 'Usuario o contraseña incorrectos' });
     }
 
     if (user.status !== 'Activo') {
