@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
 import Main from './components/Main'
 import Footer from './components/Footer'
-import Chatbot from './components/Chatbot'
 import Login from './components/Login'
 import StudentDashboard from './components/StudentDashboard'
 import AdminDashboard from './components/AdminDashboard'
@@ -36,7 +35,6 @@ function AppRoutes({ user, isLoginOpen, setIsLoginOpen, handleLogin, handleLogou
           </ProtectedRoute>
         } />
       </Routes>
-      <Chatbot isAuthenticated={!!user} isLoginOpen={isLoginOpen} />
       <Footer />
       <Login 
         isOpen={isLoginOpen} 

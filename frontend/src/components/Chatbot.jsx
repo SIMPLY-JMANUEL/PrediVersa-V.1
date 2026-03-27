@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
-import { useLocation } from 'react-router-dom'
 import { LexRuntimeV2Client, RecognizeTextCommand } from "@aws-sdk/client-lex-runtime-v2"
 import './Chatbot.css'
 
 /**
- * PrediVersa Chatbot - Diseño "Composer" (Inspirado en el diseño solicitado)
- * Conectado Nativamente a Amazon Lex V2 bajo el Bot ID: DERGWSU1C8
+ * PrediVersa Chatbot - Integrado en Dashboard
+ * Conectado Nativamente a Amazon Lex V2
  */
-function Chatbot({ isAuthenticated, isLoginOpen, user }) {
+function Chatbot({ isAuthenticated, user }) {
   const [messages, setMessages] = useState([
     { id: 1, text: '¡Hola! Soy tu asistente de PrediVersa. ¿Cómo puedo ayudarte hoy?', type: 'bot' }
   ])
@@ -16,7 +15,6 @@ function Chatbot({ isAuthenticated, isLoginOpen, user }) {
   const [sessionId] = useState(`session-${Math.random().toString(36).substring(7)}`)
   
   const messagesEndRef = useRef(null)
-  const location = useLocation()
 
   // Configuración de AWS Lex
   const client = new LexRuntimeV2Client({
@@ -31,9 +29,7 @@ function Chatbot({ isAuthenticated, isLoginOpen, user }) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // Lógica de visibilidad exclusiva para el Dashboard del Estudiante
-  const isStudentRoute = location.pathname === '/student'
-  if (!isStudentRoute || !isAuthenticated || isLoginOpen) return null
+  if (!isAuthenticated) return null
 
   const handleSend = async (e) => {
     if (e) e.preventDefault()
@@ -68,7 +64,7 @@ function Chatbot({ isAuthenticated, isLoginOpen, user }) {
       console.error("Error conectando con Lex:", error)
       setMessages(prev => [...prev, { 
         id: Date.now() + 1, 
-        text: "Hubo un problema de conexión. Inténtalo de nuevo.", 
+        text: "Hubo un problema de conexión con Amazon Lex. Verifica tus credenciales en el archivo .env.", 
         type: 'bot' 
       }])
     } finally {
@@ -84,31 +80,23 @@ function Chatbot({ isAuthenticated, isLoginOpen, user }) {
   }
 
   return (
-    <div className="chatbot-wrapper bpContainer">
-      {/* Cabecera del Bot Container */}
-      <div className="flex flex-col items-center gap-4 !mb-4 _container_1juhe_2">
-        <span className="text-xl font-bold mt-4" style={{ color: '#3b82f6' }}>Mi Amigo Predi</span>
-      </div>
-
-      <div className="chat-messages">
+    <div className="chatbot-container-integrated">
+      <div className="chat-messages-area">
         {messages.map((msg) => (
-          <div key={msg.id} className={`message ${msg.type}`}>
-            {msg.text}
+          <div key={msg.id} className={`chat-bubble-wrapper ${msg.type === 'user' ? 'user-align' : 'bot-align'}`}>
+            <div className={`chat-bubble ${msg.type}`}>
+              {msg.text}
+            </div>
           </div>
         ))}
-        {loading && <div className="message bot italic">Predi está respondiendo...</div>}
+        {loading && <div className="chat-bubble bot typing">Predi está procesando...</div>}
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="chat-composer-container">
-        <div className="chat-input-wrapper">
-          {/* Botón de subida (Icono de clip de tu código) */}
-          <button className="icon-button" title="Subir archivo">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-cloud-upload">
-              <path d="M12 13v8"></path>
-              <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path>
-              <path d="m8 17 4-4 4 4"></path>
-            </svg>
+      <div className="chat-composer">
+        <div className="composer-input-group">
+          <button className="composer-btn" title="Subir archivo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 13v8"></path><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="m8 17 4-4 4 4"></path></svg>
           </button>
 
           <textarea 
@@ -119,28 +107,21 @@ function Chatbot({ isAuthenticated, isLoginOpen, user }) {
             disabled={loading}
           />
 
-          {/* Botón de micrófono de tu código */}
-          <button className="icon-button" title="Mensaje de voz">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mic">
-              <path d="M12 19v3"></path>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-              <rect x="9" y="2" width="6" height="13" rx="3"></rect>
-            </svg>
+          <button className="composer-btn" title="Voz">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19v3"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><rect x="9" y="2" width="6" height="13" rx="3"></rect></svg>
           </button>
 
-          {/* Botón de enviar flecha arriba de tu código */}
           <button 
-            className="icon-button send-button" 
+            className="composer-btn send-active" 
             onClick={handleSend}
-            disabled={loading}
+            disabled={loading || !inputValue.trim()}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-up">
-              <path d="m5 12 7-7 7 7"></path>
-              <path d="M12 19V5"></path>
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg>
           </button>
         </div>
-        <p className="powered-by">Chat Interactivo con Inteligencia Artificial de <span>PrediVersa</span></p>
+        <div className="composer-footer">
+          Asistente Inteligente de <span>PrediVersa</span>
+        </div>
       </div>
     </div>
   )
