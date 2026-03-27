@@ -20,7 +20,8 @@ async function sendToLex(userId, text, sessionState = {}) {
       botId: process.env.LEX_BOT_ID || 'DERGWSU1C8',
       botAliasId: process.env.LEX_BOT_ALIAS_ID || 'XVK50SN8KY',
       localeId: process.env.LEX_LOCALE_ID || 'es_US',
-      sessionId: String(userId).substring(0, 100), 
+      // Lex V2 sessionId pattern: [a-zA-Z0-9._-]+ 
+      sessionId: String(userId).replace(/[^a-zA-Z0-9._-]/g, '_').substring(0, 100), 
       text: text,
       sessionState: sessionState
     };
@@ -38,7 +39,11 @@ async function sendToLex(userId, text, sessionState = {}) {
     };
 
   } catch (error) {
-    console.error('❌ Error comunicando con Amazon Lex:', error.message);
+    console.error('❌ Error comunicando con Amazon Lex:', {
+      mensaje: error.message,
+      codigo: error.name || error.$metadata?.httpStatusCode,
+      requestId: error.$metadata?.requestId
+    });
     throw error;
   }
 }
