@@ -4,7 +4,7 @@ import './AmazonLexChat.css'
 
 function AmazonLexChat({ user }) {
   const [messages, setMessages] = useState([
-    { id: 1, text: `Hola ${user?.name || 'Estudiante'}, soy Lex, tu asistente de PrediVersa. ¿En qué puedo apoyarte hoy?`, sender: 'bot' }
+    { id: 1, text: `Hola ${user?.name || 'Estudiante'}, soy tu Asistente Versa. ¿En qué puedo apoyarte hoy?`, sender: 'bot' }
   ])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
@@ -41,6 +41,12 @@ function AmazonLexChat({ user }) {
         })
       })
 
+      // Blindaje: Verificar si el servidor respondió con JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("El servidor no respondió con JSON. Revisa la ruta.");
+      }
+
       const data = await response.json()
       
       if (data.success) {
@@ -53,10 +59,10 @@ function AmazonLexChat({ user }) {
         throw new Error(data.message)
       }
     } catch (error) {
-      console.error('Error Lex:', error)
+      console.error('Error Lex/Versa:', error)
       setMessages(prev => [...prev, { 
         id: Date.now() + 2, 
-        text: 'Lo siento, tuve un problema de conexión. Por favor intenta de nuevo en unos momentos.', 
+        text: 'Servicio en mantenimiento. El Asistente Versa está actualizando sus sistemas. Por favor intenta en unos minutos. 🛡️', 
         sender: 'bot' 
       }])
     } finally {
@@ -69,8 +75,8 @@ function AmazonLexChat({ user }) {
       <div className="lex-chat-header">
         <Bot size={24} />
         <div>
-          <h4 style={{ margin: 0 }}>Amazon Lex Assistant</h4>
-          <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>PrediVersa RiskBot V1 (ID: DERGWSU1C8)</span>
+          <h4 style={{ margin: 0 }}>PrediVersa Assistant</h4>
+          <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Apoyo Pedagógico y Bienestar IA</span>
         </div>
       </div>
 
@@ -89,7 +95,7 @@ function AmazonLexChat({ user }) {
         {isTyping && (
           <div className="lex-typing">
             <Loader2 size={16} className="animate-spin" style={{ display: 'inline', marginRight: '5px' }} />
-            Lex está analizando tu mensaje...
+            Versa está analizando tu mensaje...
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -99,7 +105,7 @@ function AmazonLexChat({ user }) {
         <input 
           type="text" 
           className="lex-input" 
-          placeholder="Escribe tu mensaje aquí..."
+          placeholder="Escribe aquí tu consulta..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           disabled={isTyping}
