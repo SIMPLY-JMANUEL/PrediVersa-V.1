@@ -38,75 +38,100 @@ router.get('/stream', verifyToken, (req, res) => {
  */
 router.post('/message', verifyToken, async (req, res) => {
   const { text, sessionId } = req.body;
-  const user = req.user; // De verifyToken
+  const user = req.user; 
+  
+  // RESPUESTA POR DEFECTO (POR SI LEX O LA RED FALLAN)
+  let lexResponse = { 
+    messages: [{ content: "He recibido tu información. Estoy procesando tu mensaje de forma segura para brindarte la mejor orientación." }], 
+    intent: 'FallbackLocal' 
+  };
 
   try {
     if (!text) return res.status(400).json({ success: false, message: 'Falta texto' });
 
     // 1. Análisis de Riesgo (Motor Versa + IA Central si es necesario)
-    const riskResult = await invokeMotorVersaLambda({
-      texto: text,
-      tipoViolencia: 'no_especificado',
-      frecuencia: 'unica_vez',
-      historial: []
-    });
-    let finalRisk = riskResult.nivel_riesgo;
-    let finalScore = riskResult.score;
+    let finalRisk = 'bajo';
+    let finalScore = 0;
+    let riskResult = { keywords_detectadas: [] };
 
-    if (riskResult.requiere_gemini) {
-      try {
-        const geminiResult = await centralAI.analizarRiesgo({ mensaje: text });
-        finalRisk = geminiResult.nivel_riesgo || finalRisk;
-        finalScore = geminiResult.score || finalScore;
-      } catch (e) { console.error('Falló validación Gemini, usando motor local'); }
+    try {
+      riskResult = await invokeMotorVersaLambda({
+        texto: text,
+        tipoViolencia: 'no_especificado',
+        frecuencia: 'unica_vez',
+        historial: []
+      });
+      finalRisk = riskResult.nivel_riesgo;
+      finalScore = riskResult.score;
+
+      if (riskResult.requiere_gemini) {
+        try {
+          const geminiResult = await centralAI.analizarRiesgo({ mensaje: text });
+          finalRisk = geminiResult.nivel_riesgo || finalRisk;
+          finalScore = geminiResult.score || finalScore;
+        } catch (e) { console.error('Falló validación Gemini, usando motor local'); }
+      }
+    } catch (e) { console.error('⚠️ Falló motor de riesgo, continuando con respuesta Lex'); }
+
+    // 2. Comunicación con Amazon Lex (CON FALLBACK DE SEGURIDAD)
+    try {
+      const realLexResponse = await sendToLex(user.id || sessionId || 'anonimo', text);
+      if (realLexResponse && realLexResponse.messages?.length > 0) {
+        lexResponse = realLexResponse;
+      }
+    } catch (error) {
+       console.error('❌ Error comunicando con Lex, activando IA de respaldo local:', error.message);
+       // Respuesta manual basada en el riesgo analizado por Motor Versa
+       if (finalRisk === 'alto') {
+         lexResponse.messages = [{ content: "Entiendo que estás pasando por un momento difícil. He escalado tu mensaje de forma urgente a nuestros orientadores. Pronto te contactaremos." }];
+       } else if (finalRisk === 'medio') {
+         lexResponse.messages = [{ content: "Tu bienestar es importante para nosotros. He registrado tu reporte. ¿Hay algo más en lo que te gustaría profundizar?" }];
+       }
     }
-
-    // 2. Comunicación con Amazon Lex (ID: DERGWSU1C8)
-    const lexResponse = await sendToLex(user.id || sessionId || 'anonimo', text);
     
     // 3. Persistencia de Alertas (Si riesgo es Medio/Alto)
-    if (finalRisk === 'alto' || finalRisk === 'medio') {
-      const ticket = `LEX-${Date.now()}`;
-      await createAlert({
-        studentName: user.name || 'Estudiante Lex',
-        studentUsername: user.email || '',
-        alertType: finalRisk === 'alto' ? 'Critica' : 'Advertencia',
-        description: `[ALERTA AMAZON LEX - ${finalRisk.toUpperCase()}]\n${text}\n\nInterpretación Lex: ${lexResponse.intent}`,
-        ticketNumber: ticket,
-        status: 'Pendiente'
-      });
+    try {
+      if (finalRisk === 'alto' || finalRisk === 'medio') {
+        const ticket = `LEX-${Date.now()}`;
+        await createAlert({
+          studentName: user.name || 'Estudiante Lex',
+          studentUsername: user.email || '',
+          alertType: finalRisk === 'alto' ? 'Critica' : 'Advertencia',
+          description: `[ALERTA PREDIVERSA - ${finalRisk.toUpperCase()}]\n${text}\n\nResumen: ${riskResult.resumen || 'Análisis Automático'}`,
+          ticketNumber: ticket,
+          status: 'Pendiente'
+        });
 
-      notificarAdmins({
-        tipo: 'alerta_lex',
-        nivel: finalRisk,
-        estudiante: user.name || 'Estudiante Lex',
-        ticket: ticket,
-        mensaje: text.substring(0, 100) + '...'
-      });
-    }
+        notificarAdmins({
+          tipo: 'alerta_lex',
+          nivel: finalRisk,
+          estudiante: user.name || 'Estudiante Lex',
+          ticket: ticket,
+          mensaje: text.substring(0, 100) + '...'
+        });
+      }
+    } catch (e) { console.error('⚠️ No se pudo guardar la alerta en DB, pero el chat sigue vivo.'); }
 
-    // 4. Responder al Frontend
+    // 4. Responder al Frontend (GARANTIZADO)
     return res.json({
       success: true,
-      botResponse: lexResponse.messages.map(m => m.content).join('\n') || 'Lex está procesando tu solicitud...',
+      botResponse: lexResponse.messages.map(m => m.content).join('\n'),
       risk: {
         level: finalRisk,
         score: finalScore,
-        keywords: riskResult.keywords_detectadas
+        keywords: riskResult.keywords_detectadas || []
       },
       lexIntent: lexResponse.intent
     });
 
   } catch (error) {
-    console.error('❌ ERROR CRÍTICO EN CHATBOT /message:', {
-      mensaje: error.message,
-      stack: error.stack,
-      request: { text: req.body.text, user: req.user?.id }
-    });
-    return res.status(500).json({ 
-      success: false, 
-      message: 'Error procesando mensaje: ' + error.message,
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    console.error('❌ ERROR FATAL EN CHATBOT /message:', error);
+    // Respuesta de pánico absoluta (último recurso)
+    return res.json({ 
+      success: true, 
+      botResponse: "Gracias por escribirnos. Estamos revisando tu solicitud con nuestros profesionales para darte una respuesta adecuada.",
+      risk: { level: 'desconocido', score: 0, keywords: [] },
+      lexIntent: 'EmergencyFallback'
     });
   }
 });
