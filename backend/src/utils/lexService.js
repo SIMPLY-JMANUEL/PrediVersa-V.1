@@ -23,8 +23,8 @@ async function sendToLex(userId, text, sessionState = {}) {
   const client = getLexClient();
   try {
     const params = {
-      botId: process.env.LEX_BOT_ID || 'DERGWSU1C8',
-      botAliasId: process.env.LEX_BOT_ALIAS_ID || 'XVK50SN8KY',
+      botId: process.env.LEX_BOT_ID || 'PXVK50SN8KY',
+      botAliasId: process.env.LEX_BOT_ALIAS_ID || 'TSTALIASID',
       localeId: process.env.LEX_LOCALE_ID || 'es_US',
       // Lex V2 sessionId pattern: [a-zA-Z0-9._-]+ 
       sessionId: String(userId).replace(/[^a-zA-Z0-9._-]/g, '_').substring(0, 100), 
