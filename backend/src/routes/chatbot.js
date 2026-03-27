@@ -102,7 +102,7 @@ router.post('/message', verifyToken, async (req, res) => {
  * 🔍 DIAGNÓSTICO: /api/chatbot/check
  * Verifica que las variables de AWS estén cargadas sin exponer secretos.
  */
-router.get('/check', verifyToken, (req, res) => {
+router.get('/check', (req, res) => {
     const required = ['AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'LEX_BOT_ID', 'LEX_BOT_ALIAS_ID'];
     const status = required.reduce((acc, v) => {
         acc[v] = process.env[v] ? '✅ CARGADA' : '❌ FALTANTE';

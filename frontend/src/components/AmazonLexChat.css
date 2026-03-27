@@ -1,44 +1,56 @@
 .lex-chat-container {
   width: 100%;
-  height: 600px;
+  height: 560px; /* Altura optimizada para laptops */
+  max-height: 70vh; /* Se adapta a pantallas pequeñas */
   display: flex;
   flex-direction: column;
   background: #ffffff;
   border-radius: 16px;
   border: 1px solid #e2e8f0;
   overflow: hidden;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.08); /* Sombra más sutil */
   animation: animate-fade-in 0.5s ease-out;
 }
 
 .lex-chat-header {
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1.5rem; /* Reducido para más espacio visual */
   background: linear-gradient(135deg, #0c4a6e 0%, #075985 100%);
   color: white;
   display: flex;
   align-items: center;
   gap: 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 10;
 }
 
 .lex-chat-messages {
   flex: 1;
-  padding: 1.5rem;
+  padding: 1.25rem;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  background: #f8fafc; /* Color de fondo institucional */
+  gap: 1rem;
+  background: #f8fafc;
+  scroll-behavior: smooth; /* Movimiento suave */
+}
+
+/* Scrollbar personalizada para que no estorbe visualmente */
+.lex-chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+.lex-chat-messages::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 10px;
 }
 
 .lex-message {
-  max-width: 85%;
-  padding: 0.85rem 1.1rem;
+  max-width: 82%;
+  padding: 0.75rem 1rem;
   border-radius: 14px;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   line-height: 1.5;
   position: relative;
-  animation: slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .lex-message.bot {
@@ -47,21 +59,20 @@
   color: #334155;
   border: 1px solid #e2e8f0;
   border-bottom-left-radius: 4px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
 .lex-message.user {
   align-self: flex-end;
-  background: #0ea5e9; /* Azul PrediVersa */
+  background: #0ea5e9;
   color: white;
   border-bottom-right-radius: 4px;
-  box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.3);
+  box-shadow: 0 4px 10px -2px rgba(14, 165, 233, 0.25);
 }
 
 .lex-chat-input-area {
-  padding: 1.25rem;
+  padding: 1rem 1.25rem; 
   background: white;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #f1f5f9;
   display: flex;
   gap: 0.75rem;
   align-items: center;
@@ -69,26 +80,27 @@
 
 .lex-input {
   flex: 1;
-  padding: 0.85rem 1.25rem;
+  padding: 0.7rem 1.1rem;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   outline: none;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-  background: #f1f5f9;
+  font-size: 0.88rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #f8fafc;
 }
 
 .lex-input:focus {
   background: #fff;
   border-color: #0ea5e9;
-  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.08);
+  transform: translateY(-1px); /* Efecto de "ajuste" al escribir */
 }
 
 .lex-send-btn {
   background: #0c4a6e;
   color: white;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
   border: none;
   display: flex;
@@ -96,37 +108,29 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 6px -1px rgba(12, 74, 110, 0.2);
 }
 
-.lex-send-btn:hover {
+.lex-send-btn:hover:not(:disabled) {
   background: #0ea5e9;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.4);
-}
-
-.lex-send-btn:disabled {
-  background: #94a3b8;
-  cursor: not-allowed;
-  transform: none;
+  transform: scale(1.05);
 }
 
 .lex-typing {
-  font-size: 0.75rem;
-  color: #64748b;
-  margin-top: -5px;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-top: -8px;
   display: flex;
   align-items: center;
   gap: 6px;
-  font-weight: 500;
+  padding-left: 2px;
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(15px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes animate-fade-in {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
 }

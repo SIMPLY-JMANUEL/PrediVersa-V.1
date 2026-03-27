@@ -108,6 +108,7 @@ function AmazonLexChat({ user }) {
           placeholder="Escribe aquí tu consulta..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onFocus={scrollToBottom}
           disabled={isTyping}
         />
         <button type="submit" className="lex-send-btn" disabled={isTyping}>
