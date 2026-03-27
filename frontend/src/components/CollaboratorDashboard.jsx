@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 import { useUserPhoto } from '../hooks/useUserPhoto'
 import { useCaseTracking } from '../hooks/useCaseTracking'
-import { BASE_URL } from '../utils/api'
+import { apiFetch } from '../utils/api'
 import './CollaboratorDashboard.css'
 
 function CollaboratorDashboard({ user, onLogout }) {
@@ -25,27 +25,26 @@ function CollaboratorDashboard({ user, onLogout }) {
   const [notifVersa, setNotifVersa] = useState([])
   const [notifVisible, setNotifVisible] = useState(false)
 
-  const fetchAssignedAlerts = async () => {
-    setLoadingAlerts(true)
-    try {
-      const res = await fetch(`${BASE_URL}/api/alerts`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
-      const data = await res.json()
-      if (data.success) {
-        // Validación estricta: Solamente mostrar casos expresamente asignados a este colaborador por el Administrador.
-        const myAlerts = data.alerts.filter(a => 
-          a.assignedTo && a.assignedTo.toLowerCase().trim() === user?.name?.toLowerCase().trim() // FIX C-1: trim() para robustez
-        )
-        setAssignedAlerts(myAlerts)
-      }
-    } catch (e) { console.error(e) }
-    finally { setLoadingAlerts(false) }
-  }
+    const fetchAssignedAlerts = async () => {
+      setLoadingAlerts(true)
+      try {
+        const data = await apiFetch(`/api/alerts`);
+        if (data.success) {
+          // Validación estricta: Solamente mostrar casos asignados a este colaborador.
+          const myAlerts = data.alerts.filter(a => 
+            a.assignedTo && a.assignedTo.toLowerCase().trim() === user?.name?.toLowerCase().trim()
+          )
+          setAssignedAlerts(myAlerts)
+        }
+      } catch (e) { console.error(e) }
+      finally { setLoadingAlerts(false) }
+    }
 
-  useEffect(() => {
-    fetchAssignedAlerts()
-    const source = new EventSource(`${BASE_URL}/api/chatbot/stream?token=${token}`)
+    useEffect(() => {
+      fetchAssignedAlerts()
+      const token = localStorage.getItem('token');
+      const api_url = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const source = new EventSource(`${api_url}/api/chatbot/stream?token=${token}`)
     source.onmessage = (e) => {
       try {
         const data = JSON.parse(e.data)

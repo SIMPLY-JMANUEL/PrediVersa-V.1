@@ -10,11 +10,18 @@ const app = express();
 
 // Middlewares
 const corsOptions = {
-  origin: [
-    'https://main.d1mk14qcde817a.amplifyapp.com', // Amplify Production
-    'http://localhost:5173', // Vite Local
-    'http://localhost:3000'
-  ],
+  origin: (origin, callback) => {
+    const allowedPatterns = [
+      /https:\/\/.*\.amplifyapp\.com$/, 
+      /https:\/\/.*\.awsapprunner\.com$/,
+      /http:\/\/localhost:\d+$/
+    ];
+    if (!origin || allowedPatterns.some(pattern => pattern.test(origin))) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-botpress-token'],
   credentials: true

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BASE_URL } from '../utils/api';
+import { apiFetch, BASE_URL } from '../utils/api';
 
 export const useAlerts = (token) => {
   const [alerts, setAlerts] = useState([]);
@@ -10,15 +10,7 @@ export const useAlerts = (token) => {
   const fetchAlerts = async () => {
     setLoadingAlerts(true);
     try {
-      const response = await fetch(`${BASE_URL}/api/alerts`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      // FIX E-3: detectar sesión expirada globalmente
-      if (response.status === 401) {
-        window.dispatchEvent(new Event('auth:expired'));
-        return;
-      }
-      const data = await response.json();
+      const data = await apiFetch('/api/alerts');
       if (data.success) setAlerts(data.alerts);
     } catch (error) {
       console.error('Error fetching alerts:', error);
