@@ -47,6 +47,14 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'Backend funcionando' });
 });
 
+// 404 Handler - Siempre devolver JSON
+app.use((req, res) => {
+  res.status(404).json({ 
+    success: false, 
+    message: `La ruta ${req.originalUrl} no existe en este servidor.` 
+  });
+});
+
 // Manejo global de errores (al final)
 app.use((err, req, res, next) => {
   console.error('❌ Error API:', err.message, err.stack);

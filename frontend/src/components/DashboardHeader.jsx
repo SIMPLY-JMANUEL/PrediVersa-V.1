@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Settings, X, Sun, Moon, Monitor, Camera, UserCircle, LogOut, Check } from 'lucide-react'
 import { useUserPhoto } from '../hooks/useUserPhoto'
+import logo from '../assets/images/logo-prediversa.png'
 import './DashboardHeader.css'
 
 const THEMES = [
@@ -74,7 +75,7 @@ function DashboardHeader({ user, onLogout }) {
   return (
     <header className="dashboard-header">
       <div className="dashboard-header-content">
-        <img src="/src/assets/images/logo-prediversa.png" alt="Logo PrediVersa" className="dashboard-logo" />
+        <img src={logo} alt="Logo PrediVersa" className="dashboard-logo" />
 
         <div className="header-actions" ref={panelRef}>
           {/* Botón de Configuración */}
