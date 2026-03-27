@@ -541,12 +541,20 @@ const getAlertStats = async () => {
       return acc;
     }, {});
     
+    // Alertas por mes (Tendencia) - NUEVO PARA ANALÍTICA PREDICTIVA
+    const [trendResults] = await pool.execute(
+      `SELECT DATE_FORMAT(createdAt, '%Y-%m') as month, COUNT(*) as count 
+       FROM alerts GROUP BY month ORDER BY month DESC LIMIT 6`
+    );
+    const alertsTrend = trendResults.reverse(); 
+
     return {
       totalAlerts,
       pendingAlerts,
       resolvedAlerts,
       alertsByType,
-      alertsByStatus
+      alertsByStatus,
+      alertsTrend
     };
   } catch (error) {
     console.error('❌ Error al obtener estadísticas de alertas:', error.message);

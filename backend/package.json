@@ -11,7 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@aws-sdk/client-lex-runtime-v2": "^3.1018.0",
+    "@aws-sdk/client-lambda": "^3.1019.0",
+    "@aws-sdk/client-lex-runtime-v2": "latest",
     "@google/generative-ai": "^0.24.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

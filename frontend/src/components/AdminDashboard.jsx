@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import DashboardHeader from './DashboardHeader'
-import { FileSpreadsheet, Users, Bell, Settings } from 'lucide-react'
+import { FileSpreadsheet, Users, Bell, Settings, BarChart3 } from 'lucide-react'
 import ExcelUploader from './ExcelUploader'
+import AnalyticsDashboard from './admin/AnalyticsDashboard'
 import { useUserPhoto } from '../hooks/useUserPhoto'
 import { useUsers } from '../hooks/useUsers'
 import { useAlerts } from '../hooks/useAlerts'
@@ -41,7 +42,8 @@ function AdminDashboard({ user, onLogout }) {
     fetchUsers, currentPage, setCurrentPage, filteredUsers 
   } = useUsers(token)
   const { 
-    alerts, loadingAlerts, notifVersa, setNotifVersa, notifVisible, setNotifVisible, fetchAlerts 
+    alerts, loadingAlerts, notifVersa, setNotifVersa, notifVisible, setNotifVisible, fetchAlerts,
+    alertStats, fetchAlertStats
   } = useAlerts(token)
 
   const [activeTab, setActiveTab] = useState('usuarios')
@@ -249,6 +251,7 @@ function AdminDashboard({ user, onLogout }) {
               {[
                 { id: 'usuarios', label: 'Usuarios', icon: <Users size={18} /> },
                 { id: 'alertas', label: 'Centro de Alertas', icon: <Bell size={18} /> },
+                { id: 'analitica', label: 'Inteligencia', icon: <BarChart3 size={18} /> },
                 { id: 'configuracion', label: 'Estructura', icon: <Settings size={18} /> }
               ].map(tab => (
                 <button 
@@ -317,6 +320,12 @@ function AdminDashboard({ user, onLogout }) {
                       token={token}
                     />
                   )}
+                </div>
+              )}
+
+              {activeTab === 'analitica' && (
+                <div className="animate-fade-in">
+                  <AnalyticsDashboard stats={alertStats} />
                 </div>
               )}
               

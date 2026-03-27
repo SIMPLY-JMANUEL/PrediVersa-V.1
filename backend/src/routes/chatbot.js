@@ -2,7 +2,7 @@ const express = require('express');
 const { verifyToken } = require('../middleware/auth');
 const router = express.Router();
 const { query } = require('../db/connection');
-const { analyzeText } = require('../utils/motorVersa');
+const { invokeMotorVersaLambda } = require('../utils/lambdaService');
 const { createAlert } = require('../db/users');
 const centralAI = require('../utils/centralAIService');
 const { sendToLex } = require('../utils/lexService');
@@ -44,7 +44,12 @@ router.post('/message', verifyToken, async (req, res) => {
     if (!text) return res.status(400).json({ success: false, message: 'Falta texto' });
 
     // 1. Análisis de Riesgo (Motor Versa + IA Central si es necesario)
-    const riskResult = analyzeText(text, 'no_especificado', 'unica_vez', []);
+    const riskResult = await invokeMotorVersaLambda({
+      texto: text,
+      tipoViolencia: 'no_especificado',
+      frecuencia: 'unica_vez',
+      historial: []
+    });
     let finalRisk = riskResult.nivel_riesgo;
     let finalScore = riskResult.score;
 

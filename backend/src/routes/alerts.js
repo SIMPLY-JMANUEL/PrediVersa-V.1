@@ -13,6 +13,7 @@ const {
 } = require('../db/users');
 const { verifyToken, authorizeRoles } = require('../middleware/auth');
 const { notificarAdmins } = require('../utils/notificaciones');
+const { invokeMotorVersaLambda } = require('../utils/lambdaService');
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'tu_secreto_super_seguro_123';
@@ -80,7 +81,12 @@ router.post('/analyze', async (req, res) => {
       return res.status(400).json({ success: false, message: 'studentName es requerido' });
     }
 
-    const analisis = analyzeText(mensaje, tipoViolencia, '', []); // FIX M-1: era 0, debe ser []
+    const analisis = await invokeMotorVersaLambda({
+      texto: mensaje || '',
+      tipoViolencia: tipoViolencia || '',
+      frecuencia: '',
+      historial: []
+    });
 
     const alertTypeMap = { 'bajo': 'Informativa', 'medio': 'Advertencia', 'alto': 'Critica' };
     const finalAlertType = analisis.es_emergencia ? 'Critica' : alertTypeMap[analisis.nivel_riesgo];

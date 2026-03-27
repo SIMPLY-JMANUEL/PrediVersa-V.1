@@ -6,6 +6,8 @@ export const useAlerts = (token) => {
   const [loadingAlerts, setLoadingAlerts] = useState(false);
   const [notifVersa, setNotifVersa] = useState([]);
   const [notifVisible, setNotifVisible] = useState(false);
+  const [alertStats, setAlertStats] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(false);
 
   const fetchAlerts = async () => {
     setLoadingAlerts(true);
@@ -16,6 +18,18 @@ export const useAlerts = (token) => {
       console.error('Error fetching alerts:', error);
     } finally {
       setLoadingAlerts(false);
+    }
+  };
+
+  const fetchAlertStats = async () => {
+    setLoadingStats(true);
+    try {
+      const data = await apiFetch('/api/alerts/stats');
+      if (data.success) setAlertStats(data.stats);
+    } catch (error) {
+      console.error('Error fetching alert stats:', error);
+    } finally {
+      setLoadingStats(false);
     }
   };
 
@@ -49,6 +63,7 @@ export const useAlerts = (token) => {
 
     conectarSSE();
     fetchAlerts();
+    fetchAlertStats();
 
     return () => {
       source?.close();
@@ -63,6 +78,9 @@ export const useAlerts = (token) => {
     setNotifVersa,
     notifVisible,
     setNotifVisible,
-    fetchAlerts
+    fetchAlerts,
+    alertStats,
+    loadingStats,
+    fetchAlertStats
   };
 };
