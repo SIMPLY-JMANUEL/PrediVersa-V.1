@@ -105,14 +105,18 @@ router.post('/message', verifyToken, async (req, res) => {
 router.get('/check', (req, res) => {
     const required = ['AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'LEX_BOT_ID', 'LEX_BOT_ALIAS_ID'];
     const status = required.reduce((acc, v) => {
-        acc[v] = process.env[v] ? '✅ CARGADA' : '❌ FALTANTE';
+        acc[v] = process.env[v] ? '✅ CARGADA' : `❌ NO DEFINIDA (Default: ${v === 'LEX_BOT_ID' ? 'DERGWSU1C8' : 'XVK50SN8KY'})`;
         return acc;
     }, {});
     
     return res.json({
         success: true,
         diagnostico: status,
-        nota: "Si alguna aparece como 'FALTANTE', debes agregarla en la consola de AWS App Runner."
+        config_actual: {
+            region: process.env.AWS_REGION || 'us-east-1',
+            botId: process.env.LEX_BOT_ID || 'DERGWSU1C8',
+            aliasId: process.env.LEX_BOT_ALIAS_ID || 'XVK50SN8KY'
+        }
     });
 });
 

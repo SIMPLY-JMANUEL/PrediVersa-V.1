@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Send, Bot, User, Loader2 } from 'lucide-react'
+import { apiFetch } from '../utils/api'
 import './AmazonLexChat.css'
 
 function AmazonLexChat({ user }) {
@@ -34,26 +35,13 @@ function AmazonLexChat({ user }) {
     setIsTyping(true)
 
     try {
-      const token = localStorage.getItem('token')
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/chatbot/message`, {
+      const data = await apiFetch('/api/chatbot/message', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
         body: JSON.stringify({ 
           text: input,
           sessionId: user?.id || 'anonimo'
         })
       })
-
-      // Blindaje: Verificar si el servidor respondió con JSON
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("El servidor no respondió con JSON. Revisa la ruta.");
-      }
-
-      const data = await response.json()
       
       if (data.success) {
         setMessages(prev => [...prev, { 
@@ -66,9 +54,13 @@ function AmazonLexChat({ user }) {
       }
     } catch (error) {
       console.error('Error Lex/Versa:', error)
+      const errorMsg = error.message.includes('Fetch') 
+        ? 'Error de conexión con el servidor. Por favor, verifica tu conexión o intenta más tarde. 🌐'
+        : 'Sistemas en actualización. El Asistente Versa está optimizando su Motor de Riesgo. Intenta en un momento. 🛡️';
+      
       setMessages(prev => [...prev, { 
         id: Date.now() + 2, 
-        text: 'Servicio en mantenimiento. El Asistente Versa está actualizando sus sistemas. Por favor intenta en unos minutos. 🛡️', 
+        text: errorMsg, 
         sender: 'bot' 
       }])
     } finally {

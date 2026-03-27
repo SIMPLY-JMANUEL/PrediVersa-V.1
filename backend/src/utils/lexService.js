@@ -18,12 +18,14 @@ async function sendToLex(userId, text, sessionState = {}) {
   try {
     const params = {
       botId: process.env.LEX_BOT_ID || 'DERGWSU1C8',
-      botAliasId: process.env.LEX_BOT_ALIAS_ID || 'TSTALIASID',
+      botAliasId: process.env.LEX_BOT_ALIAS_ID || 'XVK50SN8KY',
       localeId: process.env.LEX_LOCALE_ID || 'es_US',
-      sessionId: String(userId).substring(0, 100), // Max length 100
+      sessionId: String(userId).substring(0, 100), 
       text: text,
       sessionState: sessionState
     };
+
+    console.log(`🤖 Enviando a Lex -> Bot: ${params.botId}, Alias: ${params.botAliasId}, User: ${params.sessionId}`);
 
     const command = new RecognizeTextCommand(params);
     const response = await lexClient.send(command);
