@@ -9,6 +9,7 @@ import AdminDashboard from './components/AdminDashboard'
 import CollaboratorDashboard from './components/CollaboratorDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 import RoleProtectedRoute from './components/RoleProtectedRoute'
+import QuienesSomos from './components/QuienesSomos'
 
 function AppRoutes({ user, isLoginOpen, setIsLoginOpen, handleLogin, handleLogout }) {
   const location = useLocation()
@@ -19,6 +20,12 @@ function AppRoutes({ user, isLoginOpen, setIsLoginOpen, handleLogin, handleLogou
           <>
             <Header onLoginClick={() => setIsLoginOpen(true)} />
             <Main />
+          </>
+        } />
+        <Route path="/quienes-somos" element={
+          <>
+            <Header onLoginClick={() => setIsLoginOpen(true)} />
+            <QuienesSomos />
           </>
         } />
         <Route path="/student" element={
