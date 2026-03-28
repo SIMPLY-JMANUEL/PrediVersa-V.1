@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Send, Bot, User, Loader2 } from 'lucide-react'
+import { Send, Bot, User, Loader2, Mic, MicOff, Smile, HeartHandshake } from 'lucide-react'
 import { apiFetch } from '../utils/api'
 import './AmazonLexChat.css'
 
@@ -9,8 +9,38 @@ function AmazonLexChat({ user }) {
   ])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [isListening, setIsListening] = useState(false)
+  const [botEmotion, setBotEmotion] = useState('smile') // smile, thinking, empathetic
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+
+  const toggleListening = () => {
+    if (!recognition) {
+      alert("Tu navegador no soporta reconocimiento de voz. Intenta usar Google Chrome.");
+      return;
+    }
+    if (isListening) {
+      recognition.stop();
+      setIsListening(false);
+    } else {
+      recognition.lang = 'es-CO';
+      recognition.interimResults = false;
+      recognition.start();
+      setIsListening(true);
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(prev => prev + (prev ? ' ' : '') + transcript);
+        setIsListening(false);
+      };
+
+      recognition.onerror = () => setIsListening(false);
+      recognition.onend = () => setIsListening(false);
+    }
+  };
 
   const scrollToBottom = () => {
     if (messagesContainerRef.current) {
@@ -35,15 +65,23 @@ function AmazonLexChat({ user }) {
     setIsTyping(true)
 
     try {
+      setBotEmotion('thinking');
+      
+      const historialReducido = messages.slice(-6).map(m => ({ 
+        text: m.text, type: m.sender 
+      }));
+
       const data = await apiFetch('/api/chatbot/message', {
         method: 'POST',
         body: JSON.stringify({ 
           text: input,
-          sessionId: user?.id || 'anonimo'
+          sessionId: user?.id || 'anonimo',
+          historial: historialReducido
         })
       })
       
       if (data.success) {
+        setBotEmotion(['alto', 'medio'].includes(data.risk?.level) ? 'empathetic' : 'smile');
         setMessages(prev => [...prev, { 
           id: Date.now() + 1, 
           text: data.botResponse || 'Recibí tu mensaje, estoy analizando la situación.', 
@@ -71,7 +109,11 @@ function AmazonLexChat({ user }) {
   return (
     <div className="lex-chat-container">
       <div className="lex-chat-header">
-        <Bot size={24} />
+        <div className="bot-avatar-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#e2e8f0', borderRadius: '50%', padding: '8px', transition: 'all 0.3s' }}>
+          {botEmotion === 'thinking' ? <Loader2 size={24} color="#3b82f6" className="animate-spin" /> : 
+           botEmotion === 'empathetic' ? <HeartHandshake size={24} color="#ec4899" /> : 
+           <Smile size={24} color="#10b981" />}
+        </div>
         <div>
           <h4 style={{ margin: 0 }}>PrediVersa Assistant</h4>
           <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Apoyo Pedagógico y Bienestar IA</span>
@@ -100,10 +142,19 @@ function AmazonLexChat({ user }) {
       </div>
 
       <form className="lex-chat-input-area" onSubmit={handleSend}>
+        <button 
+          type="button" 
+          className={`lex-mic-btn ${isListening ? 'listening' : ''}`} 
+          onClick={toggleListening}
+          title="Dictar mensaje por voz"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px', outline: 'none' }}
+        >
+          {isListening ? <MicOff size={20} color="#ef4444" className="animate-pulse" /> : <Mic size={20} color="#64748b" />}
+        </button>
         <input 
           type="text" 
           className="lex-input" 
-          placeholder="Escribe aquí tu consulta..."
+          placeholder="Escribe o dicta tu consulta..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onFocus={scrollToBottom}

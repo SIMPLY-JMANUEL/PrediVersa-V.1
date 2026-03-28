@@ -37,7 +37,7 @@ router.get('/stream', verifyToken, (req, res) => {
  * Procesa mensaje vía Motor Versa (Riesgo) y responde vía Amazon Lex
  */
 router.post('/message', verifyToken, async (req, res) => {
-  const { text, sessionId } = req.body;
+  const { text, sessionId, historial = [] } = req.body;
   const user = req.user; 
   
   // RESPUESTA POR DEFECTO (POR SI LEX O LA RED FALLAN)
@@ -59,7 +59,7 @@ router.post('/message', verifyToken, async (req, res) => {
         texto: text,
         tipoViolencia: 'no_especificado',
         frecuencia: 'unica_vez',
-        historial: []
+        historial: historial
       });
       finalRisk = riskResult.nivel_riesgo;
       finalScore = riskResult.score;
@@ -85,7 +85,7 @@ router.post('/message', verifyToken, async (req, res) => {
       const respuestaDinamica = await centralAI.generarRespuesta({ 
         mensaje: text, 
         nivelRiesgo: finalRisk,
-        historial: [] // Si necesitas historial, lo debes mandar desde el frontend
+        historial: historial
       });
       
       lexResponse.messages = [{ content: respuestaDinamica }];
@@ -124,6 +124,15 @@ router.post('/message', verifyToken, async (req, res) => {
           ticket: ticket,
           mensaje: text.substring(0, 100) + '...'
         });
+
+        // SIMULACIÓN ESCALAMIENTO REAL-TIME VÍA SMS / WHATSAPP PARA RIESGO ALTO
+        if (finalRisk === 'alto') {
+          console.log(`\n======================================================`);
+          console.log(`🚨 PREDIVERSA [ALERTA DE SEGURIDAD MÁXIMA] 🚨`);
+          console.log(`Escalando vía SMS/WhatsApp: Caso abierto ${ticket}`);
+          console.log(`Estudiante: ${user.name || 'Estudiante Lex'} requiere intervención Inmediata.`);
+          console.log(`======================================================\n`);
+        }
       }
     } catch (e) { console.error('⚠️ No se pudo guardar la alerta en DB, pero el chat sigue vivo.'); }
 
