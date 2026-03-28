@@ -1,5 +1,5 @@
 // FIX A-1: Usar variable de entorno para la URL base — configurable por entorno
-export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+export const BASE_URL = import.meta.env.VITE_API_URL || '';
 export const API_CHATBOT = `${BASE_URL}/api/chatbot`;
 export const API_USERS = `${BASE_URL}/api/users`;
 export const API_AUTH = `${BASE_URL}/api/auth`;
