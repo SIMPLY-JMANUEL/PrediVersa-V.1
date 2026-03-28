@@ -45,17 +45,16 @@ const AnalyticsDashboard = ({ stats }) => {
     name: name.replace('Violencia ', ''),
     value
   })).sort((a, b) => b.value - a.value).slice(0, 6);
-
-  const riskDistData = aiStats.distribution.map(d => ({
+  const riskDistData = (Array.isArray(aiStats.distribution) ? aiStats.distribution : []).map(d => ({
     name: (d.risk || 'BAJO').toUpperCase(),
-    value: d.count
+    value: d.count || 0
   }));
 
   const COLORS = ['#6366f1', '#a855f7', '#ec4899', '#f97316', '#ef4444', '#10b981'];
   const RISK_COLORS = { 'ALTO': '#ef4444', 'MEDIO': '#f97316', 'BAJO': '#10b981' };
 
   // Calcular eficiencia de forma segura
-  const efficiency = stats.totalAlerts > 0 
+  const efficiency = (stats.totalAlerts && stats.totalAlerts > 0)
     ? Math.round((stats.resolvedAlerts / stats.totalAlerts) * 100) 
     : 0;
 
@@ -95,7 +94,7 @@ const AnalyticsDashboard = ({ stats }) => {
           <div className="stat-icon"><Brain size={20} color="#8b5cf6" /></div>
           <div className="stat-data">
             <span className="stat-value">
-              {aiStats.trends.length > 0 ? aiStats.trends[0].avg_risk : '---'}
+              {aiStats.trends && aiStats.trends.length > 0 ? aiStats.trends[0].avg_risk : '---'}
             </span>
             <span className="stat-label">Indice Riesgo (AI)</span>
           </div>
@@ -111,14 +110,14 @@ const AnalyticsDashboard = ({ stats }) => {
 
       <div className="charts-grid-main">
         {/* TENDENCIA DE RIESGO AI - Gráfico Deslumbrante */}
-        <div className="chart-wrapper glass span-2">
+        <div className="chart-wrapper glass span-2" style={{ minHeight: '350px' }}>
           <div className="chart-header">
             <h3><TrendingUp size={18} /> Tendencia de Bienestar Emocional (Risk Index v2)</h3>
             <span className="badge-pro">Actualizado: TR</span>
           </div>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <AreaChart data={[...aiStats.trends].reverse()}>
+          <div className="chart-content">
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={Array.isArray(aiStats.trends) ? [...aiStats.trends].reverse() : []}>
                 <defs>
                   <linearGradient id="colorRisk" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.4}/>
@@ -145,12 +144,12 @@ const AnalyticsDashboard = ({ stats }) => {
         </div>
 
         {/* DISTRIBUCIÓN DE RIESGO CHATBOT - Pie Pro */}
-        <div className="chart-wrapper glass">
+        <div className="chart-wrapper glass" style={{ minHeight: '320px' }}>
           <div className="chart-header">
             <h3><PieIcon size={18} /> Clasificación IA de Mensajes</h3>
           </div>
-          <div style={{ width: '100%', height: 260 }}>
-            <ResponsiveContainer>
+          <div className="chart-content">
+            <ResponsiveContainer width="100%" height={260}>
               <PieChart>
                 <Pie data={riskDistData.length > 0 ? riskDistData : [{name: 'SIN DATOS', value: 1}]} cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={8} dataKey="value" stroke="none">
                   {riskDistData.map((entry, index) => (
@@ -171,7 +170,7 @@ const AnalyticsDashboard = ({ stats }) => {
             <h3><AlertTriangle size={18} color="#ef4444" /> Detecciones de Riesgo Inmediato</h3>
           </div>
           <div className="critical-students-scroll">
-            {aiStats.critical.length > 0 ? aiStats.critical.map((s, i) => (
+            {Array.isArray(aiStats.critical) && aiStats.critical.length > 0 ? aiStats.critical.map((s, i) => (
               <div key={i} className="student-alert-item pulse-red">
                 <div className="student-info">
                   <span className="id-label">SESIÓN ID</span>
@@ -192,12 +191,12 @@ const AnalyticsDashboard = ({ stats }) => {
         </div>
 
         {/* HISTORICO DE ALERTAS INSTITUCIONALES */}
-        <div className="chart-wrapper glass span-2">
+        <div className="chart-wrapper glass span-2" style={{ minHeight: '300px' }}>
            <div className="chart-header">
             <h3><ShieldAlert size={18} /> Concentración de Alertas por Categoría</h3>
           </div>
-          <div style={{ width: '100%', height: 240 }}>
-             <ResponsiveContainer>
+          <div className="chart-content">
+             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={typeData.length > 0 ? typeData : [{name: 'Sin alertas', value: 0}]} layout="horizontal">
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.02)" horizontal={false} />
                 <XAxis dataKey="name" stroke="#94a3b8" fontSize={9} axisLine={false} tickLine={false} />
