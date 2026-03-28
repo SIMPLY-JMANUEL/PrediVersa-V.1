@@ -17,23 +17,37 @@ const sesClient = new SESClient({ region: awsRegion });
 // SSE — Admin connection
 const { adminClients, notificarAdmins } = require('../utils/notificaciones');
 
-// GET /api/chatbot/stream (No changes needed)
+// GET /api/chatbot/stream (Optimizado para App Runner / Proxies)
 router.get('/stream', verifyToken, (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
   res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no'); // Crítico para evitar buffers en proxies
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.flushHeaders();
 
+  // Enviar mensaje inicial
   res.write(`data: ${JSON.stringify({ tipo: 'conexion', mensaje: 'Conectado al sistema de alertas Lex Versa ✅' })}\n\n`);
   adminClients.add(res);
 
+  // Ping frecuente (cada 15s) para mantener viva la conexión en App Runner
   const ping = setInterval(() => {
-    try { res.write(': ping\n\n'); }
-    catch (e) { clearInterval(ping); adminClients.delete(res); }
-  }, 25000);
+    try { 
+      res.write(': ping\n\n'); 
+      if (typeof res.flush === 'function') res.flush(); // Si hay compresión instalada
+    } catch (e) { 
+      clearInterval(ping); 
+      adminClients.delete(res); 
+    }
+  }, 15000);
 
   req.on('close', () => {
+    clearInterval(ping);
+    adminClients.delete(res);
+  });
+
+  req.on('error', (err) => {
+    console.error('❌ Error en stream SSE:', err.message);
     clearInterval(ping);
     adminClients.delete(res);
   });

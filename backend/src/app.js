@@ -50,9 +50,19 @@ const frontendPath = path.join(__dirname, '../../frontend/dist');
 // Servir archivos estáticos del build del frontend
 app.use(express.static(frontendPath));
 
-// Health checks
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'Backend funcionando' });
+// Health checks con prueba de vida a la base de datos
+const { testConnection } = require('./db/connection');
+app.get('/api/health', async (req, res) => {
+  try {
+    const isDbConnected = await testConnection();
+    res.json({ 
+      status: isDbConnected ? 'online' : 'error',
+      database: isDbConnected ? 'CONECTADO ✅' : 'FALLO DE CONEXIÓN ❌',
+      serverTime: new Date().toISOString()
+    });
+  } catch (e) {
+    res.status(500).json({ status: 'error', database: 'DESCONECTADO ❌', error: e.message });
+  }
 });
 
 // 🔥 CLAVE: SPA Fallback

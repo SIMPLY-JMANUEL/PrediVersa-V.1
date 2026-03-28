@@ -23,10 +23,13 @@ const pool = mysql.createPool({
   database: process.env.DB_DATABASE,
   port: process.env.DB_PORT || 3306,
   waitForConnections: true,
-  connectionLimit: 10,
+  connectionLimit: 15, // Aumentado ligeramente para mayor concurrencia
   queueLimit: 0,
+  connectTimeout: 20000, // 20s para asegurar conexión inicial en App Runner
+  acquireTimeout: 20000, // 20s para obtener conexión del pool
+  timeout: 30000,        // 30s de timeout de query por defecto
   enableKeepAlive: true,
-  keepAliveInitialDelay: 0,
+  keepAliveInitialDelay: 10000, // Empezar pings de red a los 10s
   charset: 'utf8mb4',
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined
 });

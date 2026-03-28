@@ -38,6 +38,7 @@ function CollaboratorDashboard({ user, onLogout }) {
       fetchAssignedAlerts()
       const api_url = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const source = new EventSource(`${api_url}/api/chatbot/stream?token=${token}`)
+      
       source.onmessage = (e) => {
         try {
           const data = JSON.parse(e.data)
@@ -47,7 +48,9 @@ function CollaboratorDashboard({ user, onLogout }) {
           fetchAssignedAlerts()
         } catch { /* silent */ }
       }
-      source.onerror = () => source.close()
+
+      source.onerror = () => { /* El navegador reconectará automáticamente */ }
+      
       return () => source.close()
     }, [])
 

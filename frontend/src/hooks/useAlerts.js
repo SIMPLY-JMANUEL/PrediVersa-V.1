@@ -39,9 +39,10 @@ export const useAlerts = (token) => {
     let source;
     let reconnectTimeout;
 
-    // FIX AL-3: función de conexión SSE con reconexión automática
+    // Optimización SSE con reconexión nativa del navegador
     const conectarSSE = () => {
       source = new EventSource(`${BASE_URL}/api/chatbot/stream?token=${token}`);
+      
       source.onmessage = (e) => {
         try {
           const data = JSON.parse(e.data);
@@ -51,13 +52,11 @@ export const useAlerts = (token) => {
           fetchAlerts();
         } catch { /* silent */ }
       };
+
       source.onerror = () => {
-        source.close();
-        // Reconectar después de 5 segundos
-        reconnectTimeout = setTimeout(() => {
-          console.log('🔄 Reconectando SSE...');
-          conectarSSE();
-        }, 5000);
+        // En lugar de cerrar y alertar, dejamos que el navegador 
+        // intente reconectar según su política interna (normalmente 3s).
+        // Esto reduce el ruido en la consola durante micro-cortes de App Runner.
       };
     };
 
