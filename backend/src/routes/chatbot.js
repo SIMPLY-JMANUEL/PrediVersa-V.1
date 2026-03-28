@@ -135,20 +135,26 @@ router.post('/message', verifyToken, async (req, res) => {
 
         // ESCALAMIENTO REAL-TIME VÍA SMS (AWS SNS) PARA RIESGO ALTO
         if (finalRisk === 'alto') {
-          console.log(`🚨 Escalando vía SMS a administrador: Caso ${ticket}`);
+          console.log(`🚨 Escalando vía SMS a administradores: Caso ${ticket}`);
           try {
-            // Aquí pones el número celular real con código de país (Ej: +573001234567 para Colombia)
-            const numeroAdmin = "+573000000000"; 
+            // Aquí puedes agregar 1, 3 o hasta 10 números separados por comas.
+            const numerosAdmin = [
+              "+573000000000", // Rector
+              "+573000000001", // Psicología
+              "+573000000002"  // Coordinador
+            ];
             
-            const smsParams = {
-              Message: `🚨 ALERTA CRÍTICA PREDIVERSA 🚨\nTicket: ${ticket}\nEstudiante: ${user.name || 'Estudiante Lex'}\nRiesgo: ALTO.\nIngresa al Dashboard urgente.`,
-              PhoneNumber: numeroAdmin
-            };
+            // Enviamos el mensaje a todos los números al mismo tiempo
+            const messageText = `🚨 ALERTA CRÍTICA PREDIVERSA 🚨\nTicket: ${ticket}\nEstudiante: ${user.name || 'Estudiante Lex'}\nRiesgo: ALTO.\nIngresa al Dashboard urgente.`;
             
-            await snsClient.send(new PublishCommand(smsParams));
-            console.log('✅ SMS enviado exitosamente al administrador.');
+            const smsPromises = numerosAdmin.map(numero => 
+              snsClient.send(new PublishCommand({ Message: messageText, PhoneNumber: numero }))
+            );
+            
+            await Promise.allSettled(smsPromises);
+            console.log('✅ SMS enviados al comité administrativo.');
           } catch (snsError) {
-            console.error('❌ Error enviando SMS de alerta:', snsError.message);
+            console.error('❌ Error enviando SMS de alerta múltiple:', snsError.message);
           }
         }
       }
