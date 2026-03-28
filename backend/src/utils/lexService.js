@@ -25,7 +25,7 @@ async function sendToLex(userId, text, sessionState = {}) {
     const params = {
       botId: process.env.LEX_BOT_ID || 'DERGWSU1C8',
       botAliasId: process.env.LEX_BOT_ALIAS_ID || 'XVK50SN8KY',
-      localeId: process.env.LEX_LOCALE_ID || 'es_US',
+      localeId: process.env.LEX_LOCALE_ID || 'es-US',
       // Lex V2 sessionId pattern: [a-zA-Z0-9._-]+ 
       sessionId: String(userId).replace(/[^a-zA-Z0-9._-]/g, '_').substring(0, 100), 
       text: text,
