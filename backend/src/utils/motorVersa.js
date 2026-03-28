@@ -331,7 +331,8 @@ function analyzeText(texto, tipoViolencia = '', frecuencia = '', historial = [])
       const weight = 1 / (index + 1); // 1.0, 0.5, 0.33, 0.25, 0.20
       score += (weight * 12); // Máximo ~12 de bonus por el primero, bajando drásticamente para los viejos
       
-      if (norm(h) === textoNorm) {
+      const hText = typeof h === 'string' ? h : (h?.text || '');
+      if (hText && norm(hText) === textoNorm) {
         score += (weight * 25); // Repetitividad exacta pesa mucho más si es reciente
       }
     });
@@ -339,7 +340,10 @@ function analyzeText(texto, tipoViolencia = '', frecuencia = '', historial = [])
     // 2. Detección de escalación emocional (Sentimiento persistente)
     const sentimentHistorial = historial.reduce((acc, h) => {
         let hScore = 0
-        Object.values(SENTIMIENTOS).flat().forEach(p => { if(norm(h).includes(p)) hScore -= 5 })
+        const hText = typeof h === 'string' ? h : (h?.text || '');
+        if (hText) {
+          Object.values(SENTIMIENTOS).flat().forEach(p => { if(norm(hText).includes(p)) hScore -= 5 })
+        }
         return acc + hScore
     }, 0) / numReportes
 

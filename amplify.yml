@@ -7,9 +7,9 @@ frontend:
         - npm install
     build:
       commands:
+        - cd frontend
+        - echo "VITE_API_URL=https://jkwpuacezq.us-east-1.awsapprunner.com" > .env
         - npm run build
-      env:
-        - VITE_API_URL=https://jkwpuacezq.us-east-1.awsapprunner.com
   artifacts:
     baseDirectory: frontend/dist
     files:
