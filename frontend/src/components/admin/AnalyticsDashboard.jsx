@@ -62,48 +62,48 @@ const AnalyticsDashboard = ({ stats }) => {
     <div className="analytics-container animate-fade-in shadow-premium">
       <div className="analytics-header">
         <div className="header-icon-wrapper">
-          <Brain size={32} color="#8b5cf6" />
+          <Brain size={32} color="#fff" />
         </div>
         <div className="header-text">
           <h2>Inteligencia Prediversa v1.1</h2>
-          <p>Visión analítica alimentada por Amazon Bedrock y Lex.</p>
+          <p>Visión predictiva alimentada por Amazon Bedrock.</p>
         </div>
         <div className="ai-badge">
           <Zap size={14} fill="#fbbf24" color="#fbbf24" />
-          <span>HÍBRIDO ACTIVO</span>
+          <span>SISTEMA VIVO</span>
         </div>
       </div>
 
       {/* KPI CARDS - Premium Look */}
       <div className="stats-summary">
-        <div className="stat-card glass">
-          <div className="stat-icon"><Activity size={20} color="#6366f1" /></div>
+        <div className="stat-card glass success">
+          <div className="stat-icon"><Activity size={20} color="#10b981" /></div>
           <div className="stat-data">
             <span className="stat-value">{stats.totalAlerts || 0}</span>
-            <span className="stat-label">Alertas Generales</span>
+            <span className="stat-label">Alertas Analizadas</span>
           </div>
         </div>
         <div className="stat-card glass alert-critical">
-          <div className="stat-icon"><ShieldAlert size={20} color="#ef4444" /></div>
+          <div className="stat-icon"><ShieldAlert size={20} color="#f43f5e" /></div>
           <div className="stat-data">
             <span className="stat-value">{stats.pendingAlerts || 0}</span>
-            <span className="stat-label">Riesgo Extremo</span>
+            <span className="stat-label">Riesgo Inminente</span>
           </div>
         </div>
         <div className="stat-card glass ai-brain">
-          <div className="stat-icon"><Brain size={20} color="#8b5cf6" /></div>
+          <div className="stat-icon"><Brain size={20} color="#f59e0b" /></div>
           <div className="stat-data">
             <span className="stat-value">
               {aiStats.trends && aiStats.trends.length > 0 ? aiStats.trends[0].avg_risk : '---'}
             </span>
-            <span className="stat-label">Indice Riesgo (AI)</span>
+            <span className="stat-label">Coeficiente Risk (AI)</span>
           </div>
         </div>
-        <div className="stat-card glass success">
-          <div className="stat-icon"><TrendingUp size={20} color="#10b981" /></div>
+        <div className="stat-card glass">
+          <div className="stat-icon"><TrendingUp size={20} color="#f472b6" /></div>
           <div className="stat-data">
             <span className="stat-value">{efficiency}%</span>
-            <span className="stat-label">Puntaje Operativo</span>
+            <span className="stat-label">Eficacia Operativa</span>
           </div>
         </div>
       </div>
