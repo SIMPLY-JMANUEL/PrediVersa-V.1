@@ -10,7 +10,7 @@
 .header-left {
   display: flex;
   align-items: center;
-  gap: 3cm;
+  gap: 2rem;
 }
 
 .header-logo {
@@ -60,4 +60,40 @@
 .login-link:hover {
   color: #8ECFEA !important;
   font-weight: 600;
+}
+
+/* RESPONSIVIDAD DEL HEADER */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .header-left {
+    width: 100%;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .navbar-left ul, 
+  .navbar-right ul {
+    gap: 1rem;
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .header-logo {
+    height: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-left ul, 
+  .navbar-right ul {
+    gap: 0.8rem;
+    font-size: 0.8rem;
+  }
 }

@@ -1855,3 +1855,24 @@
   box-shadow: 0 0 10px #22c55e;
   animation: v-pulse 2s infinite;
 }
+
+/* RESPONSIVIDAD GENERAL ADMIN DASHBOARD */
+@media (max-width: 1200px) {
+  .user-form-grid { grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .user-form-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .admin-top-section { flex-direction: column; gap: 2rem; align-items: center; }
+  .admin-section { flex-direction: column; align-items: center; text-align: center; }
+  .admin-data-section { max-width: 100%; width: 100%; }
+  .users-table-header, .users-table-row { grid-template-columns: 1.5fr 2fr 1.2fr; font-size: 0.8rem; }
+  .users-table-header div:nth-child(n+4), .users-table-row div:nth-child(n+4) { display: none; } /* Ocultar columnas menos importantes */
+  .search-box { flex-direction: column; align-items: stretch; }
+  .search-input { max-width: 100%; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .user-creation-section, .users-list-section, .stats-section, .alerts-section { padding: 1rem; }
+  .tabs-row, .alerts-tabs-row { overflow-x: auto; padding-bottom: 10px; }
+  .tab-btn, .alert-tab-btn { white-space: nowrap; padding: 0.5rem 1rem; }
+}

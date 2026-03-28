@@ -317,53 +317,68 @@
    ============================================================== */
 
 @media (max-width: 1024px) {
-  .hero-content h1 { font-size: 3rem; }
+  .hero-content h1 { font-size: 2.8rem; }
   .tabs-structured { grid-template-columns: 1fr; }
+  .hero { gap: 2rem; }
 }
 
 @media (max-width: 768px) {
-  .main { padding: 1rem; }
+  .main { padding: 1.5rem 1rem; }
   
   .hero {
-    flex-direction: column;
+    flex-direction: column-reverse; /* Imagen arriba en móviles puede ser mejor o simplemente apilar */
     text-align: center;
-    gap: 1.5rem;
+    gap: 2rem;
+    padding: 2rem 0;
   }
   
-  .hero-content h1 { font-size: 2.5rem; }
-  .hero-content .highlight { font-size: 1.8rem; }
-  .hero-content .tagline { font-size: 1.8rem; border: none; padding: 0; }
+  .hero-content h1 { 
+    font-size: 2.2rem; 
+    line-height: 1.2;
+  }
   
-  .hero-image { display: none; } /* Ocultar círculos en móvil para ahorrar espacio */
+  .hero-content .highlight { font-size: 1.6rem; }
+  .hero-content .tagline { 
+    font-size: 1.5rem; 
+    border-left: none; 
+    border-top: 3px solid #8ECFEA;
+    padding: 1rem 0 0 0; 
+    margin-top: 1rem;
+  }
   
-  .about-header h2 { font-size: 2.2rem; }
+  .hero-image { 
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .image-circle {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .about-header h2 { font-size: 2rem; }
   .about-grid { grid-template-columns: 1fr; }
   
   .glass-panel { padding: 1.5rem; }
   
-  .value-proposition { padding: 2rem 1rem; }
-  .value-proposition h3 { font-size: 1.8rem; }
+  .value-proposition { padding: 3rem 1.5rem; }
+  .value-proposition h3 { font-size: 1.6rem; }
   
   .prop-grid { grid-template-columns: 1fr 1fr; }
-  
-  .tabs-structured { gap: 1rem; }
 
-  .back-button-container {
-    top: 10px !important;
-    left: 10px !important;
-  }
-  
-  .back-button-container button {
-    padding: 0.5rem 1rem !important;
-    font-size: 0.9rem !important;
+  .back-button-holder {
+    justify-content: center;
   }
 }
 
 @media (max-width: 480px) {
-  .hero-content h1 { font-size: 2rem; }
+  .hero-content h1 { font-size: 1.8rem; }
+  .hero-content p { font-size: 1.1rem; }
+  .image-circle {
+    width: 120px;
+    height: 120px;
+  }
   .prop-grid { grid-template-columns: 1fr; }
-  .general-objective h4, .specific-objectives h4 { font-size: 1.3rem; }
-  .about-header h2 { font-size: 1.8rem; }
 }
 
 /* ==============================================================

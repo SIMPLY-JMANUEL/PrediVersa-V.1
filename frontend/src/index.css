@@ -7,6 +7,13 @@
 html,
 body {
   min-height: 100vh;
+  overflow-x: hidden; /* Evitar scroll horizontal accidental */
+}
+
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
 #root {
