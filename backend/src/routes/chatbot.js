@@ -7,8 +7,12 @@ const { createAlert } = require('../db/users');
 const centralAI = require('../utils/centralAIService');
 const { sendToLex } = require('../utils/lexService');
 const { SNSClient, PublishCommand } = require("@aws-sdk/client-sns");
+const { SESClient, SendEmailCommand } = require("@aws-sdk/client-ses");
 
-const snsClient = new SNSClient({ region: process.env.AWS_REGION || "us-east-1" });
+// Clientes AWS
+const awsRegion = process.env.AWS_REGION || "us-east-1";
+const snsClient = new SNSClient({ region: awsRegion });
+const sesClient = new SESClient({ region: awsRegion });
 
 // SSE — Admin connection
 const { adminClients, notificarAdmins } = require('../utils/notificaciones');
@@ -133,28 +137,66 @@ router.post('/message', verifyToken, async (req, res) => {
           mensaje: text.substring(0, 100) + '...'
         });
 
-        // ESCALAMIENTO REAL-TIME VÍA SMS (AWS SNS) PARA RIESGO ALTO
+        // ESCALAMIENTO REAL-TIME VÍA SMS (AWS SNS) Y EMAIL (AWS SES)
         if (finalRisk === 'alto') {
-          console.log(`🚨 Escalando vía SMS a administradores: Caso ${ticket}`);
+          console.log(`🚨 Escalando vía SMS y Email a administradores: Caso ${ticket}`);
           try {
+            // ================== 1. ENVÍO DE SMS ==================
             // Aquí puedes agregar 1, 3 o hasta 10 números separados por comas.
             const numerosAdmin = [
               "+573206708788", // Rector
               "+573225892184", // Psicología
               "+573234071416"  // Coordinador
             ];
-
-            // Enviamos el mensaje a todos los números al mismo tiempo
+            
             const messageText = `🚨 ALERTA CRÍTICA PREDIVERSA 🚨\nTicket: ${ticket}\nEstudiante: ${user.name || 'Estudiante Lex'}\nRiesgo: ALTO.\nIngresa al Dashboard urgente.`;
-
+            
             const smsPromises = numerosAdmin.map(numero =>
               snsClient.send(new PublishCommand({ Message: messageText, PhoneNumber: numero }))
             );
-
+            
             await Promise.allSettled(smsPromises);
             console.log('✅ SMS enviados al comité administrativo.');
+
+            // ================== 2. ENVÍO DE EMAIL ==================
+            // Coloca aquí tu correo verificado en AWS SES
+            const correoAdmin = "admin@prediversa.colegio"; 
+            
+            try {
+              const emailParams = {
+                Source: correoAdmin, // En Sandbox, el remitente debe estar verificado
+                Destination: { ToAddresses: [correoAdmin] }, // El destinatario también
+                Message: {
+                  Subject: { Data: `🚨 IMPORTANTE: Alerta de Riesgo Alto - Ticket ${ticket}` },
+                  Body: {
+                    Html: { Data: `
+                      <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; border: 1px solid #ff4d4f; border-radius: 8px;">
+                        <h2 style="color: #ff4d4f; margin-top: 0;">🚨 ALERTA DE SEGURIDAD ESCOLAR - RIESGO ALTO</h2>
+                        <p>El Motor de Inteligencia Artificial (Versa) acaba de detectar una situación crítica en el chat.</p>
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                          <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>🔖 Ticket:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${ticket}</td></tr>
+                          <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>👤 Estudiante:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${user.name || 'Estudiante Lex'} / Correo: ${user.email || 'N/A'}</td></tr>
+                          <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>💬 Mensaje detectado:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd; background: #fff0f0;">"${text}"</td></tr>
+                          <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>⚠️ Nivel de Riesgo:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd; color: #e11d48; font-weight: bold;">ALTO</td></tr>
+                        </table>
+                        <p style="margin-top: 20px;">Por favor, ingresa inmediatamente al Panel de Estudiante > <strong>Dashboard Administrativo</strong> para tomar acción.</p>
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;" />
+                        <small style="color: #666;">Este es un mensaje automático generado de forma confidencial por PrediVersa.</small>
+                      </div>
+                    ` },
+                    Text: { Data: `ALERTA DE RIESGO ALTO\n\nTicket: ${ticket}\nEstudiante: ${user.name}\nMensaje: "${text}"\n\nIngresa urgente al panel.` }
+                  }
+                }
+              };
+
+              await sesClient.send(new SendEmailCommand(emailParams));
+              console.log('✅ Correo electrónico de alerta enviado a', correoAdmin);
+            } catch (emailError) {
+              console.error('⚠️ Error enviando Email de Alerta (¿Está verificado en AWS SES?):', emailError.message);
+            }
+
           } catch (snsError) {
-            console.error('❌ Error enviando SMS de alerta múltiple:', snsError.message);
+            console.error('❌ Error en proceso de escalamiento:', snsError.message);
           }
         }
       }
