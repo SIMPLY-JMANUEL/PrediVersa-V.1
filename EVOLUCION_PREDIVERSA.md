@@ -1,41 +1,51 @@
-# 🚀 PLAN DE EVOLUCIÓN TÉCNICA: PREDIVERSA v1.1
-**Fecha:** 25 de Marzo de 2026 | **Estado:** Documento de Planeación
+# 🚀 PLAN DE EVOLUCIÓN TÉCNICA: PREDIVERSA v1.2
+**Fecha:** 28 de Marzo de 2026 | **Estado:** Hitos de v1.1 Alcanzados ✅
 
 ---
 
-## 📅 1. DESCRIPCIÓN DEL PROYECTO (ESTADO ACTUAL v1.0)
-PrediVersa es actualmente un **MVP funcional robusto** que centraliza la convivencia institucional.
-*   **Logros:** Autenticación JWT, Dashboards diferenciados por roles (Admin, Estudiante, Colaborador), persistencia en AWS RDS (MySQL), carga masiva de archivos Excel e integración de chatbot dual de Botpress.
-*   **Estado:** Reactivo (funciona por alertas generadas manualmente o vía chatbot) con seguridad estándar.
-
-## 🎯 2. NUEVO ALCANCE TÉCNICO
-El objetivo es transformar PrediVersa de ser una herramienta de gestión a un **sistema inteligente y proactivo**.
-*   **Proactividad:** El sistema no esperará al reporte del usuario; analizará patrones de riesgo.
-*   **Omnicanalidad:** Monitoreo y notificaciones en múltiples plataformas para bienestar institucional.
-*   **Seguridad Empresarial:** Implementación de protocolos de identidad estrictos.
-
-## 🛠️ 3. MÓDULOS Y MEJORAS POR IMPLEMENTAR (ROADMAP)
-
-### A. Módulo de Seguridad Avanzada (Identity)
-*   **2FA (Autenticación de dos factores):** Envío de código por email/SMS al login.
-*   **OAuth2 Integration:** Permitir login seguro con Google, GitHub o Microsoft.
-*   **Bcryptjs Hashing:** (Verificar/Reforzar) Cifrado avanzado de contraseñas.
-
-### B. Motor Versa 2.0 (Análisis Predictivo)
-*   **Detección de Patrones:** Algoritmos que analicen datos históricos para predecir picos de conflicto o estrés institucional.
-*   **IA Generativa:** Mejoras en el chatbot para respuestas más empáticas y precisas.
-
-### C. Canal de Notificaciones Proactivas
-*   **Notificaciones Push:** Alertas en tiempo real dentro del navegador.
-*   **Email/WhatsApp Integration:** Notificación automática a orientadores sobre alertas críticas identificadas por el Motor Versa.
-
-### D. Módulo de Servicios Críticos
-*   **Videoconferencia Segura:** Sala virtual privada para citas de orientación psicológica/administrativa.
-*   **Generador de Reportes PDF:** Informes mensuales automatizados con gráficos estadísticos de bienestar para la junta directiva.
-
-### E. Expansión y Monetización (v1.2)
-*   **Pasarela de Pagos (Stripe):** Soportar consultoría premium o acceso a recursos exclusivos.
-*   **Mobile App (React Native):** Versión nativa para iOS y Android.
+## 📅 1. HITOS ALCANZADOS (RESUMEN v1.1)
+El proyecto ha pasado de ser un **MVP funcional básico** a una **plataforma corporativa premium**.
+- ✅ **Seguridad**: Registro de usuarios y recuperación de contraseña (Reset Password).
+- ✅ **Estética**: Rediseño total de la Web Corporativa con un estilo "Rich Aesthetic".
+- ✅ **IA Avanzada**: Migración de Botpress a **Amazon Lex** para el chatbot del estudiante.
+- ✅ **Admin Pro**: Gestión de usuarios completa en el dashboard del administrador.
+- ✅ **Despliegue**: Integración con Render y AWS App Runner para hosting escalable.
+- ✅ **Reportes**: Dashboard de estadísticas reales basadas en la base de datos AWS RDS.
 
 ---
-**PrediVersa: Innovando en la prevención y el bienestar institucional.**
+
+## 🎯 2. NUEVO ALCANCE TÉCNICO (v1.2)
+El nuevo objetivo es consolidar la herramienta como un **sistema inteligente y proactivo**.
+
+### A. Módulo de Seguridad Crítica
+- **2FA (Autenticación de dos factores)**: Envío de códigos vía email (NodeMailer) para accesos sensibles.
+- **Login Social (OAuth2)**: Integración con Google para facilitar el acceso a usuarios externos.
+
+### B. Módulo de Notificaciones en Tiempo Real (Proactividad)
+- **WebSockets (Socket.io)**: Chat en tiempo real y notificaciones instantáneas de alertas.
+- **Push Notifications**: Alertas nativas en el navegador para reportes críticos.
+
+### C. Módulo de Tutoría Virtual (Videoconferencia)
+- **Sala Virtual Segura**: Módulo de citas integrado que genera salas de videoconferencia (usando WebRTC o Jitsi Meet SDK).
+
+### D. Expansión y Monetización
+- **Pasarela de Pagos (Stripe)**: Implementación de pagos reales para los "Planes" corporativos.
+- **Generador de Reportes PDF**: Automatización de informes mensuales de bienestar para la administración.
+
+---
+
+## 🛠️ 3. ESTRATEGIA DE CRECIMIENTO (ROADMAP)
+
+| Trimestre | Fases | Objetivos Principales |
+|-----------|-------|-----------------------|
+| **Q2 2026** | **v1.2 (Notificaciones & Real-Time)** | Socket.io, Notificaciones Push, PDF Reports. |
+| **Q3 2026** | **v1.3 (Pagos & Monetización)** | Stripe, Planes Premium, Videoconferencia. |
+| **Q4 2026** | **v2.0 (Mobile & Omnicanalidad)** | React Native App, Soporte Multilingüe. |
+
+---
+
+**Versión:** `v1.1.0` | **Licencia:** `Propietaria` | **© 2026 PrediVersa**
+
+**Autores:**
+*Jmanuel Calvo/PrediVersa, Andrey Luna/PrediVersa, Harold Salcedo/PrediVersa*
+**Departamento de Crecimiento Estratégico**
