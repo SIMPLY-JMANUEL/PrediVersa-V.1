@@ -29,8 +29,8 @@
 }
 
 .login-header-premium {
-  padding: 2.5rem 2rem 1.5rem 2rem;
-  background: linear-gradient(135deg, #3A6F85 0%, #2A4E5F 100%);
+  padding: 3rem 2rem 2rem 2rem;
+  background: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%);
   color: white;
   position: relative;
 }
@@ -102,9 +102,9 @@
 }
 
 .input-wrapper:focus-within {
-  border-color: #8ECFEA;
+  border-color: #6366F1;
   background: white;
-  box-shadow: 0 0 0 4px rgba(142, 207, 234, 0.15);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
 }
 
 .input-icon {
@@ -154,7 +154,7 @@
 }
 
 .login-btn-action {
-  background: linear-gradient(135deg, #2A4E5F 0%, #3A6F85 100%);
+  background: linear-gradient(135deg, #4338CA 0%, #4F46E5 100%);
   color: white;
   border: none;
   padding: 1.1rem;
@@ -163,12 +163,12 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 10px 15px -3px rgba(42, 78, 95, 0.3);
+  box-shadow: 0 10px 15px -3px rgba(67, 56, 202, 0.3);
 }
 
 .login-btn-action:hover {
   transform: translateY(-2px);
-  box-shadow: 0 20px 25px -5px rgba(42, 78, 95, 0.4);
+  box-shadow: 0 20px 25px -5px rgba(67, 56, 202, 0.4);
 }
 
 .login-btn-action:disabled {
@@ -190,7 +190,7 @@
 .link-btn {
   background: none;
   border: none;
-  color: #3A6F85;
+  color: #4F46E5;
   font-weight: 800;
   cursor: pointer;
   text-decoration: underline;
