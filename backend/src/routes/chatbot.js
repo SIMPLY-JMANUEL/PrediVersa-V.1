@@ -6,6 +6,9 @@ const { invokeMotorVersaLambda } = require('../utils/lambdaService');
 const { createAlert } = require('../db/users');
 const centralAI = require('../utils/centralAIService');
 const { sendToLex } = require('../utils/lexService');
+const { SNSClient, PublishCommand } = require("@aws-sdk/client-sns");
+
+const snsClient = new SNSClient({ region: process.env.AWS_REGION || "us-east-1" });
 
 // SSE — Admin connection
 const { adminClients, notificarAdmins } = require('../utils/notificaciones');
@@ -130,13 +133,23 @@ router.post('/message', verifyToken, async (req, res) => {
           mensaje: text.substring(0, 100) + '...'
         });
 
-        // SIMULACIÓN ESCALAMIENTO REAL-TIME VÍA SMS / WHATSAPP PARA RIESGO ALTO
+        // ESCALAMIENTO REAL-TIME VÍA SMS (AWS SNS) PARA RIESGO ALTO
         if (finalRisk === 'alto') {
-          console.log(`\n======================================================`);
-          console.log(`🚨 PREDIVERSA [ALERTA DE SEGURIDAD MÁXIMA] 🚨`);
-          console.log(`Escalando vía SMS/WhatsApp: Caso abierto ${ticket}`);
-          console.log(`Estudiante: ${user.name || 'Estudiante Lex'} requiere intervención Inmediata.`);
-          console.log(`======================================================\n`);
+          console.log(`🚨 Escalando vía SMS a administrador: Caso ${ticket}`);
+          try {
+            // Aquí pones el número celular real con código de país (Ej: +573001234567 para Colombia)
+            const numeroAdmin = "+573000000000"; 
+            
+            const smsParams = {
+              Message: `🚨 ALERTA CRÍTICA PREDIVERSA 🚨\nTicket: ${ticket}\nEstudiante: ${user.name || 'Estudiante Lex'}\nRiesgo: ALTO.\nIngresa al Dashboard urgente.`,
+              PhoneNumber: numeroAdmin
+            };
+            
+            await snsClient.send(new PublishCommand(smsParams));
+            console.log('✅ SMS enviado exitosamente al administrador.');
+          } catch (snsError) {
+            console.error('❌ Error enviando SMS de alerta:', snsError.message);
+          }
         }
       }
     } catch (e) { console.error('⚠️ No se pudo guardar la alerta en DB, pero el chat sigue vivo.'); }
