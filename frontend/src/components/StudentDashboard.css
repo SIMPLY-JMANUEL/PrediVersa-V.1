@@ -4,14 +4,14 @@
 }
 
 .profile-card-pro {
-    padding: 3rem 2rem;
+    padding: 2.5rem 1.5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     background: white;
-    border-radius: 24px;
-    border: 1px solid var(--border-light);
-    box-shadow: var(--shadow-lg);
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
 }
 
 .profile-photo-container {
@@ -24,18 +24,17 @@
 }
 
 .profile-photo-pro {
-    width: 140px;
-    height: 140px;
-    background: #f1f5f9;
-    border-radius: 24px;
+    width: 130px;
+    height: 130px;
+    background: #f8fafc;
+    border-radius: 50%;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 6px solid #fff;
-    box-shadow: var(--shadow-md);
+    border: 4px solid #fff;
+    box-shadow: 0 0 0 1px #e2e8f0, 0 10px 15px -3px rgba(0,0,0,0.1);
     position: relative;
-    transform: rotate(2deg);
 }
 
 .profile-photo-img-pro {
@@ -79,24 +78,20 @@
 }
 
 .user-name-pro {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 800;
-    color: var(--text-main);
-    margin-bottom: 6px;
-    letter-spacing: -0.02em;
+    color: #1e293b;
+    margin-bottom: 4px;
 }
 
 .user-role-pro {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #3A6F85;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    background: rgba(79, 70, 229, 0.1);
-    padding: 4px 14px;
-    border-radius: 30px;
-    display: inline-block;
-    margin-bottom: 2rem;
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 1.5rem;
 }
 
 .info-grid-pro {

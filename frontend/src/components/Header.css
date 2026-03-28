@@ -42,16 +42,15 @@
 
 .navbar-left li,
 .navbar-right li {
-  color: #1e293b;
+  color: #3A6F85;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 0.95rem;
-  transition: color 0.2s;
+  font-weight: 500;
+  transition: color 0.3s;
 }
 
 .navbar-left li:hover,
 .navbar-right li:hover {
-  color: #4f46e5;
+  color: #8ECFEA;
 }
 
 .navbar-left li:hover,
@@ -60,10 +59,14 @@
 }
 
 .login-link {
-  color: #4f46e5 !important;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: #3A6F85 !important;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.login-link:hover {
+  color: #8ECFEA !important;
 }
 
 /* RESPONSIVIDAD DEL HEADER */
