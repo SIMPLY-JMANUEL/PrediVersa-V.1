@@ -73,30 +73,45 @@ router.post('/message', verifyToken, async (req, res) => {
       }
     } catch (e) { console.error('⚠️ Falló motor de riesgo, continuando con respuesta Lex'); }
 
-    // 2. Comunicación con Amazon Lex (CON FALLBACK DE SEGURIDAD)
+    // 2. Comunicación Combinada (Amazon Lex + Motor AI Central para Interacción Avanzada)
     try {
+      // 2.1 Enviar a Lex para mantener métricas e intents en AWS
       const realLexResponse = await sendToLex(user.id || sessionId || 'anonimo', text);
-      if (realLexResponse && realLexResponse.messages?.length > 0) {
-        lexResponse = realLexResponse;
+      if (realLexResponse && realLexResponse.intent) {
+        lexResponse.intent = realLexResponse.intent;
       }
+      
+      // 2.2 Usar el Motor de IA Central para asegurar respuestas empáticas en lugar de las estáticas de Lex
+      const respuestaDinamica = await centralAI.generarRespuesta({ 
+        mensaje: text, 
+        nivelRiesgo: finalRisk,
+        historial: [] // Si necesitas historial, lo debes mandar desde el frontend
+      });
+      
+      lexResponse.messages = [{ content: respuestaDinamica }];
+
     } catch (error) {
-       console.error('❌ Error comunicando con Lex, activando IA de respaldo local:', error.message);
-       // Respuesta manual basada en el riesgo analizado por Motor Versa
+       console.error('❌ Error en Motor AI o Lex, usando respaldo:', error.message);
        if (finalRisk === 'alto') {
-         lexResponse.messages = [{ content: "Entiendo que estás pasando por un momento difícil. He escalado tu mensaje de forma urgente a nuestros orientadores. Pronto te contactaremos." }];
-       } else if (finalRisk === 'medio') {
-         lexResponse.messages = [{ content: "Tu bienestar es importante para nosotros. He registrado tu reporte. ¿Hay algo más en lo que te gustaría profundizar?" }];
+         lexResponse.messages = [{ content: "Entiendo que estás pasando por un momento muy difícil. He escalado tu mensaje de forma urgente a los orientadores." }];
+       } else {
+         lexResponse.messages = [{ content: "Te escucho. Tu bienestar es clave para nosotros y he registrado el caso. ¿Quieres contarme más al respecto?" }];
        }
     }
     
-    // 3. Persistencia de Alertas (Si riesgo es Medio/Alto)
+    // 3. Persistencia de Alertas (Todos los niveles de riesgo van al Dashboard de Admin)
     try {
-      if (finalRisk === 'alto' || finalRisk === 'medio') {
+      if (['alto', 'medio', 'bajo'].includes(finalRisk)) {
         const ticket = `LEX-${Date.now()}`;
+        
+        let tipoAlerta = 'Informativa'; // Por defecto para 'bajo'
+        if (finalRisk === 'alto') tipoAlerta = 'Critica';
+        else if (finalRisk === 'medio') tipoAlerta = 'Advertencia';
+
         await createAlert({
           studentName: user.name || 'Estudiante Lex',
           studentUsername: user.email || '',
-          alertType: finalRisk === 'alto' ? 'Critica' : 'Advertencia',
+          alertType: tipoAlerta,
           description: `[ALERTA PREDIVERSA - ${finalRisk.toUpperCase()}]\n${text}\n\nResumen: ${riskResult.resumen || 'Análisis Automático'}`,
           ticketNumber: ticket,
           status: 'Pendiente'
