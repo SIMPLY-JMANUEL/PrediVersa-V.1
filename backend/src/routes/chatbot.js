@@ -159,13 +159,18 @@ router.post('/message', verifyToken, async (req, res) => {
             console.log('✅ SMS enviados al comité administrativo.');
 
             // ================== 2. ENVÍO DE EMAIL ==================
-            // Coloca aquí tu correo verificado en AWS SES
-            const correoAdmin = "admin@prediversa.colegio"; 
+            const correosAdministrativos = [
+              "ha.l@lanuevaamerica.edu.co",
+              "h.salcedob@lanuevaamerica.edu.co",
+              "jm.calvou@lanuevaamerica.edu.co"
+            ];
             
             try {
               const emailParams = {
-                Source: correoAdmin, // En Sandbox, el remitente debe estar verificado
-                Destination: { ToAddresses: [correoAdmin] }, // El destinatario también
+                // El remitente debe ser uno de los correos autorizados en SES Sandbox
+                Source: "ha.l@lanuevaamerica.edu.co", 
+                // Se envía copia a todo el comité
+                Destination: { ToAddresses: correosAdministrativos }, 
                 Message: {
                   Subject: { Data: `🚨 IMPORTANTE: Alerta de Riesgo Alto - Ticket ${ticket}` },
                   Body: {
@@ -190,9 +195,9 @@ router.post('/message', verifyToken, async (req, res) => {
               };
 
               await sesClient.send(new SendEmailCommand(emailParams));
-              console.log('✅ Correo electrónico de alerta enviado a', correoAdmin);
+              console.log('✅ Correo(s) electrónico(s) de alerta enviado(s) al comité.');
             } catch (emailError) {
-              console.error('⚠️ Error enviando Email de Alerta (¿Está verificado en AWS SES?):', emailError.message);
+              console.error('⚠️ Error enviando Email de Alerta (¿Están verificados en AWS SES?):', emailError.message);
             }
 
           } catch (snsError) {
