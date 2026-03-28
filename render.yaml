@@ -1,4 +1,5 @@
 services:
+  # ─── BACKEND: Node.js en App Runner ─────────────────────────────
   - type: web
     name: prediversa-api
     runtime: node
@@ -10,24 +11,49 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 5000
+        value: 8080
+
+      # JWT
       - key: JWT_SECRET
         generateValue: true
+
+      # Base de Datos AWS RDS MySQL
       - key: DB_HOST
         value: "prediversa-db.ce1qo0a0sygg.us-east-1.rds.amazonaws.com"
       - key: DB_PORT
         value: "3306"
       - key: DB_DATABASE
-        value: "prediversa"
+        value: "PrediVersa"
       - key: DB_USER
         value: "admin"
       - key: DB_PASSWORD
-        sync: false
+        sync: false       # ← Debes ingresar "Prediversa2026" manualmente en Render
       - key: DB_SSL
         value: "true"
-      - key: BOTPRESS_SECRET
-        value: "prediversa_secret_2026"
 
+      # AWS Credenciales IAM (para Lex y Lambda)
+      - key: AWS_REGION
+        value: "us-east-1"
+      - key: AWS_ACCESS_KEY_ID
+        sync: false       # ← Ingresar manualmente en Render
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false       # ← Ingresar manualmente en Render
+
+      # Amazon Lex V2 — Alias de Producción
+      - key: LEX_BOT_ID
+        value: "DERGWSU1C8"
+      - key: LEX_BOT_ALIAS_ID
+        value: "XVK50SN8KY"
+      - key: LEX_LOCALE_ID
+        value: "es_419"   # Spanish (Latin American) — locale real del bot
+
+      # Lambda — Motor Versa IA
+      - key: USE_LAMBDA_MOTOR
+        value: "true"
+      - key: LAMBDA_MOTOR_VERSA_NAME
+        value: "MotorVersaEngine"
+
+  # ─── FRONTEND: React/Vite estático ──────────────────────────────
   - type: static
     name: prediversa-frontend
     plan: free
@@ -40,4 +66,7 @@ services:
           type: web
           name: prediversa-api
           property: host
-
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

@@ -1,0 +1,31 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - cd frontend
+        - npm install
+    build:
+      commands:
+        - npm run build
+      env:
+        - VITE_API_URL=https://jkwpuacezq.us-east-1.awsapprunner.com
+  artifacts:
+    baseDirectory: frontend/dist
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - frontend/node_modules/**/*
+  customHeaders:
+    - pattern: '**/*'
+      headers:
+        - key: 'Cache-Control'
+          value: 'no-store'
+redirects:
+  - source: '</^[^.]+$|\.(?!(css|gif|ico|jpg|js|png|txt|svg|woff|ttf|map|json)[^.]*$)([^.]+$)/>'
+    target: '/index.html'
+    status: '200'
+  - source: '/<*>'
+    target: '/index.html'
+    status: '200'

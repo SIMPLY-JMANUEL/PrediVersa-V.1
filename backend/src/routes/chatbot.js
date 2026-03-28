@@ -141,9 +141,9 @@ router.post('/message', verifyToken, async (req, res) => {
  * Verifica que las variables de AWS estén cargadas sin exponer secretos.
  */
 router.get('/check', (req, res) => {
-    const required = ['AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'LEX_BOT_ID', 'LEX_BOT_ALIAS_ID'];
+    const required = ['AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'LEX_BOT_ID', 'LEX_BOT_ALIAS_ID', 'DB_HOST', 'DB_DATABASE'];
     const status = required.reduce((acc, v) => {
-        acc[v] = process.env[v] ? '✅ CARGADA' : `❌ NO DEFINIDA (Default: ${v === 'LEX_BOT_ID' ? 'DERGWSU1C8' : 'XVK50SN8KY'})`;
+        acc[v] = process.env[v] ? '✅ CARGADA' : '❌ NO DEFINIDA';
         return acc;
     }, {});
     
@@ -153,10 +153,17 @@ router.get('/check', (req, res) => {
         config_actual: {
             region: process.env.AWS_REGION || 'us-east-1',
             botId: process.env.LEX_BOT_ID || 'DERGWSU1C8',
-            aliasId: process.env.LEX_BOT_ALIAS_ID || 'XVK50SN8KY'
+            // XVK50SN8KY = PrediVersaAlias (Producción, Versión 1)
+            aliasId: process.env.LEX_BOT_ALIAS_ID || 'XVK50SN8KY',
+            localeId: process.env.LEX_LOCALE_ID || 'es_US',
+            db_host: process.env.DB_HOST ? `${process.env.DB_HOST.substring(0, 20)}...` : 'NO DEFINIDO',
+            db_name: process.env.DB_DATABASE || 'NO DEFINIDO',
+            lambda_motor: process.env.LAMBDA_MOTOR_VERSA_NAME || 'MotorVersaEngine',
+            usa_lambda: process.env.USE_LAMBDA_MOTOR || 'false'
         }
     });
 });
+
 
 // Mantener endpoints de estadísticas y administración (Dashboard)
 router.get('/estadisticas', verifyToken, async (req, res) => {
