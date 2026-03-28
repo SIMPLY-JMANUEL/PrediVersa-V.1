@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiFetch } from '../utils/api' // FIX A-1: Centralizar URL
+import { apiFetch } from '../utils/api'
 import './Login.css'
 
 function Login({ isOpen, onClose, onLoginSuccess }) {
   const navigate = useNavigate()
+  const [view, setView] = useState('login') // 'login', 'register', 'forgot'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -14,102 +15,104 @@ function Login({ isOpen, onClose, onLoginSuccess }) {
     e.preventDefault()
     setError('')
     
-    if (!email || !password) {
-      setError('Por favor completa todos los campos')
-      return
-    }
-
-    setLoading(true)
-
-    try {
-      const response = await apiFetch('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password })
-      })
-
-      const data = response;
-
-      if (data.success) {
-        // Guardar token y datos del usuario
-        localStorage.setItem('token', data.token)
-        localStorage.setItem('user', JSON.stringify(data.user))
-        
-        // Notificar al App
-        onLoginSuccess(data.user)
-        
-        // Limpiar formulario
-        setEmail('')
-        setPassword('')
-        
-        // Redirigir según el rol
-        setTimeout(() => {
-          onClose()
-          const role = data.user.role
-          if (role === 'Estudiante') {
-            navigate('/student')
-          } else if (role === 'Administrador') {
-            navigate('/admin')
-          } else if (role === 'Colaborador' || role === 'Colaboradores') {
-            navigate('/collaborator')
-          }
-        }, 500)
-      } else {
-        setError(data.message || 'Error al iniciar sesión')
+    if (view === 'login') {
+      if (!email || !password) {
+        setError('Por favor completa todos los campos')
+        return
       }
-    } catch (err) {
-      setError('Error de conexión con el servidor. Por favor intenta de nuevo en unos segundos.')
-      console.error('Error:', err)
-    } finally {
-      setLoading(false)
+      setLoading(true)
+      try {
+        const data = await apiFetch('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email, password })
+        })
+        if (data.success) {
+          localStorage.setItem('token', data.token)
+          localStorage.setItem('user', JSON.stringify(data.user))
+          onLoginSuccess(data.user)
+          setEmail(''); setPassword('')
+          setTimeout(() => {
+            onClose()
+            const role = data.user.role
+            if (role === 'Estudiante') navigate('/student')
+            else if (role === 'Administrador' || role === 'Administradores') navigate('/admin')
+            else navigate('/collaborator')
+          }, 500)
+        } else {
+          setError(data.message || 'Credenciales incorrectas')
+        }
+      } catch (err) {
+        setError('Error de conexión con el servidor.')
+      } finally { setLoading(false) }
+    } else if (view === 'register') {
+      setError('El registro de usuarios nuevos debe ser gestionado por el administrador institucional.')
+    } else {
+      setError('Se ha enviado un correo de recuperación (Simulado). Revisa tu bandeja.')
     }
   }
 
   if (!isOpen) return null
 
   return (
-    <div className="login-overlay" onClick={onClose}>
-      <div className="login-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="login-header">
-          <h2>Inicio de Sesión</h2>
-          <button className="login-close" onClick={onClose} disabled={loading}>✕</button>
+    <div className="login-overlay">
+      <div className="login-modal premium-card">
+        <div className="login-header-premium">
+          <div className="header-text">
+            <h2>{view === 'login' ? 'Bienvenido a PrediVersa' : view === 'register' ? 'Solicitud de Registro' : 'Recuperar Acceso'}</h2>
+            <p>{view === 'login' ? 'Ingresa tus credenciales para continuar' : 'Sigue los pasos a continuación'}</p>
+          </div>
+          <button className="login-close-premium" onClick={onClose} disabled={loading}>✕</button>
         </div>
 
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu_email@ejemplo.com"
-              disabled={loading}
-            />
-            <small>Ingresa tu email registrado en el sistema</small>
+        <form onSubmit={handleSubmit} className="login-form-content">
+          <div className="form-group-premium">
+            <label>Correo Institucional</label>
+            <div className="input-wrapper">
+              <span className="input-icon">📧</span>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="ejemplo@prediversa.com"
+                disabled={loading}
+                required
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Contraseña</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              disabled={loading}
-            />
-            <small>Ingresa tu contraseña registrada en el sistema</small>
-          </div>
+          {view === 'login' && (
+            <div className="form-group-premium">
+              <label>Contraseña</label>
+              <div className="input-wrapper">
+                <span className="input-icon">🔒</span>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  disabled={loading}
+                  required
+                />
+              </div>
+              <div className="forgot-password-link">
+                <span onClick={() => setView('forgot')}>¿Olvidaste tu contraseña?</span>
+              </div>
+            </div>
+          )}
 
-          {error && <p className="login-error">{error}</p>}
+          {error && <div className="login-alert-ui">{error}</div>}
 
-          <button type="submit" className="login-btn" disabled={loading}>
-            {loading ? 'Iniciando...' : 'Iniciar Sesión'}
+          <button type="submit" className="login-btn-action" disabled={loading}>
+            {loading ? <span className="loader-dots">⬤ ⬤ ⬤</span> : view === 'login' ? 'Iniciar Sesión' : 'Enviar Solicitud'}
           </button>
         </form>
 
-        <div className="login-footer">
-          <p>¿No tienes cuenta? <a href="#signup">Regístrate aquí</a></p>
+        <div className="login-footer-professional">
+          {view === 'login' ? (
+            <p>¿No tienes una cuenta aún? <button onClick={() => setView('register')} className="link-btn">Regístrate</button></p>
+          ) : (
+            <p>¿Ya tienes cuenta? <button onClick={() => setView('login')} className="link-btn">Volver al Login</button></p>
+          )}
         </div>
       </div>
     </div>
