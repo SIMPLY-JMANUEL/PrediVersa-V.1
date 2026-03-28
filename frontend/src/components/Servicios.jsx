@@ -58,26 +58,9 @@ function Servicios() {
   return (
     <main className="main-responsive-container" style={{ minHeight: '100vh', backgroundColor: '#fcfdfe', padding: '1rem' }}>
       
-      {/* BOTÓN REGRESO */}
-      <div className="back-button-container" style={{ position: 'sticky', top: '20px', left: '20px', zIndex: 100 }}>
-        <button 
-          onClick={() => navigate('/')}
-          className="cta-btn back-btn"
-          style={{ 
-            background: 'white', 
-            color: '#3A6F85', 
-            border: '2px solid #8ECFEA', 
-            boxShadow: '0 4px 12px rgba(142,207,234,0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            borderRadius: '50px',
-            padding: '0.6rem 1.2rem',
-            fontSize: '1rem',
-            fontWeight: '600',
-            cursor: 'pointer'
-          }}
-        >
+      {/* BOTÓN REGRESO ESTANDARIZADO */}
+      <div style={{ padding: '1rem' }}>
+        <button onClick={() => navigate('/')} className="back-button-global">
           <span>←</span> Regresar al Inicio
         </button>
       </div>

@@ -23,10 +23,10 @@ function Noticias() {
   return (
     <main className="main-responsive-container" style={{ minHeight: '90vh', background: '#f8fafc', paddingBottom: '3rem' }}>
       
-      {/* BOTÓN REGRESO MINIMALISTA */}
-      <div style={{ padding: '1.5rem', maxWidth: '1000px', margin: '0 auto' }}>
-        <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1rem' }}>
-          <span>←</span> Regresar
+      {/* BOTÓN REGRESO ESTANDARIZADO */}
+      <div style={{ padding: '1rem', maxWidth: '1000px', margin: '0 auto' }}>
+        <button onClick={() => navigate('/')} className="back-button-global">
+          <span>←</span> Regresar al Inicio
         </button>
       </div>
 

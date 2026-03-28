@@ -13,6 +13,7 @@ import QuienesSomos from './components/QuienesSomos'
 import Servicios from './components/Servicios'
 import Noticias from './components/Noticias'
 import Planes from './components/Planes'
+import Contacto from './components/Contacto'
 
 function AppRoutes({ user, isLoginOpen, setIsLoginOpen, handleLogin, handleLogout }) {
   const location = useLocation()
@@ -47,6 +48,12 @@ function AppRoutes({ user, isLoginOpen, setIsLoginOpen, handleLogin, handleLogou
           <>
             <Header onLoginClick={() => setIsLoginOpen(true)} />
             <Planes />
+          </>
+        } />
+        <Route path="/contacto" element={
+          <>
+            <Header onLoginClick={() => setIsLoginOpen(true)} />
+            <Contacto />
           </>
         } />
         <Route path="/student" element={
