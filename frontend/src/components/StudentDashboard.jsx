@@ -1,17 +1,16 @@
 import { useState, useEffect } from 'react'
 import DashboardHeader from './DashboardHeader'
-import { UserCircle, Scale, Newspaper, ClipboardList, AlertTriangle, Info, MessageSquare } from 'lucide-react'
 import DenunciaFacil from './DenunciaFacil'
 import Normatividad from './Normatividad'
 import TestVersa from './TestVersa'
 import AmazonLexChat from './AmazonLexChat'
-import { useUserPhoto } from '../hooks/useUserPhoto'
+import UniversalSidebar from './shared/UniversalSidebar'
+import { MessageSquare, AlertTriangle, Scale, ClipboardList, Info } from 'lucide-react'
 import '../ProfessionalTheme.css'
 import './StudentDashboard.css'
 
 function StudentDashboard({ user, onLogout }) {
   const [activeMenu, setActiveMenu] = useState('chat')
-  const [photo] = useUserPhoto()
 
   return (
     <div className="dashboard-wrapper profesional-theme">
@@ -20,26 +19,7 @@ function StudentDashboard({ user, onLogout }) {
       <div className="dashboard-container profesional-theme">
         <div className="dashboard-layout">
           
-          <aside className="dashboard-sidebar">
-            <div className="dashboard-card profile-card">
-              <div style={{ position: 'relative', marginBottom: '1.5rem' }}>
-                {photo ? (
-                  <img src={photo} alt="Perfil" className="profile-photo-img img-theme-circle" />
-                ) : (
-                  <div className="img-theme-circle flex-center" style={{background: '#f8fafc'}}>
-                    <UserCircle size={80} color="#94a3b8" strokeWidth={1} />
-                  </div>
-                )}
-
-              </div>
-
-              <div className="profile-details">
-                <h3 className="user-name">{user?.name}</h3>
-                <p className="user-role">{user?.role}</p>
-                <p className="user-email">{user?.email}</p>
-              </div>
-            </div>
-
+          <UniversalSidebar user={user} stats={{ totalUsers: 1, activeUsers: 1, totalAlerts: 0, verifiedUsers: 0, dbConnected: true }}>
             <div className="dashboard-card sidebar-info">
               <div className="card-header-pro">
                 <Info size={18} />
@@ -47,7 +27,7 @@ function StudentDashboard({ user, onLogout }) {
               </div>
               <p>Gestiona tus reportes, consultas y normatividad institucional.</p>
             </div>
-          </aside>
+          </UniversalSidebar>
 
           <main className="dashboard-main">
             <div className="professional-header">

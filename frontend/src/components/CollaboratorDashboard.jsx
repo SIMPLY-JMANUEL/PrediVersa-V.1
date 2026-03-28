@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react'
 import DashboardHeader from './DashboardHeader'
-import { 
-  UserCircle, ChevronDown, AlertCircle, ClipboardCheck, 
-  HelpCircle, Scale, Briefcase, FileText, Send, Calendar, 
-  User, CheckCircle, Info, Paperclip, Book 
-} from 'lucide-react'
-import { useUserPhoto } from '../hooks/useUserPhoto'
+import { Briefcase, Info, AlertCircle, FileText, Send, Paperclip, ClipboardCheck, Book, Scale, User, Calendar, CheckCircle } from 'lucide-react'
+import UniversalSidebar from './shared/UniversalSidebar'
 import { useCaseTracking } from '../hooks/useCaseTracking'
 import { apiFetch } from '../utils/api'
 import './CollaboratorDashboard.css'
@@ -13,7 +9,6 @@ import './CollaboratorDashboard.css'
 function CollaboratorDashboard({ user, onLogout }) {
   const token = localStorage.getItem('token')
   const [activeMenu, setActiveMenu] = useState('alerta')
-  const [photo] = useUserPhoto()
   const { registerAction, loadingActions } = useCaseTracking(token)
 
   const [assignedAlerts, setAssignedAlerts] = useState([])
@@ -30,7 +25,6 @@ function CollaboratorDashboard({ user, onLogout }) {
       try {
         const data = await apiFetch(`/api/alerts`);
         if (data.success) {
-          // Validación estricta: Solamente mostrar casos asignados a este colaborador.
           const myAlerts = data.alerts.filter(a => 
             a.assignedTo && a.assignedTo.toLowerCase().trim() === user?.name?.toLowerCase().trim()
           )
@@ -42,23 +36,21 @@ function CollaboratorDashboard({ user, onLogout }) {
 
     useEffect(() => {
       fetchAssignedAlerts()
-      const token = localStorage.getItem('token');
       const api_url = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const source = new EventSource(`${api_url}/api/chatbot/stream?token=${token}`)
-    source.onmessage = (e) => {
-      try {
-        const data = JSON.parse(e.data)
-        if (data.tipo === 'conexion') return
-        setNotifVersa(prev => [data, ...prev].slice(0, 20))
-        setNotifVisible(true)
-        fetchAssignedAlerts()
-      } catch { /* silent */ }
-    }
-    source.onerror = () => source.close()
-    return () => source.close()
-  }, [])
+      source.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data)
+          if (data.tipo === 'conexion') return
+          setNotifVersa(prev => [data, ...prev].slice(0, 20))
+          setNotifVisible(true)
+          fetchAssignedAlerts()
+        } catch { /* silent */ }
+      }
+      source.onerror = () => source.close()
+      return () => source.close()
+    }, [])
 
-  // ── ESTADOS DE FORMULARIO MEJORADOS ──
   const [forms, setForms] = useState({
     remision: { area: 'Psicología', responsable: '', fecha: new Date().toISOString().split('T')[0], motivo: '', urgencia: 'Media', observaciones: '' },
     actuacion: { tipo: 'Contacto telefónico con el usuario', fechaHora: new Date().toISOString().slice(0, 16), responsable: user?.name, descripcion: '', resultado: '' },
@@ -93,7 +85,7 @@ function CollaboratorDashboard({ user, onLogout }) {
         area: forms.remision.area,
         responsibleName: forms.remision.responsable,
         description: forms.remision.motivo,
-        urgency: forms.remision.urgencia, // FIX C-4: era urgencia, debe ser urgency (consistente con backend)
+        urgency: forms.remision.urgencia,
         result: forms.remision.observaciones,
         actionDate: forms.remision.fecha
       }
@@ -140,18 +132,7 @@ function CollaboratorDashboard({ user, onLogout }) {
       <div className="dashboard-container profesional-theme">
         <div className="dashboard-layout">
           
-          <aside className="dashboard-sidebar">
-            <div className="dashboard-card profile-card">
-              <div className="profile-photo">
-                {photo ? <img src={photo} alt="P" className="profile-photo-img" /> : <UserCircle size={64} color="#8ECFEA" />}
-              </div>
-              <div className="profile-details">
-                <h3 className="user-name">{user?.name}</h3>
-                <p className="user-role">{user?.role}</p>
-                <p className="user-email">{user?.email}</p>
-              </div>
-            </div>
-
+          <UniversalSidebar user={user} stats={{ totalUsers: 1, activeUsers: 1, totalAlerts: assignedAlerts.length, verifiedUsers: 0, dbConnected: true }}>
             <div className="dashboard-card caseload-card">
               <h4 className="card-title">
                 <Briefcase size={18} /> Casos Asignados{' '}
@@ -175,7 +156,7 @@ function CollaboratorDashboard({ user, onLogout }) {
                 }
               </div>
             </div>
-          </aside>
+          </UniversalSidebar>
 
           <main className="dashboard-main">
             <div className="professional-header">
@@ -222,7 +203,6 @@ function CollaboratorDashboard({ user, onLogout }) {
               ) : (
                 <div className="form-container animate-fade-in">
                   
-                  {/* MENU 1: REMISION */}
                   {activeMenu === 'alerta' && (
                     <div className="pro-form">
                       <div className="form-header">
@@ -282,7 +262,6 @@ function CollaboratorDashboard({ user, onLogout }) {
                     </div>
                   )}
 
-                  {/* MENU 2: ACTUACIONES */}
                   {activeMenu === 'actuaciones' && (
                     <div className="pro-form">
                       <div className="form-header">
@@ -322,14 +301,13 @@ function CollaboratorDashboard({ user, onLogout }) {
                         </div>
                       </div>
                       <div className="form-actions-pro">
-                        <button className="btn-save-pro accent" onClick={() => handleSubmit('actuacion', 'Actuacion')} disabled={loadingActions}>
+                        <button className="btn-save-pro accent" onClick={() => handleSubmit('actuaciones', 'Actuacion')} disabled={loadingActions}>
                           <ClipboardCheck size={18} /> Guardar Actuación en Folio
                         </button>
                       </div>
                     </div>
                   )}
 
-                  {/* MENU 3: SOPORTE */}
                   {activeMenu === 'soporte' && (
                     <div className="pro-form">
                       <div className="form-header">
@@ -375,7 +353,6 @@ function CollaboratorDashboard({ user, onLogout }) {
                     </div>
                   )}
 
-                  {/* MENU 4: NORMATIVIDAD */}
                   {activeMenu === 'normatividad' && (
                     <div className="pro-form">
                       <div className="form-header">
@@ -414,7 +391,6 @@ function CollaboratorDashboard({ user, onLogout }) {
                       </div>
                     </div>
                   )}
-
                 </div>
               )}
             </div>
