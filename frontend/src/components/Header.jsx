@@ -29,7 +29,9 @@ function Header({ onLoginClick }) {
       </div>
       <nav className="navbar-right">
         <ul>
-          <li style={{ cursor: 'pointer' }}>Noticias</li>
+          <li>
+            <Link to="/noticias" style={{ color: 'inherit', textDecoration: 'none' }}>Noticias</Link>
+          </li>
           <li style={{ cursor: 'pointer' }}>Contacto</li>
           <li onClick={onLoginClick} className="login-link">Inicio de Sesión</li>
         </ul>
