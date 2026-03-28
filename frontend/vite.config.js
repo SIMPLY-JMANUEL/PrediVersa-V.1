@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: './', // Asegura assets relativos (soluciona error 404 de vite.svg)
+  base: '/', // Ruta absoluta para producción (SPA compatible)
   server: {
     proxy: {
       '/api': {

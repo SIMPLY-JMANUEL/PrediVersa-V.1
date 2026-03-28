@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
@@ -41,10 +42,23 @@ app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/config', configRoutes);
 
 
+// --- SERVIDOR ESTÁTICO Y FALLBACK DE SPA (PARA EVITAR 404 EN /student) ---
+const frontendPath = path.join(__dirname, '../../frontend/dist');
+
+// Servir archivos estáticos del build del frontend
+app.use(express.static(frontendPath));
+
 // Health checks
-app.get('/', (req, res) => res.status(200).send('API PrediVersa Online'));
 app.get('/api/health', (req, res) => {
   res.json({ status: 'Backend funcionando' });
+});
+
+// 🔥 CLAVE: SPA Fallback
+// Cualquier ruta que NO empiece por /api y no sea un archivo real, sirve el index.html
+app.get('*', (req, res) => {
+  if (!req.url.startsWith('/api')) {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+  }
 });
 
 // 404 Handler - Siempre devolver JSON
