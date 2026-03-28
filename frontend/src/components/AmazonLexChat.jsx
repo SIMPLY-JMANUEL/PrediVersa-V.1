@@ -64,42 +64,42 @@ function AmazonLexChat({ user }) {
     setInput('')
     setIsTyping(true)
 
-    try {
+    try {me siento mal
       setBotEmotion('thinking');
-      
-      const historialReducido = messages.slice(-6).map(m => ({ 
-        text: m.text, type: m.sender 
+
+      const historialReducido = messages.slice(-6).map(m => ({
+        text: m.text, type: m.sender
       }));
 
       const data = await apiFetch('/api/chatbot/message', {
         method: 'POST',
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           text: input,
           sessionId: user?.id || 'anonimo',
           historial: historialReducido
         })
       })
-      
+
       if (data.success) {
         setBotEmotion(['alto', 'medio'].includes(data.risk?.level) ? 'empathetic' : 'smile');
-        setMessages(prev => [...prev, { 
-          id: Date.now() + 1, 
-          text: data.botResponse || 'Recibí tu mensaje, estoy analizando la situación.', 
-          sender: 'bot' 
+        setMessages(prev => [...prev, {
+          id: Date.now() + 1,
+          text: data.botResponse || 'Recibí tu mensaje, estoy analizando la situación.',
+          sender: 'bot'
         }])
       } else {
         throw new Error(data.message)
       }
     } catch (error) {
       console.error('Error Lex/Versa:', error)
-      const errorMsg = error.message.includes('Fetch') 
+      const errorMsg = error.message.includes('Fetch')
         ? 'Error de conexión con el servidor. Por favor, verifica tu conexión o intenta más tarde. 🌐'
         : 'Sistemas en actualización. El Asistente Versa está optimizando su Motor de Riesgo. Intenta en un momento. 🛡️';
-      
-      setMessages(prev => [...prev, { 
-        id: Date.now() + 2, 
-        text: errorMsg, 
-        sender: 'bot' 
+
+      setMessages(prev => [...prev, {
+        id: Date.now() + 2,
+        text: errorMsg,
+        sender: 'bot'
       }])
     } finally {
       setIsTyping(false)
@@ -110,9 +110,9 @@ function AmazonLexChat({ user }) {
     <div className="lex-chat-container">
       <div className="lex-chat-header">
         <div className="bot-avatar-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#e2e8f0', borderRadius: '50%', padding: '8px', transition: 'all 0.3s' }}>
-          {botEmotion === 'thinking' ? <Loader2 size={24} color="#3b82f6" className="animate-spin" /> : 
-           botEmotion === 'empathetic' ? <HeartHandshake size={24} color="#ec4899" /> : 
-           <Smile size={24} color="#10b981" />}
+          {botEmotion === 'thinking' ? <Loader2 size={24} color="#3b82f6" className="animate-spin" /> :
+            botEmotion === 'empathetic' ? <HeartHandshake size={24} color="#ec4899" /> :
+              <Smile size={24} color="#10b981" />}
         </div>
         <div>
           <h4 style={{ margin: 0 }}>PrediVersa Assistant</h4>
@@ -142,18 +142,18 @@ function AmazonLexChat({ user }) {
       </div>
 
       <form className="lex-chat-input-area" onSubmit={handleSend}>
-        <button 
-          type="button" 
-          className={`lex-mic-btn ${isListening ? 'listening' : ''}`} 
+        <button
+          type="button"
+          className={`lex-mic-btn ${isListening ? 'listening' : ''}`}
           onClick={toggleListening}
           title="Dictar mensaje por voz"
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px', outline: 'none' }}
         >
           {isListening ? <MicOff size={20} color="#ef4444" className="animate-pulse" /> : <Mic size={20} color="#64748b" />}
         </button>
-        <input 
-          type="text" 
-          className="lex-input" 
+        <input
+          type="text"
+          className="lex-input"
           placeholder="Escribe o dicta tu consulta..."
           value={input}
           onChange={(e) => setInput(e.target.value)}

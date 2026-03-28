@@ -77,8 +77,11 @@ router.post('/message', verifyToken, async (req, res) => {
     try {
       // 2.1 Enviar a Lex para mantener métricas e intents en AWS
       const realLexResponse = await sendToLex(user.id || sessionId || 'anonimo', text);
-      if (realLexResponse && realLexResponse.intent) {
-        lexResponse.intent = realLexResponse.intent;
+      if (realLexResponse) {
+        if (realLexResponse.intent) lexResponse.intent = realLexResponse.intent;
+        if (realLexResponse.messages && realLexResponse.messages.length > 0) {
+          lexResponse.messages = realLexResponse.messages;
+        }
       }
       
       // 2.2 Usar el Motor de IA Central para asegurar respuestas empáticas en lugar de las estáticas de Lex

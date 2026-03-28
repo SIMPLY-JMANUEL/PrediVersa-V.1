@@ -173,30 +173,8 @@ class CentralAIService {
         console.error('❌ Error API Gemini:', error.message);
       }
       
-      // Respuestas locales variadas según riesgo
-      const msgLow = mensaje.toLowerCase();
-      
-      if (nivelRiesgo === 'alto') {
-          return "Oye, lo que me cuentas suena muy difícil. No estás solo en esto. ¿Has pensado en hablar con un adulto de confianza o un orientador? Estoy aquí para apoyarte. 💙";
-      }
-      
-      if (msgLow.includes('triste')) {
-          return "Entiendo que te sientas así. A veces las cosas se ponen pesadas, pero hablarlo es el primer paso para estar mejor. ¿Quieres contarme más de qué te tiene así? 🫂";
-      }
-
-      if (msgLow.includes('hola') || msgLow.includes('buenos dias')) {
-          return "¡Hola! Soy Versa, tu compañero de PrediVersa. ¿En qué te puedo ayudar hoy? ¡Todo bien! 😊";
-      }
-
-      const respuestasGenericas = [
-        "Te escucho con atención. Lo que compartes es importante y estoy aquí para acompañarte en este proceso. 💙",
-        "Entiendo lo que me dices. A veces es difícil expresar lo que sentimos, pero aquí puedes hacerlo con confianza. 🫂",
-        "Gracias por compartir eso conmigo. Me interesa mucho cómo te sientes hoy. Cuéntame más si quieres. 😊",
-        "Aquí estoy para ti. Tu bienestar es nuestra prioridad en PrediVersa. ¿Quieres profundizar un poco más en eso? 💙"
-      ];
-      
-      const randomMsg = respuestasGenericas[Math.floor(Math.random() * respuestasGenericas.length)];
-      return randomMsg;
+      // Si la IA falla, retornamos null para que el sistema de fallback (Amazon Lex) tome el control de forma natural.
+      return null;
     }
   }
 }
