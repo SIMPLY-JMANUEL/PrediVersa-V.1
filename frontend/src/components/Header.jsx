@@ -32,6 +32,9 @@ function Header({ onLoginClick }) {
           <li>
             <Link to="/noticias" style={{ color: 'inherit', textDecoration: 'none' }}>Noticias</Link>
           </li>
+          <li>
+            <Link to="/planes" style={{ color: 'inherit', textDecoration: 'none' }}>Planes</Link>
+          </li>
           <li style={{ cursor: 'pointer' }}>Contacto</li>
           <li onClick={onLoginClick} className="login-link">Inicio de Sesión</li>
         </ul>

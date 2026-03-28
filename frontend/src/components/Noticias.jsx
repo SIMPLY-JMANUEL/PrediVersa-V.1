@@ -4,193 +4,119 @@ import './Main.css';
 
 function Noticias() {
   const navigate = useNavigate();
-  const [expandedSection, setExpandedSection] = useState(null);
-
-  const toggleSection = (id) => {
-    setExpandedSection(expandedSection === id ? null : id);
-  };
+  const [activeTab, setActiveTab] = useState('news');
+  const [expandedId, setExpandedId] = useState(null);
 
   const newsItems = [
-    {
-      id: 1,
-      source: 'El País',
-      title: 'Familiares de víctimas exigen ley contra el bullying',
-      date: '6 Nov 2025',
-      summary: 'Ante el Congreso, exigen protección real: "¿Cuántos niños tienen que morir?"',
-      detail: 'Las familias denuncian la falta de protocolos efectivos y demandan una legislación nacional que obligue a los colegios a reportar y prevenir activamente el acoso escolar.'
-    },
-    {
-      id: 2,
-      source: 'Cadena SER',
-      title: 'Importancia de la prevención en el Día contra el Acoso',
-      date: '6 Nov 2025',
-      summary: 'Expertos de APIR remarcan el rol de la detección temprana.',
-      detail: 'En el marco del Día Internacional contra la Violencia y el Acoso Escolar, se recalca que el 90% de los casos severos podrían evitarse con sistemas de monitoreo continuo.'
-    },
-    {
-      id: 3,
-      source: 'Cadena SER',
-      title: 'Las llamadas de auxilio se multiplican por 50',
-      date: '15 Nov 2025',
-      summary: 'Impacto tras el suicidio de Sandra Peña genera alerta nacional.',
-      detail: 'El caso ha disparado las denuncias de familias que antes guardaban silencio, evidenciando una crisis de salud mental que requiere intervención tecnológica urgente.'
-    },
-    {
-      id: 4,
-      source: 'El País',
-      title: 'Colombia: País con más ataques a colegios en América',
-      date: '27 Nov 2025',
-      summary: 'Reporte internacional sitúa a Colombia en una situación crítica.',
-      detail: 'La inseguridad en los entornos escolares y el aumento de la violencia interna reflejan la vulnerabilidad extrema de los estudiantes en el contexto actual colombiano.'
-    }
+    { id: 1, source: 'El País', date: '06.11.2025', title: 'Exigencia de Ley Anti-Bullying', detail: 'Familiares de víctimas demandan al Congreso acciones inmediatas tras aumento de casos fatales.' },
+    { id: 2, source: 'Cadena SER', date: '06.11.2025', title: 'Prevención Escolar Activa', detail: 'Se destaca la analítica de datos como pilar preventivo en el Día Internacional contra el Acoso.' },
+    { id: 3, source: 'Cadena SER', date: '15.11.2025', title: 'Alerta Nacional: Caso Sandra Peña', detail: 'Las peticiones de ayuda institucional se multiplican exponencialmente tras suicidios recientes.' },
+    { id: 4, source: 'El País', date: '27.11.2025', title: 'Crisis de Seguridad en Colegios', detail: 'Colombia lidera trágica estadística de ataques a entornos escolares en Latinoamérica.' }
   ];
 
-  const analysisSections = [
-    {
-      id: 'a1',
-      title: '📈 Violencia escolar en Colombia (2025)',
-      content: 'En 2025 se registró un incremento significativo. Solo en Bogotá, las agresiones físicas aumentaron un 51%, alcanzando más de 5.800 incidentes. El 23% de los estudiantes nacionales reporta ser víctima de acoso sistemático.',
-      footer: 'Esto evidencia la necesidad crítica de sistemas como PrediVersa para la detección temprana.'
-    },
-    {
-      id: 'a2',
-      title: '🌍 Tendencias Globales de Prevención',
-      content: 'A nivel internacional, la prevención es prioridad. Programas estructurados han logrado reducir el acoso en un 67% general y un 95% en casos severos. La tendencia apunta a pasar de modelos reactivos a modelos predictivos basados en datos.',
-      footer: 'El enfoque actual integra analítica de datos y participación estudiantil activa.'
-    },
-    {
-      id: 'a3',
-      title: '⚖️ Normatividad y el rol de SIUCE',
-      content: 'La Ley 1620 de 2013 crea el Sistema Nacional de Convivencia Escolar. El sistema SIUCE permite monitorear casos, pero enfrenta desafíos como el subregistro y la detección tardía.',
-      footer: 'PrediVersa actúa como la solución tecnológica complementaria para cerrar la brecha de detección.'
-    }
+  const analysisItems = [
+    { id: 'a1', title: '📈 Alza del 51% en Bogotá', content: 'Solo en 2025, las agresiones físicas en colegios capitalinos escalaron drásticamente, evidenciando un problema de convivencia estructural.' },
+    { id: 'a2', title: '🌍 Estándar Global 67%', content: 'Implementar sistemas predictivos reduce el acoso general en un 67% y los casos severos en un 95%.' },
+    { id: 'a3', title: '⚖️ Desafío SIUCE', content: 'Aunque existe la Ley 1620, el subregistro de casos sigue siendo el mayor obstáculo para la intervención oportuna.' }
   ];
 
   return (
-    <main className="main-responsive-container" style={{ minHeight: '100vh', backgroundColor: '#f4f7f9', padding: '1rem' }}>
+    <main className="main-responsive-container" style={{ minHeight: '90vh', background: '#f8fafc', paddingBottom: '3rem' }}>
       
-      {/* BOTÓN REGRESO */}
-      <div className="back-button-container" style={{ position: 'sticky', top: '20px', left: '20px', zIndex: 100 }}>
-        <button 
-          onClick={() => navigate('/')}
-          className="cta-btn back-btn"
-          style={{ 
-            background: 'white', 
-            color: '#3A6F85', 
-            border: '2px solid #8ECFEA', 
-            boxShadow: '0 4px 12px rgba(142,207,234,0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            borderRadius: '50px',
-            padding: '0.6rem 1.2rem',
-            fontWeight: '600',
-            cursor: 'pointer'
-          }}
-        >
-          <span>←</span> Regresar al Inicio
+      {/* BOTÓN REGRESO MINIMALISTA */}
+      <div style={{ padding: '1.5rem', maxWidth: '1000px', margin: '0 auto' }}>
+        <button onClick={() => navigate('/')} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1rem' }}>
+          <span>←</span> Regresar
         </button>
       </div>
 
-      <section className="about-section" style={{ width: '100%', maxWidth: '1100px', margin: '0 auto', padding: '2rem 0' }}>
+      <section className="glass-panel" style={{ maxWidth: '1000px', margin: '0 auto', padding: '0', overflow: 'hidden', borderRadius: '24px' }}>
         
-        <div className="about-hero" style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <h1 className="responsive-title" style={{ color: '#3A6F85', marginBottom: '1rem', fontWeight: 800 }}>
-            Sala de <span className="highlight" style={{ color: '#8ECFEA' }}>Noticias & Análisis</span>
-          </h1>
-          <p style={{ fontSize: '1.2rem', color: '#555', maxWidth: '800px', margin: '0 auto', lineHeight: '1.6' }}>
-            Mantente informado sobre la situación de convivencia escolar y los avances en tecnologías preventivas.
-          </p>
+        {/* HEADER COMPACTO */}
+        <div style={{ background: 'linear-gradient(90deg, #3A6F85 0%, #2A4E5F 100%)', padding: '2.5rem 2rem', color: 'white' }}>
+          <h1 style={{ fontSize: '2.2rem', fontWeight: 800, margin: 0 }}>Sala de Prensa</h1>
+          <p style={{ opacity: 0.9, fontSize: '1.1rem', marginTop: '0.5rem' }}>Información estratégica para la seguridad institucional.</p>
         </div>
 
-        {/* NOTICIAS FLASH */}
-        <h2 style={{ color: '#2A4E5F', marginBottom: '1.5rem', fontSize: '1.8rem', paddingLeft: '10px', borderLeft: '5px solid #8ECFEA' }}>Noticias de Actualidad</h2>
-        <div className="about-grid" style={{ marginBottom: '4rem' }}>
-          {newsItems.map(item => (
-            <div 
-              key={item.id}
-              onClick={() => toggleSection(item.id)}
-              className={`glass-panel interaction-card ${expandedSection === item.id ? 'card-expanded' : ''}`}
-              style={{ 
-                padding: '2rem', 
-                cursor: 'pointer', 
-                maxHeight: expandedSection === item.id ? '500px' : '240px',
-                transition: 'all 0.4s ease',
-                border: expandedSection === item.id ? '2px solid #8ECFEA' : '1px solid rgba(255,255,255,0.5)'
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#8ECFEA', fontWeight: 700, fontSize: '0.85rem', marginBottom: '0.8rem' }}>
-                <span>{item.source}</span>
-                <span>{item.date}</span>
-              </div>
-              <h3 style={{ color: '#3A6F85', marginBottom: '0.8rem', fontSize: '1.2rem', lineHeight: '1.4' }}>{item.title}</h3>
-              <p style={{ color: '#666', fontSize: '0.95rem' }}>{item.summary}</p>
-              
-              <div style={{ 
-                marginTop: '1.5rem', 
-                paddingTop: '1rem', 
-                borderTop: '1px solid #eee',
-                display: expandedSection === item.id ? 'block' : 'none'
-              }}>
-                <p style={{ color: '#444', lineHeight: '1.6' }}>{item.detail}</p>
-              </div>
-
-              <div style={{ position: 'absolute', bottom: '15px', right: '20px', color: '#8ECFEA', fontSize: '0.8rem' }}>
-                {expandedSection === item.id ? 'Ver menos' : 'Leer más'}
-              </div>
-            </div>
-          ))}
+        {/* SELECTOR DE PESTAÑAS (INTUITIVO) */}
+        <div style={{ display: 'flex', borderBottom: '1px solid #f1f5f9' }}>
+          <button 
+            onClick={() => setActiveTab('news')}
+            style={{ 
+              flex: 1, padding: '1.2rem', background: 'none', border: 'none', 
+              borderBottom: activeTab === 'news' ? '3px solid #8ECFEA' : 'none',
+              color: activeTab === 'news' ? '#3A6F85' : '#94a3b8',
+              fontWeight: 700, cursor: 'pointer', fontSize: '1.1rem'
+            }}
+          >
+            Últimas Noticias
+          </button>
+          <button 
+            onClick={() => setActiveTab('analysis')}
+            style={{ 
+              flex: 1, padding: '1.2rem', background: 'none', border: 'none', 
+              borderBottom: activeTab === 'analysis' ? '3px solid #8ECFEA' : 'none',
+              color: activeTab === 'analysis' ? '#3A6F85' : '#94a3b8',
+              fontWeight: 700, cursor: 'pointer', fontSize: '1.1rem'
+            }}
+          >
+            Análisis & Datos
+          </button>
         </div>
 
-        {/* ANÁLISIS PROFUNDO */}
-        <h2 style={{ color: '#2A4E5F', marginBottom: '1.5rem', fontSize: '1.8rem', paddingLeft: '10px', borderLeft: '5px solid #8ECFEA' }}>Análisis & Tendencias</h2>
-        <div className="analysis-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '4rem' }}>
-          {analysisSections.map(section => (
-            <div 
-              key={section.id}
-              onClick={() => toggleSection(section.id)}
-              className={`glass-panel interaction-card ${expandedSection === section.id ? 'card-expanded' : ''}`}
-              style={{ 
-                padding: '2.5rem', 
-                cursor: 'pointer',
-                textAlign: 'left',
-                maxHeight: expandedSection === section.id ? '600px' : '130px',
-                overflow: 'hidden',
-                transition: 'all 0.3s'
-              }}
-            >
-              <h3 style={{ color: '#2A4E5F', marginBottom: '1rem' }}>{section.title}</h3>
-              <div style={{ display: expandedSection === section.id ? 'block' : 'none' }}>
-                <p style={{ color: '#555', lineHeight: '1.8', marginBottom: '1rem', fontSize: '1.1rem' }}>{section.content}</p>
-                <div style={{ background: 'rgba(142,207,234,0.1)', padding: '1rem', borderRadius: '10px', color: '#3A6F85', fontWeight: 600 }}>
-                  👉 {section.footer}
+        {/* CONTENIDO DINÁMICO */}
+        <div style={{ padding: '2rem' }}>
+          
+          {activeTab === 'news' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {newsItems.map(item => (
+                <div 
+                  key={item.id} 
+                  onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
+                  style={{ 
+                    padding: '1.5rem', borderRadius: '15px', border: '1px solid #f1f5f9', 
+                    cursor: 'pointer', background: expandedId === item.id ? '#f0f9ff' : 'white',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <span style={{ color: '#8ECFEA', fontWeight: 800, fontSize: '0.8rem' }}>{item.source}</span>
+                    <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>{item.date}</span>
+                  </div>
+                  <h4 style={{ color: '#1e293b', fontSize: '1.1rem', margin: '0' }}>{item.title}</h4>
+                  <p style={{ color: '#64748b', fontSize: '0.95rem', marginTop: '0.5rem', display: expandedId === item.id ? 'block' : 'none' }}>
+                    {item.detail}
+                  </p>
                 </div>
-              </div>
-              {expandedSection !== section.id && <p style={{ color: '#aaa' }}>Haz clic para profundizar el análisis...</p>}
+              ))}
             </div>
-          ))}
-        </div>
+          )}
 
-        {/* ENLACES RELEVANTES */}
-        <div className="value-proposition" style={{ padding: '3rem', borderRadius: '25px' }}>
-          <h3 style={{ marginBottom: '2rem', color: '#fff' }}>🔗 Recursos & Enlaces Oficiales</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', textAlign: 'center' }}>
-            <a href="http://siuce.mineducacion.gov.co/siuce-angular2/" target="_blank" rel="noreferrer" className="glass-panel" style={{ textDecoration: 'none', background: 'rgba(255,255,255,0.1)', color: '#fff' }}>
-              <h4>Sistema SIUCE (Mineducación)</h4>
-              <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)' }}>Monitoreo nacional de convivencia escolar en Colombia.</p>
-            </a>
-            <a href="https://www.colombiaaprende.edu.co" target="_blank" rel="noreferrer" className="glass-panel" style={{ textDecoration: 'none', background: 'rgba(255,255,255,0.1)', color: '#fff' }}>
-              <h4>Colombia Aprende</h4>
-              <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)' }}>Portal con recursos pedagógicos de prevención oficial.</p>
-            </a>
-          </div>
+          {activeTab === 'analysis' && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+              {analysisItems.map(item => (
+                <div key={item.id} style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '15px', borderLeft: '4px solid #3A6F85' }}>
+                  <h4 style={{ color: '#3A6F85', marginBottom: '0.8rem' }}>{item.title}</h4>
+                  <p style={{ color: '#475569', fontSize: '0.9rem', lineHeight: '1.6' }}>{item.content}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
         </div>
 
       </section>
 
-      <footer style={{ marginTop: 'auto', padding: '2rem', textAlign: 'center', color: '#99b', fontSize: '0.9rem' }}>
-        © {new Date().getFullYear()} PrediVersa • Centro de Información Preventiva.
-      </footer>
+      {/* ENLACES RÁPIDOS */}
+      <div style={{ maxWidth: '1000px', margin: '2rem auto', display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <a href="http://siuce.mineducacion.gov.co/" target="_blank" rel="noreferrer" style={{ padding: '0.8rem 1.5rem', background: 'white', borderRadius: '50px', border: '1px solid #e2e8f0', color: '#64748b', textDecoration: 'none', fontSize: '0.9rem' }}>
+          Portal SIUCE 🔗
+        </a>
+        <a href="https://www.colombiaaprende.edu.co" target="_blank" rel="noreferrer" style={{ padding: '0.8rem 1.5rem', background: 'white', borderRadius: '50px', border: '1px solid #e2e8f0', color: '#64748b', textDecoration: 'none', fontSize: '0.9rem' }}>
+          Colombia Aprende 🔗
+        </a>
+      </div>
+
     </main>
   );
 }

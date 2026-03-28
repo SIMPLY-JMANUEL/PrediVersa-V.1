@@ -12,6 +12,7 @@ import RoleProtectedRoute from './components/RoleProtectedRoute'
 import QuienesSomos from './components/QuienesSomos'
 import Servicios from './components/Servicios'
 import Noticias from './components/Noticias'
+import Planes from './components/Planes'
 
 function AppRoutes({ user, isLoginOpen, setIsLoginOpen, handleLogin, handleLogout }) {
   const location = useLocation()
@@ -40,6 +41,12 @@ function AppRoutes({ user, isLoginOpen, setIsLoginOpen, handleLogin, handleLogou
           <>
             <Header onLoginClick={() => setIsLoginOpen(true)} />
             <Noticias />
+          </>
+        } />
+        <Route path="/planes" element={
+          <>
+            <Header onLoginClick={() => setIsLoginOpen(true)} />
+            <Planes />
           </>
         } />
         <Route path="/student" element={
