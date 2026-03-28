@@ -217,7 +217,7 @@ router.post('/message', verifyToken, async (req, res) => {
     // 4. Responder al Frontend (GARANTIZADO)
     return res.json({
       success: true,
-      botResponse: lexResponse.messages.map(m => m.content).join('\n'),
+      botResponse: finalResponse,
       risk: {
         level: finalRisk,
         score: finalScore,
