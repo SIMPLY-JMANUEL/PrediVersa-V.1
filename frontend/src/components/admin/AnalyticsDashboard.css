@@ -87,6 +87,56 @@
   letter-spacing: 1px;
 }
 
+
+.critical-students-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.critical-student-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.1);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.critical-student-row:hover {
+  background: rgba(239, 68, 68, 0.1);
+  transform: translateX(5px);
+}
+
+.student-id {
+  font-size: 0.9rem;
+  color: #f1f5f9;
+  font-family: monospace;
+}
+
+.risk-tag {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.risk-tag.alto {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.no-data {
+  text-align: center;
+  color: #64748b;
+  padding: 40px 0;
+  font-size: 0.9rem;
+}
+
 @media (max-width: 768px) {
   .charts-grid {
     grid-template-columns: 1fr;

@@ -5,6 +5,7 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const alertRoutes = require('./routes/alerts');
 const chatbotRoutes = require('./routes/chatbot');
+const dashboardRoutes = require('./routes/dashboard');
 const configRoutes = require('./routes/config');
 
 const app = express();
@@ -39,6 +40,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/alerts', alertRoutes);
 app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/config', configRoutes);
 
 
