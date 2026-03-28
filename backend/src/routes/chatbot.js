@@ -1,7 +1,7 @@
 const express = require('express');
 const { verifyToken } = require('../middleware/auth');
 const router = express.Router();
-const { query } = require('../db/connection');
+const { query, executeQuery } = require('../db/connection');
 const { invokeMotorVersaLambda } = require('../utils/lambdaService');
 const { createAlert } = require('../db/users');
 const centralAI = require('../utils/centralAIService');

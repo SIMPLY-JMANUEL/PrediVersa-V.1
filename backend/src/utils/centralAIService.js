@@ -210,7 +210,7 @@ class CentralAIService {
 
       const result = await this.model.generateContent({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxTokens: 200 }
+        generationConfig: { temperature: 0.7, maxOutputTokens: 200 }
       });
       const response = await result.response;
       let finalResponse = response.text().trim();
