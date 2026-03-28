@@ -4,150 +4,111 @@ import './Main.css';
 
 function Servicios() {
   const navigate = useNavigate();
-  const [expandedCard, setExpandedCard] = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
 
-  const toggleCard = (id) => {
-    setExpandedCard(expandedCard === id ? null : id);
+  const toggleService = (id) => {
+    setExpandedId(expandedId === id ? null : id);
   };
 
   const servicesData = [
     {
       id: 1,
-      icon: '📊',
-      title: 'Análisis de Información Institucional',
-      summary: 'Procesamiento de datos internos para identificar patrones.',
-      detail: 'Analizamos profundamente el flujo de datos institucionales para detectar tendencias y posibles factores de riesgo en la convivencia y el bienestar de los integrantes.'
+      name: 'Análisis de Información Institucional',
+      desc: 'Procesamiento de datos internos para identificar patrones, tendencias y posibles factores de riesgo en convivencia y bienestar.',
+      detail: 'Utilizamos algoritmos avanzados para cruzar variables académicas, disciplinarias y de salud mental, generando un mapa térmico de riesgos en tiempo real para la toma de decisiones informada.'
     },
     {
       id: 2,
-      icon: '📈',
-      title: 'Generación de Indicadores',
-      summary: 'Métricas clave para evaluar el clima institucional.',
-      detail: 'Construimos indicadores y KPIs específicos que permiten medir de forma objetiva la evolución del bienestar institucional a lo largo del tiempo.'
+      name: 'Generación de Indicadores (KPIs)',
+      desc: 'Construcción de métricas clave que permiten evaluar el estado del clima institucional y su evolución en el tiempo.',
+      detail: 'Definimos indicadores de gestión de convivencia que ayudan a las directivas a medir el impacto de sus estrategias preventivas y el bienestar general de la comunidad educativa.'
     },
     {
       id: 3,
-      icon: '🖥️',
-      title: 'Dashboards Inteligentes',
-      summary: 'Paneles interactivos de visualización clara.',
-      detail: 'Visualización intuitiva de resultados en tiempo real para orientadores, directivos y equipos de talento humano, optimizando la interpretación estratégica.'
+      name: 'Dashboards Inteligentes',
+      desc: 'Visualización de datos en paneles interactivos para facilitar la interpretación por parte de directivos y orientadores.',
+      detail: 'Paneles visuales que muestran de forma clara y accesible el estado de convivencia, permitiendo filtrar información por grupos, grados o periodos específicos de tiempo.'
     },
     {
       id: 4,
-      icon: '🚨',
-      title: 'Alertas Preventivas',
-      summary: 'Modelos predictivos para detección temprana.',
-      detail: 'Implementamos algoritmos que anticipan situaciones críticas, disparando notificaciones inmediatas ante cualquier señal de riesgo detectada por el sistema.'
+      name: 'Alertas Preventivas',
+      desc: 'Detección temprana de posibles situaciones de riesgo mediante modelos de análisis predictivo.',
+      detail: 'El sistema notifica automáticamente a los responsables cuando se detecta un comportamiento o patrón que sugiere una escalada de riesgo en la convivencia escolar.'
     },
     {
       id: 5,
-      icon: '📄',
-      title: 'Reportes Estratégicos',
-      summary: 'Informes estructurados para toma de decisiones.',
-      detail: 'Generación automatizada de reportes formales listos para sustentar decisiones estratégicas y cumplir con requisitos de auditoría o seguimiento.'
+      name: 'Reportes Estratégicos',
+      desc: 'Generación de informes estructurados para apoyar la toma de decisiones institucionales.',
+      detail: 'Informes ejecutivos listos para presentar ante consejos directivos o comités de convivencia, con data sólida y recomendaciones basadas en el análisis sistémico.'
     },
     {
       id: 6,
-      icon: '🎓',
-      title: 'Implementación y Capacitación',
-      summary: 'Acompañamiento integral en la adopción tecnológica.',
-      detail: 'Formamos a los equipos internos en el uso ético y efectivo de PrediVersa, asegurando una transición fluida hacia una cultura institucional basada en datos.'
+      name: 'Implementación y Capacitación',
+      desc: 'Acompañamiento en la adopción de la plataforma y formación de usuarios clave.',
+      detail: 'Aseguramos que el talento humano de la institución domine la herramienta y sepa interpretar los resultados para una gestión eficiente y humana.'
     }
   ];
 
   return (
-    <main className="main-responsive-container" style={{ minHeight: '100vh', backgroundColor: '#fcfdfe', padding: '1rem' }}>
-      
+    <main className="page-internal-standard">
       {/* BOTÓN REGRESO ESTANDARIZADO */}
-      <div style={{ padding: '1rem' }}>
+      <div className="back-button-holder">
         <button onClick={() => navigate('/')} className="back-button-global">
           <span>←</span> Regresar al Inicio
         </button>
       </div>
 
-      <section className="about-section" style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', padding: '2rem 0' }}>
-        
-        {/* HERO SERVICIOS */}
-        <div className="about-hero" style={{ textAlign: 'center', marginBottom: '4rem' }}>
-          <h1 className="responsive-title" style={{ color: '#3A6F85', marginBottom: '1.2rem', fontSize: '3.2rem', fontWeight: 800 }}>
-            Nuestros <span className="highlight" style={{ color: '#8ECFEA' }}>Servicios</span> Especializados
-          </h1>
-          <p style={{ fontSize: '1.2rem', color: '#555', maxWidth: '800px', margin: '0 auto', lineHeight: '1.7', padding: '0 1rem' }}>
-            Potenciamos el bienestar institucional a través de soluciones tecnológicas integrales basadas en analítica predictiva.
-          </p>
-        </div>
-
-        {/* GRID DE SERVICIOS (INTERACTIVO) */}
-        <div className="about-grid interactive-grid" style={{ marginBottom: '4rem' }}>
+      <div className="page-content-wrapper">
+        <section className="about-section">
           
-          {servicesData.map((service) => (
-            <div 
-              key={service.id}
-              onClick={() => toggleCard(service.id)}
-              className={`glass-panel interaction-card ${expandedCard === service.id ? 'card-expanded' : ''}`}
-              style={{ 
-                padding: '2.5rem 1.8rem', 
-                cursor: 'pointer', 
-                transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                position: 'relative',
-                overflow: 'hidden',
-                maxHeight: expandedCard === service.id ? '700px' : '280px',
-                border: expandedCard === service.id ? '2px solid #8ECFEA' : '1px solid rgba(255,255,255,0.6)',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'flex-start',
-                alignItems: 'center',
-                textAlign: 'center'
-              }}
-            >
-              <div style={{ fontSize: '3.5rem', marginBottom: '1.5rem' }}>{service.icon}</div>
-              <h3 style={{ color: '#2A4E5F', marginBottom: '1rem', fontSize: '1.4rem', lineHeight: '1.3' }}>{service.title}</h3>
-              <p style={{ color: '#666', fontSize: '1rem', marginBottom: '1rem' }}>{service.summary}</p>
-              
-              {/* DETALLE EXPANDIBLE */}
-              <div style={{ 
-                marginTop: '1.5rem', 
-                paddingTop: '1.5rem', 
-                borderTop: '1px solid rgba(0,0,0,0.08)',
-                opacity: expandedCard === service.id ? 1 : 0,
-                transform: expandedCard === service.id ? 'translateY(0)' : 'translateY(25px)',
-                transition: 'all 0.3s ease',
-                display: expandedCard === service.id ? 'block' : 'none'
-              }}>
-                <p style={{ color: '#444', lineHeight: '1.8', fontSize: '1.05rem', textAlign: 'left' }}>{service.detail}</p>
+          <div className="about-hero" style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <h1 className="responsive-title" style={{ color: '#3A6F85', marginBottom: '1rem', fontWeight: 800 }}>
+              Nuestros <span className="highlight" style={{ color: '#8ECFEA' }}>Servicios</span>
+            </h1>
+            <p style={{ fontSize: '1.2rem', color: '#555', maxWidth: '750px', margin: '0 auto', lineHeight: '1.6' }}>
+              Soluciones integrales para la gestión moderna de la convivencia y el bienestar escolar.
+            </p>
+          </div>
+
+          <div className="about-grid">
+            {servicesData.map((service) => (
+              <div 
+                key={service.id}
+                onClick={() => toggleService(service.id)}
+                className={`glass-panel interaction-card ${expandedId === service.id ? 'card-expanded' : ''}`}
+                style={{ 
+                  padding: '2rem', 
+                  cursor: 'pointer', 
+                  transition: 'all 0.4s ease',
+                  maxHeight: expandedId === service.id ? '500px' : '230px',
+                  border: expandedId === service.id ? '2px solid #8ECFEA' : '1px solid rgba(255,255,255,0.5)'
+                }}
+              >
+                <div style={{ color: '#8ECFEA', fontWeight: 700, marginBottom: '0.8rem', fontSize: '1rem' }}>Servicio 0{service.id}</div>
+                <h3 style={{ color: '#2A4E5F', marginBottom: '1rem', fontSize: '1.3rem' }}>{service.name}</h3>
+                <p style={{ color: '#666', fontSize: '0.95rem' }}>{service.desc}</p>
+                
+                <div style={{ 
+                  marginTop: '1.5rem', 
+                  paddingTop: '1rem', 
+                  borderTop: '1px solid #eee',
+                  display: expandedId === service.id ? 'block' : 'none'
+                }}>
+                  <p style={{ color: '#444', lineHeight: '1.6' }}>{service.detail}</p>
+                </div>
+
+                <div style={{ position: 'absolute', bottom: '15px', right: '20px', color: '#8ECFEA', fontSize: '0.8rem', fontWeight: 600 }}>
+                  {expandedId === service.id ? 'Ver menos' : 'Conocer más'}
+                </div>
               </div>
+            ))}
+          </div>
 
-              <div style={{ 
-                position: 'absolute', 
-                bottom: '15px', 
-                right: '25px', 
-                fontSize: '0.9rem', 
-                color: '#8ECFEA', 
-                fontWeight: 600,
-                letterSpacing: '0.5px'
-              }}>
-                {expandedCard === service.id ? 'Contraer [-]' : 'Ver detalle [+]'}
-              </div>
-            </div>
-          ))}
+        </section>
+      </div>
 
-        </div>
-
-        {/* CTA FINAL */}
-        <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'linear-gradient(135deg, #f0f8ff, #ffffff)', borderRadius: '30px', boxShadow: '0 10px 30px rgba(0,0,0,0.03)' }}>
-          <h2 style={{ color: '#3A6F85', marginBottom: '1.5rem' }}>¿Listo para transformar tu institución?</h2>
-          <p style={{ color: '#666', marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2.5rem auto' }}>
-            Únete a las organizaciones que ya están previniendo riesgos hoy mismo.
-          </p>
-          <button className="cta-btn" onClick={() => navigate('/')} style={{ padding: '1rem 3rem', fontSize: '1.1rem' }}>
-            Solicitar Información
-          </button>
-        </div>
-
-      </section>
-      
-      <footer style={{ marginTop: '3rem', padding: '2rem', textAlign: 'center', color: '#99b', fontSize: '0.9rem', borderTop: '1px solid #eee' }}>
-        © {new Date().getFullYear()} PrediVersa • Líderes en Análisis Institucional.
+      <footer style={{ marginTop: 'auto', padding: '2rem', color: '#94a3b8', fontSize: '0.9rem' }}>
+        © {new Date().getFullYear()} PrediVersa • Soluciones que transforman realidades.
       </footer>
     </main>
   );
