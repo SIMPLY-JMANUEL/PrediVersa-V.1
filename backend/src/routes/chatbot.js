@@ -85,18 +85,34 @@ router.post('/message', verifyToken, async (req, res) => {
 
       if (respuestaDinamica) {
         lexResponse.messages = [{ content: respuestaDinamica }];
+        finalResponse = respuestaDinamica;
+      } else {
+        finalResponse = lexResponse.messages[0].content;
       }
-      finalResponse = lexResponse.messages[0].content;
 
-      // 3. PERSISTENCIA Y MÉTRICAS (Producto Real)
+    } catch (error) {
+      console.error('❌ Error en Motor AI o Lex:', error.message);
+      finalResponse = lexResponse.messages[0].content;
+    }
+
+    // 🧼 POST-PROCESAMIENTO DE SEGURIDAD (HARD-CODED REDUNDANCY)
+    // Si el riesgo es ALTO, forzamos que el mensaje incluya contención emocional pase lo que pase.
+    if (finalRisk.toUpperCase() === "ALTO") {
+      const lowerRes = finalResponse.toLowerCase();
+      if (!lowerRes.includes("no estás solo") && !lowerRes.includes("confianza")) {
+         finalResponse += "\n\nNo estás solo, parce. Sería bueno hablar con alguien de confianza (como un orientador de tu colegio) para no cargar con esto solo, ¿sí? Aquí estoy para escucharte.";
+      }
+    }
+    
+    // 3. PERSISTENCIA Y MÉTRICAS (Producto Real)
+    try {
       await executeQuery(
         `INSERT INTO chatbot_interacciones (session_id, user_input, response, risk, risk_score)
          VALUES (?, ?, ?, ?, ?)`,
         [user.id || sessionId || 'anonimo', text, finalResponse, finalRisk, finalScore]
       );
-    } catch (error) {
-      console.error('❌ Error en Motor AI o Lex:', error.message);
-      finalResponse = lexResponse.messages[0].content;
+    } catch (dbErr) {
+      console.error('⚠️ Error guardando interacción:', dbErr.message);
     }
 
     // 3. Persistencia de Alertas (Todos los niveles de riesgo van al Dashboard de Admin)
