@@ -14,7 +14,7 @@ const WEIGHTS = {
 class CentralAIService {
   constructor() {
     this.client = new BedrockRuntimeClient({ region: process.env.AWS_REGION || "us-east-1" });
-    this.modelId = "anthropic.claude-3-haiku-20240307-v1:0"; // Migrado a Haiku Activo
+    this.modelId = "us.anthropic.claude-3-5-haiku-20241022-v1:0"; // Claude 3.5 Haiku (US Profile)
     this.initialized = true;
   }
 
