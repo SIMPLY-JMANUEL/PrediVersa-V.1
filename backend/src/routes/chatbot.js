@@ -71,6 +71,8 @@ router.post('/message', verifyToken, async (req, res) => {
     }
 
     // 2. Comunicación Combinada (Amazon Lex + Motor AI Central)
+    let finalResponse = lexResponse.messages[0].content;
+
     try {
       const realLexResponse = await sendToLex(user.id || sessionId || 'anonimo', text);
       if (realLexResponse) {
@@ -86,8 +88,6 @@ router.post('/message', verifyToken, async (req, res) => {
       if (respuestaDinamica) {
         lexResponse.messages = [{ content: respuestaDinamica }];
         finalResponse = respuestaDinamica;
-      } else {
-        finalResponse = lexResponse.messages[0].content;
       }
 
     } catch (error) {
