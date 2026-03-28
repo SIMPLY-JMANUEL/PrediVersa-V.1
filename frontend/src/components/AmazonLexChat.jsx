@@ -5,7 +5,7 @@ import './AmazonLexChat.css'
 
 function AmazonLexChat({ user }) {
   const [messages, setMessages] = useState([
-    { id: 1, text: `Hola ${user?.name || 'Estudiante'}, soy tu Asistente Versa. ¿En qué puedo apoyarte hoy?`, sender: 'bot' }
+    { id: 1, text: `Hola ${user?.name || 'Estudiante'}, soy tu Asistente Versa. ¿Como estas hoy?`, sender: 'bot' }
   ])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
@@ -117,14 +117,34 @@ function AmazonLexChat({ user }) {
   return (
     <div className="lex-chat-container">
       <div className="lex-chat-header">
-        <div className="bot-avatar-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#e2e8f0', borderRadius: '50%', padding: '8px', transition: 'all 0.3s' }}>
-          {botEmotion === 'thinking' ? <Loader2 size={24} color="#3b82f6" className="animate-spin" /> :
-            botEmotion === 'empathetic' ? <HeartHandshake size={24} color="#ec4899" /> :
-              <Smile size={24} color="#10b981" />}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="bot-avatar-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#e2e8f0', borderRadius: '50%', padding: '8px', transition: 'all 0.3s' }}>
+            {botEmotion === 'thinking' ? <Loader2 size={24} color="#3b82f6" className="animate-spin" /> :
+              botEmotion === 'empathetic' ? <HeartHandshake size={24} color="#ec4899" /> :
+                <Smile size={24} color="#10b981" />}
+          </div>
+          <div>
+            <h4 style={{ margin: 0 }}>Versa Assitente Vitual</h4>
+            <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Apoyo Pedagógico y Bienestar IA</span>
+          </div>
         </div>
-        <div>
-          <h4 style={{ margin: 0 }}>PrediVersa Assistant</h4>
-          <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Apoyo Pedagógico y Bienestar IA</span>
+        
+        {/* Banner Central de Conexión Protegida */}
+        <div style={{ 
+          fontSize: '0.65rem', 
+          backgroundColor: '#f0fdf4', 
+          color: '#166534', 
+          padding: '4px 10px', 
+          borderRadius: '20px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '6px',
+          border: '1px solid #bbf7d0',
+          fontWeight: 600,
+          margin: '0 auto'
+        }}>
+          <span style={{ width: '8px', height: '8px', backgroundColor: '#22c55e', borderRadius: '50%', display: 'inline-block', boxShadow: '0 0 5px rgba(34, 197, 94, 0.5)' }}></span>
+          Conexión Protegida — Amazon Lex & Motor Versa IA
         </div>
       </div>
 
@@ -134,7 +154,7 @@ function AmazonLexChat({ user }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
               {msg.sender === 'bot' ? <Bot size={14} /> : <User size={14} />}
               <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>
-                {msg.sender === 'bot' ? 'PrediVersa Assistant' : 'Tú'}
+                {msg.sender === 'bot' ? 'Versa Assitente Vitual' : 'Tú'}
               </span>
             </div>
             {msg.text}

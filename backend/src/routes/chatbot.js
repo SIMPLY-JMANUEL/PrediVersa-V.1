@@ -129,34 +129,47 @@ router.post('/message', verifyToken, async (req, res) => {
       console.error('⚠️ Error guardando interacción:', dbErr.message);
     }
 
-    // 3. Persistencia de Alertas (Todos los niveles de riesgo van al Dashboard de Admin)
-    try {
-      if (['alto', 'medio', 'bajo'].includes(finalRisk)) {
-        const ticket = `LEX-${Date.now()}`;
+        // 3. Persistencia de Alertas (Todos los niveles de riesgo van al Dashboard de Admin)
+        try {
+          if (['alto', 'medio', 'bajo'].includes(finalRisk)) {
+            const ticket = `LEX-${Date.now()}`;
+            const ejeDetectado = riskResult.eje_principal || 'GENERAL';
+            const accionSugerida = riskResult.accion_sugerida || 'Monitoreo Estándar';
 
-        let tipoAlerta = 'Informativa'; // Por defecto para 'bajo'
-        if (finalRisk === 'alto') tipoAlerta = 'Critica';
-        else if (finalRisk === 'medio') tipoAlerta = 'Advertencia';
+            let tipoAlerta = 'Informativa'; // Por defecto para 'bajo'
+            if (finalRisk === 'alto') tipoAlerta = 'Critica';
+            else if (finalRisk === 'medio') tipoAlerta = 'Advertencia';
 
-        const alertSummary = riskResult.razon || `Intención: ${riskResult.intencion_principal || 'N/A'}`;
-        const detectedEmotions = (riskResult.emociones_detectadas || []).join(', ');
+            const alertSummary = riskResult.razon || `Intención: ${riskResult.intencion_principal || 'N/A'}`;
+            const detectedEmotions = (riskResult.emociones_detectadas || []).join(', ');
 
-        await createAlert({
-          studentName: user.name || 'Estudiante Lex',
-          studentUsername: user.email || '',
-          alertType: tipoAlerta,
-          description: `[SISTEMA VERSA v2 - ${finalRisk.toUpperCase()}]\n\nMensaje: "${text}"\n\nAnálisis IA:\n- Razonamiento: ${alertSummary}\n- Emociones: ${detectedEmotions}\n- Palabras Clave: ${(riskResult.palabras_clave_criticas || []).join(', ')}`,
-          ticketNumber: ticket,
-          status: 'Pendiente'
-        });
+            // REGISTRO DE ALERTA CON DIAGNÓSTICO DE REMISIÓN V2.6
+            await createAlert({
+              studentName: user.name || 'Estudiante Lex',
+              studentUsername: user.email || '',
+              alertType: tipoAlerta,
+              description: `[ALERTA EN CALIENTE - EJE: ${ejeDetectado}]\n\n` +
+                           `Mensaje Estudiante: "${text}"\n\n` +
+                           `📋 ACCIÓN SUGERIDA: ${accionSugerida}\n` +
+                           `----------------------------------\n` +
+                           `Análisis IA Diagnóstico:\n` +
+                           `- Razonamiento: ${alertSummary}\n` +
+                           `- Emociones: ${detectedEmotions}\n` +
+                           `- Palabras Clave: ${(riskResult.keywords_detectadas || []).join(', ')}`,
+              ticketNumber: ticket,
+              status: (finalRisk === 'alto') ? 'Urgente' : 'Pendiente'
+            });
 
-        notificarAdmins({
-          tipo: 'alerta_lex',
-          nivel: finalRisk,
-          estudiante: user.name || 'Estudiante Lex',
-          ticket: ticket,
-          mensaje: text.substring(0, 100) + '...'
-        });
+            // NOTIFICACIÓN SSE INMEDIATA AL ADMINISTRADOR (EN EL ACTO)
+            notificarAdmins({
+              tipo: 'alerta_lex',
+              nivel: finalRisk,
+              eje: ejeDetectado, // Nuevo campo de Eje para el Dashboard
+              remision: accionSugerida, // Acción sugerida en el acto
+              estudiante: user.name || 'Estudiante Lex',
+              ticket: ticket,
+              mensaje: text.substring(0, 100) + '...'
+            });
 
         // ESCALAMIENTO REAL-TIME VÍA SMS (AWS SNS) Y EMAIL (AWS SES)
         if (finalRisk === 'alto') {
