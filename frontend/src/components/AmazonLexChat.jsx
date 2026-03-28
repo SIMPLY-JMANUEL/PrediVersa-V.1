@@ -64,7 +64,7 @@ function AmazonLexChat({ user }) {
     setInput('')
     setIsTyping(true)
 
-    try {me siento mal
+    try {
       setBotEmotion('thinking');
 
       const historialReducido = messages.slice(-6).map(m => ({

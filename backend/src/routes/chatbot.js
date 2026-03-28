@@ -23,7 +23,7 @@ router.get('/stream', verifyToken, (req, res) => {
 
   res.write(`data: ${JSON.stringify({ tipo: 'conexion', mensaje: 'Conectado al sistema de alertas Lex Versa ✅' })}\n\n`);
   adminClients.add(res);
-  
+
   const ping = setInterval(() => {
     try { res.write(': ping\n\n'); }
     catch (e) { clearInterval(ping); adminClients.delete(res); }
@@ -41,12 +41,12 @@ router.get('/stream', verifyToken, (req, res) => {
  */
 router.post('/message', verifyToken, async (req, res) => {
   const { text, sessionId, historial = [] } = req.body;
-  const user = req.user; 
-  
+  const user = req.user;
+
   // RESPUESTA POR DEFECTO (POR SI LEX O LA RED FALLAN)
-  let lexResponse = { 
-    messages: [{ content: "He recibido tu información. Estoy procesando tu mensaje de forma segura para brindarte la mejor orientación." }], 
-    intent: 'FallbackLocal' 
+  let lexResponse = {
+    messages: [{ content: "He recibido tu información. Estoy procesando tu mensaje de forma segura para brindarte la mejor orientación." }],
+    intent: 'FallbackLocal'
   };
 
   try {
@@ -86,32 +86,32 @@ router.post('/message', verifyToken, async (req, res) => {
           lexResponse.messages = realLexResponse.messages;
         }
       }
-      
+
       // 2.2 Usar el Motor de IA Central para asegurar respuestas empáticas en lugar de las estáticas de Lex
-      const respuestaDinamica = await centralAI.generarRespuesta({ 
-        mensaje: text, 
+      const respuestaDinamica = await centralAI.generarRespuesta({
+        mensaje: text,
         nivelRiesgo: finalRisk,
         historial: historial
       });
-      
+
       if (respuestaDinamica) {
         lexResponse.messages = [{ content: respuestaDinamica }];
       }
 
     } catch (error) {
-       console.error('❌ Error en Motor AI o Lex, usando respaldo:', error.message);
-       if (finalRisk === 'alto') {
-         lexResponse.messages = [{ content: "Entiendo que estás pasando por un momento muy difícil. He escalado tu mensaje de forma urgente a los orientadores." }];
-       } else {
-         lexResponse.messages = [{ content: "Te escucho. Tu bienestar es clave para nosotros y he registrado el caso. ¿Quieres contarme más al respecto?" }];
-       }
+      console.error('❌ Error en Motor AI o Lex, usando respaldo:', error.message);
+      if (finalRisk === 'alto') {
+        lexResponse.messages = [{ content: "Entiendo que estás pasando por un momento muy difícil. He escalado tu mensaje de forma urgente a los orientadores." }];
+      } else {
+        lexResponse.messages = [{ content: "Te escucho. Tu bienestar es clave para nosotros y he registrado el caso. ¿Quieres contarme más al respecto?" }];
+      }
     }
-    
+
     // 3. Persistencia de Alertas (Todos los niveles de riesgo van al Dashboard de Admin)
     try {
       if (['alto', 'medio', 'bajo'].includes(finalRisk)) {
         const ticket = `LEX-${Date.now()}`;
-        
+
         let tipoAlerta = 'Informativa'; // Por defecto para 'bajo'
         if (finalRisk === 'alto') tipoAlerta = 'Critica';
         else if (finalRisk === 'medio') tipoAlerta = 'Advertencia';
@@ -139,18 +139,18 @@ router.post('/message', verifyToken, async (req, res) => {
           try {
             // Aquí puedes agregar 1, 3 o hasta 10 números separados por comas.
             const numerosAdmin = [
-              "+573000000000", // Rector
-              "+573000000001", // Psicología
-              "+573000000002"  // Coordinador
+              "+573206708788", // Rector
+              "+573225892184", // Psicología
+              "+573234071416"  // Coordinador
             ];
-            
+
             // Enviamos el mensaje a todos los números al mismo tiempo
             const messageText = `🚨 ALERTA CRÍTICA PREDIVERSA 🚨\nTicket: ${ticket}\nEstudiante: ${user.name || 'Estudiante Lex'}\nRiesgo: ALTO.\nIngresa al Dashboard urgente.`;
-            
-            const smsPromises = numerosAdmin.map(numero => 
+
+            const smsPromises = numerosAdmin.map(numero =>
               snsClient.send(new PublishCommand({ Message: messageText, PhoneNumber: numero }))
             );
-            
+
             await Promise.allSettled(smsPromises);
             console.log('✅ SMS enviados al comité administrativo.');
           } catch (snsError) {
@@ -175,8 +175,8 @@ router.post('/message', verifyToken, async (req, res) => {
   } catch (error) {
     console.error('❌ ERROR FATAL EN CHATBOT /message:', error);
     // Respuesta de pánico absoluta (último recurso)
-    return res.json({ 
-      success: true, 
+    return res.json({
+      success: true,
       botResponse: "Gracias por escribirnos. Estamos revisando tu solicitud con nuestros profesionales para darte una respuesta adecuada.",
       risk: { level: 'desconocido', score: 0, keywords: [] },
       lexIntent: 'EmergencyFallback'
@@ -189,34 +189,34 @@ router.post('/message', verifyToken, async (req, res) => {
  * Verifica que las variables de AWS estén cargadas sin exponer secretos.
  */
 router.get('/check', (req, res) => {
-    const required = ['AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'LEX_BOT_ID', 'LEX_BOT_ALIAS_ID', 'DB_HOST', 'DB_DATABASE'];
-    const status = required.reduce((acc, v) => {
-        acc[v] = process.env[v] ? '✅ CARGADA' : '❌ NO DEFINIDA';
-        return acc;
-    }, {});
-    
-    return res.json({
-        success: true,
-        diagnostico: status,
-        config_actual: {
-            region: process.env.AWS_REGION || 'us-east-1',
-            botId: process.env.LEX_BOT_ID || 'DERGWSU1C8',
-            // XVK50SN8KY = PrediVersaAlias (Producción, Versión 1)
-            aliasId: process.env.LEX_BOT_ALIAS_ID || 'XVK50SN8KY',
-            localeId: process.env.LEX_LOCALE_ID || 'es_US',
-            db_host: process.env.DB_HOST ? `${process.env.DB_HOST.substring(0, 20)}...` : 'NO DEFINIDO',
-            db_name: process.env.DB_DATABASE || 'NO DEFINIDO',
-            lambda_motor: process.env.LAMBDA_MOTOR_VERSA_NAME || 'MotorVersaEngine',
-            usa_lambda: process.env.USE_LAMBDA_MOTOR || 'false'
-        }
-    });
+  const required = ['AWS_REGION', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'LEX_BOT_ID', 'LEX_BOT_ALIAS_ID', 'DB_HOST', 'DB_DATABASE'];
+  const status = required.reduce((acc, v) => {
+    acc[v] = process.env[v] ? '✅ CARGADA' : '❌ NO DEFINIDA';
+    return acc;
+  }, {});
+
+  return res.json({
+    success: true,
+    diagnostico: status,
+    config_actual: {
+      region: process.env.AWS_REGION || 'us-east-1',
+      botId: process.env.LEX_BOT_ID || 'DERGWSU1C8',
+      // XVK50SN8KY = PrediVersaAlias (Producción, Versión 1)
+      aliasId: process.env.LEX_BOT_ALIAS_ID || 'XVK50SN8KY',
+      localeId: process.env.LEX_LOCALE_ID || 'es_US',
+      db_host: process.env.DB_HOST ? `${process.env.DB_HOST.substring(0, 20)}...` : 'NO DEFINIDO',
+      db_name: process.env.DB_DATABASE || 'NO DEFINIDO',
+      lambda_motor: process.env.LAMBDA_MOTOR_VERSA_NAME || 'MotorVersaEngine',
+      usa_lambda: process.env.USE_LAMBDA_MOTOR || 'false'
+    }
+  });
 });
 
 
 // Mantener endpoints de estadísticas y administración (Dashboard)
 router.get('/estadisticas', verifyToken, async (req, res) => {
-    try {
-        const stats = await query(`
+  try {
+    const stats = await query(`
           SELECT 
             (SELECT COUNT(*) FROM chatbot_reportes) as total_interacciones,
             (SELECT COUNT(*) FROM chatbot_reportes WHERE nivel_riesgo = 'bajo') as riesgo_bajo,
@@ -225,9 +225,9 @@ router.get('/estadisticas', verifyToken, async (req, res) => {
             (SELECT COUNT(*) FROM chatbot_alertas_criticas) as total_alertas_criticas,
             (SELECT COUNT(*) FROM chatbot_reuniones) as reuniones_agendadas
         `);
-        const s = stats[0] || {};
-        return res.json({ success: true, data: { ...s, total_lex_active: true } });
-    } catch (error) { res.status(500).json({ success: false }); }
+    const s = stats[0] || {};
+    return res.json({ success: true, data: { ...s, total_lex_active: true } });
+  } catch (error) { res.status(500).json({ success: false }); }
 });
 
 module.exports = router;
