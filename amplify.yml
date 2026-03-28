@@ -3,13 +3,11 @@ frontend:
   phases:
     preBuild:
       commands:
-        - cd frontend
-        - npm install
+        - cd frontend && npm install
     build:
       commands:
-        - cd frontend
-        - echo "VITE_API_URL=https://jkwpuacezq.us-east-1.awsapprunner.com" > .env
-        - npm run build
+        - cd frontend && echo "VITE_API_URL=https://jkwpuacezq.us-east-1.awsapprunner.com" > .env
+        - cd frontend && npm run build
   artifacts:
     baseDirectory: frontend/dist
     files:
