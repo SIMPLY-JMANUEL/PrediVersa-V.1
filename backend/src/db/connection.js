@@ -76,7 +76,7 @@ const initializeDatabase = async () => {
   try {
     const connection = await pool.getConnection();
 
-    // Crear tabla de usuarios si no existe
+    // Crear tabla de usuarios si no existe con TODAS las columnas necesarias
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -90,6 +90,23 @@ const initializeDatabase = async () => {
         birthDate DATE DEFAULT NULL,
         profilePicture LONGTEXT DEFAULT NULL,
         status ENUM('Activo', 'Inactivo') DEFAULT 'Activo',
+        
+        -- Columnas adicionales de la migración v1.1
+        edad VARCHAR(10) DEFAULT '',
+        lugarNacimiento VARCHAR(100) DEFAULT '',
+        nombrePadre VARCHAR(100) DEFAULT '',
+        nombreMadre VARCHAR(100) DEFAULT '',
+        grado VARCHAR(50) DEFAULT '',
+        repName VARCHAR(100) DEFAULT '',
+        repDocType VARCHAR(10) DEFAULT '',
+        repDocId VARCHAR(20) DEFAULT '',
+        repRelationship VARCHAR(50) DEFAULT '',
+        repPhone VARCHAR(20) DEFAULT '',
+        repEmail VARCHAR(100) DEFAULT '',
+        repAddress VARCHAR(255) DEFAULT '',
+        institutionalEmail VARCHAR(100) DEFAULT '',
+        isVerified BOOLEAN DEFAULT false,
+
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         INDEX idx_role (role),
@@ -98,7 +115,37 @@ const initializeDatabase = async () => {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
 
-    console.log('✅ Tabla de usuarios verificada/creada correctamente');
+    // 🔥 PARCHE DE ACTUALIZACIÓN: Agregar columnas si la tabla ya existía
+    const columnsToPatch = [
+      "edad VARCHAR(10) DEFAULT ''",
+      "lugarNacimiento VARCHAR(100) DEFAULT ''",
+      "nombrePadre VARCHAR(100) DEFAULT ''",
+      "nombreMadre VARCHAR(100) DEFAULT ''",
+      "grado VARCHAR(50) DEFAULT ''",
+      "repName VARCHAR(100) DEFAULT ''",
+      "repDocType VARCHAR(10) DEFAULT ''",
+      "repDocId VARCHAR(20) DEFAULT ''",
+      "repRelationship VARCHAR(50) DEFAULT ''",
+      "repPhone VARCHAR(20) DEFAULT ''",
+      "repEmail VARCHAR(100) DEFAULT ''",
+      "repAddress VARCHAR(255) DEFAULT ''",
+      "institutionalEmail VARCHAR(100) DEFAULT ''",
+      "isVerified BOOLEAN DEFAULT false"
+    ];
+
+    for (const colDef of columnsToPatch) {
+      const colName = colDef.split(' ')[0];
+      try {
+        await connection.execute(`ALTER TABLE users ADD COLUMN ${colDef};`);
+        console.log(`✅ Columna de parche añadida: ${colName}`);
+      } catch (err) {
+        if (err.code !== 'ER_DUP_FIELDNAME') {
+          console.warn(`⚠️ Aviso al añadir columna ${colName}:`, err.message);
+        }
+      }
+    }
+
+    console.log('✅ Tabla de usuarios verificada/actualizada correctamente');
 
     // Crear tabla de alertas si no existe
     await connection.execute(`
