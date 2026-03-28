@@ -1,10 +1,10 @@
 const { BedrockRuntimeClient, ConverseCommand } = require("@aws-sdk/client-bedrock-runtime");
 require('dotenv').config();
 
-const WEIGHTS = {
-  "suicidio": 10, "matarme": 10, "no quiero vivir": 10, "morirme": 10, "muerte": 10,
-  "me pegan": 8, "me violan": 10, "acoso": 7, "bullying": 6, "amenaza": 7,
-  "solo": 3, "triste": 4, "ansiedad": 5, "llorar": 3, "paila": 3, "insulto": 4
+const IMPACT_CATEGORIES = {
+  CRITICO: ["suicidio", "matarme", "no quiero vivir", "morirme", "muerte", "violan", "abuso", "quitarme la vida", "ahorcarme"],
+  MODERADO: ["acoso", "bullying", "pegan", "amenaza", "golpe", "insulto", "maltrato"],
+  EMOCIONAL: ["solo", "triste", "ansiedad", "llorar", "paila", "desespero", "vacio"]
 };
 
 /**
@@ -27,26 +27,38 @@ class CentralAIService {
   }
 
   /**
-   * 🧠 RISK INDEX ENGINE v2: Scoring avanzado y tendencia temporal
+   * 🧠 CATEGORIZACIÓN DIRECTA: Identifica el nivel base por palabras clave
    */
-  async computeAdvancedRiskScore(text, history = []) {
-    let score = 0;
+  async categorizeMessage(text) {
     const cleanText = this.preprocess(text);
+    const result = { nivel: "BAJO", detectadas: [] };
 
-    for (const [word, weight] of Object.entries(WEIGHTS)) {
-      if (cleanText.includes(word)) score += weight;
+    // 1. Prioridad Máxima: Crítico
+    for (const word of IMPACT_CATEGORIES.CRITICO) {
+      if (cleanText.includes(word)) {
+        result.nivel = "ALTO";
+        result.detectadas.push(word);
+      }
+    }
+    if (result.nivel === "ALTO") return result;
+
+    // 2. Prioridad Media: Moderado
+    for (const word of IMPACT_CATEGORIES.MODERADO) {
+      if (cleanText.includes(word)) {
+        result.nivel = "MEDIO";
+        result.detectadas.push(word);
+      }
+    }
+    if (result.nivel === "MEDIO") return result;
+
+    // 3. Prioridad Baja: Emocional
+    for (const word of IMPACT_CATEGORIES.EMOCIONAL) {
+      if (cleanText.includes(word)) {
+        result.detectadas.push(word);
+      }
     }
 
-    if (cleanText.includes("muy") || cleanText.includes("demasiado") || cleanText.includes("bastante")) {
-      score += 2;
-    }
-
-    if (history.length > 0) {
-      if (history.some(h => cleanText.includes(h.text?.toLowerCase() || ""))) score += 3;
-      if (history.length >= 3) score += 2;
-    }
-
-    return Math.min(score, 100);
+    return result;
   }
 
   /**
@@ -54,29 +66,30 @@ class CentralAIService {
    */
   async analizarRiesgo(datosAnonimos) {
     const { mensaje, historial = [] } = datosAnonimos;
-    const cleanText = this.preprocess(mensaje);
     
-    // 1. Scoring Engine Cuantificable
-    const score = await this.computeAdvancedRiskScore(cleanText, historial);
-    let nivel_riesgo = "BAJO";
-    if (score >= 15) nivel_riesgo = "ALTO";
-    else if (score >= 7) nivel_riesgo = "MEDIO";
+    // 1. Detección Directa (Filtro Rojo/Naranja/Amarillo)
+    const categoria = await this.categorizeMessage(mensaje);
+    let nivel_riesgo = categoria.nivel;
 
-    // 2. Validación con Bedrock (Claude 3)
-    const systemPrompt = `Eres un motor de detección de riesgos psicosociales. Analiza el mensaje del estudiante y devuelve un JSON estricto.`;
+    // 2. Validación y Contexto con Bedrock (IA Superior)
+    const systemPrompt = `Eres un motor de detección de riesgos psicosociales para PrediVersa. 
+    Analiza el mensaje y devuelve un JSON estricto. 
+    Si el mensaje es una broma clara, saludo o no tiene riesgo real, clasifícalo como BAJO aunque use palabras ruidosas.`;
+    
     const userPrompt = `
-      MENSAJE: "${cleanText}"
-      SCORING LOCAL: ${score}
-      HISTORIAL: ${historial.length ? historial.map(h => h.text).join(' | ') : 'N/A'}
+      MENSAJE DEL ESTUDIANTE: "${mensaje}"
+      DETECCIÓN PALABRAS CLAVE: ${categoria.detectadas.join(', ') || 'Ninguna'}
+      NIVEL BASE DETECTADO: ${nivel_riesgo}
+      HISTORIAL RECIENTE: ${historial.length ? historial.map(h => h.text).slice(-3).join(' | ') : 'N/A'}
 
-      RESPONDE SOLO CON ESTE JSON:
+      RESPONDE ÚNICAMENTE CON ESTE FORMATO JSON:
       {
         "nivel_riesgo": "BAJO" | "MEDIO" | "ALTO",
-        "score": (0-100),
+        "score": (0-100 calculo interno),
         "intencion_principal": "string",
         "emociones_detectadas": ["string"],
         "palabras_clave_criticas": ["string"],
-        "razon": "string",
+        "razon": "Explicación breve de por qué se asignó este nivel",
         "requiere_intervencion_humana": boolean
       }
     `;
@@ -90,22 +103,22 @@ class CentralAIService {
       });
 
       const response = await this.client.send(command);
-      const text = response.output.message.content[0].text;
-      const aiResult = JSON.parse(text.replace(/```json|```/g, '').trim());
+      const resText = response.output.message.content[0].text;
+      const aiResult = JSON.parse(resText.replace(/```json|```/g, '').trim());
 
-      // Fusión de riesgo
+      // REGLA DE SEGURIDAD HÍBRIDA: Si la detección directa fue ALTA, no dejamos que la IA la baje a menos que sea muy seguro.
       if (nivel_riesgo === "ALTO" && aiResult.nivel_riesgo !== "ALTO") {
-        aiResult.nivel_riesgo = "ALTO";
-        aiResult.score = Math.max(score, aiResult.score);
+        // Mantenemos ALTO solo si no es un saludo o broma obvia detectada por la IA
+        if (aiResult.score > 40) aiResult.nivel_riesgo = "ALTO";
       }
 
       return aiResult;
     } catch (error) {
-      console.warn('⚠️ Bedrock falló, usando Risk Index local:', error.message);
+      console.warn('⚠️ Bedrock falló, usando Detección Directa:', error.message);
       return {
         nivel_riesgo,
-        score,
-        razon: "Fallo de conexión API - Risk Index local activo",
+        score: nivel_riesgo === 'ALTO' ? 90 : (nivel_riesgo === 'MEDIO' ? 50 : 10),
+        razon: "Fallo de conexión API - Usando Diccionario de Impacto",
         requiere_intervencion_humana: nivel_riesgo === 'ALTO'
       };
     }

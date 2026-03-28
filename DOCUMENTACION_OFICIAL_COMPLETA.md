@@ -10,24 +10,20 @@ PrediVersa es una plataforma educativa web de vanguardia diseñada para ser incl
 
 ### 2.1 Backend (Node.js + Express)
 - **Rutas de Autenticación**: `/api/auth/login`, `/api/auth/register`, `/api/auth/reset-password`.
-- **Centralización IA**: El servicio `centralAIService.js` actúa como el "cerebro" que conecta el dashboard estudiantil con **Amazon Lex Runtime V2**.
-- **Gestión de Base de Datos**: Uso de `mysql2/promise` para interactuar con la instancia **AWS RDS MySQL**.
+- **Análisis de Riesgo Híbrido**: El sistema combina un **Diccionario de Impacto** (detección inmediata por palabras clave críticas) con **Amazon Bedrock (Claude 3.5 Haiku)** para validar el contexto y reducir falsos positivos.
+- **Flujo de Mensajes**: El frontend envía el mensaje al backend (`/api/chatbot/message`).
+- **Niveles de Impacto**:
+  - **CRÍTICO**: Disparo inmediato de protocolos de emergencia (ALTO).
+  - **MODERADO**: Alertas de seguimiento y advertencia (MEDIO).
+  - **EMOCIONAL**: Reportes informativos de bienestar (BAJO).
+- **Respuestas Contextuales**: El bot responde basándose en los intents configurados para el ámbito educativo.
 
 ### 2.2 Frontend (React + Vite)
-- **Diseño Moderno**: Implementación de una estética "Rich Aesthetic" con Vanilla CSS, fuentes personalizadas (Outfit) y micro-animaciones en botones y tarjetas.
-- **Páginas Corporativas**:
-  - `Landing Modernizada`: Con gradientes suaves y layout de alto impacto.
-  - `Quienes Somos`: Diseño basado en la misión institucional.
-  - `Servicios`: Catálogo interactivo de ofertas.
-- **Dashboards**:
-  - `StudentDashboard`: Integración con Chatbot Lex.
-  - `AdminDashboard`: Panel de control total con estadísticas dinámicas y CRUD de usuarios.
-
-## 🤖 SECCIÓN 3: INTEGRACIÓN AMAZON LEX (CHATBOT)
-Se ha completado la migración de Botpress a **Amazon Lex** para una mayor escalabilidad y control de datos.
-- **Flujo de Mensajes**: El frontend envía el mensaje al backend (`/api/chatbot/message`).
-- **Procesamiento AI**: El backend invoca el SDK de AWS Lex Runtime V2, adjuntando el `sessionId` y el `userId`.
-- **Respuestas Contextuales**: El bot responde basándose en los intents configurados para el ámbito educativo.
+- **Diseño Moderno**: Implementación de una estética "Rich Aesthetic" con Vanilla CSS, fuentes personalizadas e interacciones premium.
+- **Responsividad Universal**: La plataforma se adapta automáticamente a Móviles, Tablets y Desktop.
+- **Dashboards por Rol**:
+  - `StudentDashboard`: Integración con Chatbot Lex y Versa AI.
+  - `AdminDashboard`: Gestión total de usuarios, alertas y estadísticas en tiempo real.
 
 ## 🔐 SECCIÓN 4: SEGURIDAD Y PERSISTENCIA
 - **Hash de Contraseñas**: Implementado con **bcryptjs** (10 salt rounds) para todas las cuentas.
@@ -54,7 +50,7 @@ Se ha completado la migración de Botpress a **Amazon Lex** para una mayor escal
 
 ## 🔄 SECCIÓN 6: HISTORIAL DE CAMBIOS (DE LOGS DE DESARROLLO)
 
-- **Marzo 28, 2026**: Modernización total de la landing page corporativa.
+- **Marzo 28, 2026**: Implementación del **Modelo Híbrido de IA** (Diccionario + Bedrock) y **Limpieza Total de Producción (v1.1.0 Ready)**. Modernización total de la landing page corporativa.
 - **Marzo 27, 2026**: Integración exitosa de **Amazon Lex Runtime V2** en el dashboard de estudiantes.
 - **Marzo 25, 2026**: Implementación del sistema de recuperación de contraseña y login mejorado.
 - **Marzo 20, 2026**: Migración completa a base de datos **AWS RDS MySQL**.
