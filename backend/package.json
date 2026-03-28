@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.1019.0",
     "@aws-sdk/client-lambda": "^3.1019.0",
     "@aws-sdk/client-lex-runtime-v2": "latest",
     "@aws-sdk/client-ses": "^3.1019.0",
