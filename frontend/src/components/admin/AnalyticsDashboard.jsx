@@ -62,15 +62,15 @@ const AnalyticsDashboard = ({ stats }) => {
     <div className="analytics-container animate-fade-in shadow-premium">
       <div className="analytics-header">
         <div className="header-icon-wrapper">
-          <Brain size={32} color="#fff" />
+          <Brain size={36} color="#ffffff" />
         </div>
         <div className="header-text">
-          <h2>Inteligencia Prediversa v1.1</h2>
-          <p>Visión predictiva alimentada por Amazon Bedrock.</p>
+          <h2>Inteligencia Prediversa</h2>
+          <p>Visión predictiva corporativa v1.1.0</p>
         </div>
         <div className="ai-badge">
-          <Zap size={14} fill="#fbbf24" color="#fbbf24" />
-          <span>SISTEMA VIVO</span>
+          <Zap size={14} fill="#0369a1" color="#0369a1" />
+          <span>SISTEMA ACTIVO</span>
         </div>
       </div>
 

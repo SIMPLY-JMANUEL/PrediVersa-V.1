@@ -1,73 +1,133 @@
 .analytics-container {
-  padding: 30px;
-  background: linear-gradient(145deg, rgba(42, 78, 95, 0.4) 0%, rgba(30, 41, 59, 0.6) 100%);
-  backdrop-filter: blur(20px);
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  color: white;
+  padding: 35px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #1e293b;
   position: relative;
-  overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 40px -10px rgba(58, 111, 133, 0.1);
+}
+
+/* Header Refinado */
+.analytics-header {
+  margin-bottom: 45px;
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  border-bottom: 2px solid rgba(58, 111, 133, 0.1);
+  padding-bottom: 25px;
 }
 
 .header-icon-wrapper {
-  background: linear-gradient(135deg, #3A6F85, #2A4E5F);
-  padding: 15px;
-  border-radius: 18px;
-  box-shadow: 0 10px 20px -5px rgba(58, 111, 133, 0.4);
+  background: linear-gradient(135deg, #3A6F85 0%, #0c4a6e 100%);
+  padding: 18px;
+  border-radius: 22px;
+  box-shadow: 0 12px 24px -6px rgba(58, 111, 133, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .header-text h2 {
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 800;
-  color: #fff;
-  letter-spacing: -0.5px;
+  color: #0c4a6e;
+  margin: 0;
+  letter-spacing: -1px;
+}
+
+.header-text p {
+  margin: 5px 0 0 0;
+  color: #64748b;
+  font-size: 1rem;
 }
 
 .ai-badge {
   margin-left: auto;
-  background: rgba(142, 207, 234, 0.15);
-  border: 1px solid rgba(142, 207, 234, 0.3);
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  color: #0369a1;
   padding: 8px 18px;
-  border-radius: 100px;
-  color: #8ECFEA;
-  font-weight: 700;
+  border-radius: 50px;
+  font-weight: 800;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+}
+
+/* KPI CARDS - Crystal Style */
+.stats-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 40px;
 }
 
 .stat-card.glass {
-  background: rgba(30, 41, 59, 0.4);
-  padding: 24px;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: #ffffff;
+  padding: 28px 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(255,255,255,0.5);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 18px;
 }
 
 .stat-card.glass:hover {
-  transform: translateY(-8px);
-  background: rgba(42, 78, 95, 0.6);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 25px 35px -12px rgba(58, 111, 133, 0.2);
   border-color: #3A6F85;
 }
 
 .stat-value {
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 900;
-  color: #fff;
+  color: #1e293b;
+  line-height: 1;
+  display: block;
 }
 
-.stat-card.success:hover { box-shadow: 0 15px 30px -10px rgba(16, 185, 129, 0.2); }
-.stat-card.alert-critical:hover { box-shadow: 0 15px 30px -10px rgba(239, 68, 68, 0.2); }
-.stat-card.ai-brain:hover { box-shadow: 0 15px 30px -10px rgba(58, 111, 133, 0.4); }
+.stat-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Custom Accents */
+.stat-card.success .stat-value { color: #10b981; }
+.stat-card.alert-critical .stat-value { color: #f43f5e; }
+.stat-card.ai-brain .stat-value { color: #3A6F85; }
+
+/* Dashboard Content Grid */
+.charts-grid-main {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+}
 
 .chart-wrapper.glass {
-  background: rgba(15, 23, 42, 0.4);
-  border-radius: 24px;
-  padding: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.02);
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 35px;
+  box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.chart-header h3 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #334155;
 }
 
 .badge-pro {
-  background: rgba(58, 111, 133, 0.15);
-  color: #8ECFEA;
-  border: 1px solid rgba(58, 111, 133, 0.3);
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
 }
 
 .id-value { color: #8ECFEA; }
