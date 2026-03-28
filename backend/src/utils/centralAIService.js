@@ -6,6 +6,12 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
  * En una fase avanzada, esto viviría en un servidor independiente.
  */
 
+const WEIGHTS = {
+  "suicidio": 10, "matarme": 10, "no quiero vivir": 10, "morirme": 10, "muerte": 10,
+  "me pegan": 8, "me violan": 10, "acoso": 7, "bullying": 6, "amenaza": 7,
+  "solo": 3, "triste": 4, "ansiedad": 5, "llorar": 3, "paila": 3, "insulto": 4
+};
+
 class CentralAIService {
   constructor() {
     this.genAI = null;
@@ -42,81 +48,101 @@ class CentralAIService {
   }
 
   /**
+   * 🧼 PRE-PROCESAMIENTO: Normaliza input para evitar ruido
+   */
+  preprocess(text) {
+    if (!text) return "";
+    return text.toLowerCase().trim().replace(/\s+/g, ' ');
+  }
+
+  /**
+   * 🧠 RISK INDEX ENGINE v2: Scoring avanzado y tendencia temporal
+   */
+  async computeAdvancedRiskScore(text, history = []) {
+    let score = 0;
+    const cleanText = this.preprocess(text);
+
+    // 1. Reglas duras (Factores del score)
+    for (const [word, weight] of Object.entries(WEIGHTS)) {
+      if (cleanText.includes(word)) score += weight;
+    }
+
+    // 2. Intensidad emocional
+    if (cleanText.includes("muy") || cleanText.includes("demasiado") || cleanText.includes("bastante")) {
+      score += 2;
+    }
+
+    // 3. Repetición/Tendencia en el historial
+    if (history.length > 0) {
+      if (history.some(h => cleanText.includes(h.text.toLowerCase()))) score += 3;
+      if (history.length >= 3) score += 2;
+    }
+
+    return Math.min(score, 100);
+  }
+
+  /**
    * Analiza un mensaje para detectar niveles de riesgo de forma anónima.
-   * REGRESA: { nivel_riesgo: 'bajo'|'medio'|'alto', score: 0-100, razon: string }
+   * REGRESA: { nivel_riesgo: 'BAJO'|'MEDIO'|'ALTO', score: 0-100, razon: string }
    */
   async analizarRiesgo(datosAnonimos) {
     if (!this.initialized && !this.init()) throw new Error('AI Service not initialized');
 
-    const { mensaje, tipo_violencia, frecuencia, historial = [] } = datosAnonimos;
+    const { mensaje, historial = [] } = datosAnonimos;
+    const cleanText = this.preprocess(mensaje);
+    
+    // 🧠 1. Scoring Engine Cuantificable
+    const score = await this.computeAdvancedRiskScore(cleanText, historial);
+    let nivel_riesgo = "BAJO";
+    if (score >= 15) nivel_riesgo = "ALTO";
+    else if (score >= 7) nivel_riesgo = "MEDIO";
 
-    // Validación de PII (Protección de Datos): No procesamos si detectamos posibles nombres propios o emails (simplificado)
-    // En producción, aquí iría un filtro de anonimización robusto.
-
+    // 🧠 2. Validación y Contexto con LLM (Gemini)
     const prompt = `
-      SISTEMA DE ANÁLISIS PREDIVERSA v2
-      Eres un motor de análisis de riesgo especializado en detección temprana de riesgos psicosociales, convivencia y bienestar escolar.
+      SISTEMA DE ANÁLISIS PREDIVERSA v2 - MOTOR DE RIESGO
+      Eres el motor de análisis especializado en detección de riesgos psicosociales.
       
-      OBJETIVO:
-      1. Escuchar activamente al usuario (estudiante).
-      2. Identificar señales de riesgo: ${mensaje}
-      3. Clasificar el nivel de riesgo: BAJO, MEDIO, ALTO.
+      DATOS ACTUALES:
+      - Mensaje del Estudiante: "${cleanText}"
+      - Scoring Local: ${score} (Nivel sugerido: ${nivel_riesgo})
+      - Historial Reciente: ${historial.length ? historial.map(h => h.text).join(' | ') : 'Sin historial'}
       
-      SEÑALES CRÍTICAS A IDENTIFICAR:
-      - Violencia, acoso, bullying ("me pegan", "me insultan", "la tienen montada").
-      - Riesgo emocional: ansiedad, depresión, aislamiento ("me siento solo", "estoy triste", "nadie me ayuda").
-      - Ideación autolesiva o riesgo de vida ("no quiero vivir", "morirme", "matarme").
-      
-      CONTEXTO ADICIONAL:
-      - Tipo de situación: ${tipo_violencia || 'No definida'}
-      - Frecuencia: ${frecuencia || 'No especificada'}
-      - Historial: ${historial.length ? historial.join(' | ') : 'Sin historial'}
-      
-      REGLAS DE CLASIFICACIÓN:
-      - ALTO: Ideación suicida, violencia física severa, armas, abuso, peligro de vida inminente.
-      - MEDIO: Acoso recurrente, angustia emocional profunda, conflictos familiares graves.
-      - BAJO: Quejas de convivencia menores, desahogo emocional sin riesgo de daño, dudas generales.
+      TU MISIÓN:
+      Analizar la intención emocional y confirmar el nivel de riesgo.
+      Si detectas ironía, jerga colombiana específica o escalamiento sutil, ajusta el nivel.
 
       RESPONDE ESTRICTAMENTE EN FORMATO JSON:
       {
-        "nivel_riesgo": "bajo" | "medio" | "alto",
-        "score": (0-100),
+        "nivel_riesgo": "BAJO" | "MEDIO" | "ALTO",
+        "score": (Ajustado por ti, 0-100),
         "intencion_principal": "string",
         "emociones_detectadas": ["string"],
         "palabras_clave_criticas": ["string"],
-        "razon": "Explicación breve basada en las reglas",
+        "razon": "Explicación breve de tu decisión",
         "requiere_intervencion_humana": boolean
       }
     `;
 
-
     try {
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
-      const text = response.text();
-      const cleaned = text.replace(/```json|```/g, '').trim();
-      return JSON.parse(cleaned);
-    } catch (error) {
-      console.warn('⚠️ Central AI API fallo, usando lógica local de respaldo:', error.message);
+      const text = response.text().replace(/```json|```/g, '').trim();
+      const aiResult = JSON.parse(text);
       
-      // Lógica de respaldo local basada en keywords si falla la API
-      const msgLow = mensaje.toLowerCase();
-      let nivel = 'bajo';
-      let score = 10;
-      let razon = "Análisis local (Offline)";
-
-      if (msgLow.includes('matar') || msgLow.includes('suicidio') || msgLow.includes('morir') || msgLow.includes('arma')) {
-        nivel = 'alto'; score = 95; razon = "Detección local de riesgo inminente";
-      } else if (msgLow.includes('triste') || msgLow.includes('solo') || msgLow.includes('llorar') || msgLow.includes('pegan')) {
-        nivel = 'medio'; score = 50; razon = "Detección local de angustia emocional";
+      // Fusión de riesgo: Priorizamos el score manual si es más alto
+      if (nivel_riesgo === "ALTO" && aiResult.nivel_riesgo !== "ALTO") {
+        aiResult.nivel_riesgo = "ALTO";
+        aiResult.score = Math.max(score, aiResult.score);
       }
 
+      return aiResult;
+    } catch (error) {
+      console.warn('⚠️ AI API falló, usando Risk Index local:', error.message);
       return {
-        nivel_riesgo: nivel,
-        score: score,
-        tipos_identificados: ["deteccion_local"],
-        razon: razon,
-        requiere_intervencion_humana: nivel === 'alto'
+        nivel_riesgo,
+        score,
+        razon: "Análisis basado en Risk Index v2 (Offline)",
+        requiere_intervencion_humana: nivel_riesgo === 'ALTO'
       };
     }
   }
@@ -133,7 +159,6 @@ class CentralAIService {
     const { mensaje, nivelRiesgo, historial = [] } = datos;
 
     try {
-      // FIX M-3: Reutilizar this.model en lugar de crear nueva instancia chatModel
       let chatHistory = historial.map(m => `${m.type === 'user' ? 'Estudiante' : 'Versa'}: ${m.text}`).join('\n');
 
       const prompt = `
@@ -185,29 +210,22 @@ class CentralAIService {
 
       const result = await this.model.generateContent({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 200 }
+        generationConfig: { temperature: 0.7, maxTokens: 200 }
       });
       const response = await result.response;
-      return response.text().trim();
-    } catch (error) {
-      // FIX M-5: Intentar con modelo alternativo si el principal falla
-      if (error.message?.includes('404') || error.message?.includes('not found') || error.message?.includes('503')) {
-        try {
-          console.warn('⚠️ gemini-2.0-flash inaccesible, intentando con gemini-1.5-flash...');
-          const fallbackModel = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
-          const result = await fallbackModel.generateContent({
-            contents: [{ role: 'user', parts: [{ text: `Eres Versa, orientador empático de PrediVersa. El estudiante dice: "${mensaje}". Responde de forma corta, empática y en español colombiano. RIESGO: ${nivelRiesgo.toUpperCase()}` }] }],
-            generationConfig: { temperature: 0.7, maxOutputTokens: 200 }
-          });
-          return result.response.text().trim();
-        } catch(e2) {
-          console.error('❌ Ambos modelos Gemini fallaron:', e2.message);
+      let finalResponse = response.text().trim();
+
+      // 🧼 POST-PROCESAMIENTO DE SEGURIDAD (HARD-CODED)
+      if (nivelRiesgo.toUpperCase() === "ALTO") {
+        const lowerRes = finalResponse.toLowerCase();
+        if (!lowerRes.includes("no estás solo") && !lowerRes.includes("hablar con alguien")) {
+           finalResponse += "\n\nNo estás solo, parce. Sería bueno hablar con alguien de confianza (como un orientador de tu colegio) para no cargar con esto solo, ¿sí?";
         }
-      } else {
-        console.error('❌ Error API Gemini:', error.message);
       }
-      
-      // Si la IA falla, retornamos null para que el sistema de fallback (Amazon Lex) tome el control de forma natural.
+
+      return finalResponse;
+    } catch (error) {
+      console.error('❌ Error AI Gemini:', error.message);
       return null;
     }
   }

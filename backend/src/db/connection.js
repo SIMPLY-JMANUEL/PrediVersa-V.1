@@ -285,6 +285,23 @@ const initializeDatabase = async () => {
     `);
     console.log('✅ Tabla chatbot_ajustes_ia verificada/creada');
 
+    // 🔥 TABLA DE INTERACCIONES (CON HISTORY Y SCORING REAL-TIME)
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS chatbot_interacciones (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        session_id VARCHAR(100) NOT NULL,
+        user_input TEXT,
+        response TEXT,
+        risk VARCHAR(10),
+        risk_score INT DEFAULT 0,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_session (session_id),
+        INDEX idx_risk (risk),
+        INDEX idx_createdAt (createdAt)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+    console.log('✅ Tabla chatbot_interacciones (Scoring Engine) lista.');
+
     console.log('✅ Tabla case_actions verificada/creada');
 
     // 🚀 SEMILLA AUTOMÁTICA: Asegurar que existe al menos un Administrador

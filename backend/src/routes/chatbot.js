@@ -56,49 +56,27 @@ router.post('/message', verifyToken, async (req, res) => {
   try {
     if (!text) return res.status(400).json({ success: false, message: 'Falta texto' });
 
-    // 1. Análisis de Riesgo (Motor Versa + IA Central si es necesario)
-    let finalRisk = 'bajo';
+    // 1. Análisis de Riesgo (Risk Index v2 + IA Central)
+    let finalRisk = 'BAJO';
     let finalScore = 0;
-    let riskResult = { keywords_detectadas: [] };
+    let riskResult = {};
 
     try {
-      // 1.1 Motor Local / Lambda
-      riskResult = await invokeMotorVersaLambda({
-        texto: text,
-        tipoViolencia: 'no_especificado',
-        frecuencia: 'unica_vez',
-        historial: historial
-      });
+      riskResult = await centralAI.analizarRiesgo({ mensaje: text, historial });
       finalRisk = riskResult.nivel_riesgo;
       finalScore = riskResult.score;
-
-      // 1.2 Potenciación con Gemini (LLM Analysis)
-      // Forzamos el uso de Gemini si el riesgo local es medio/alto o si el usuario quiere "Potente prompt"
-      const geminiResult = await centralAI.analizarRiesgo({ mensaje: text, historial });
-      if (geminiResult) {
-        finalRisk = geminiResult.nivel_riesgo || finalRisk;
-        finalScore = geminiResult.score || finalScore;
-        // Mezclamos resultados para la persistencia
-        riskResult = { ...riskResult, ...geminiResult };
-      }
     } catch (e) { 
       console.error('⚠️ Error en análisis de riesgo:', e.message);
-      // Fallback básico si todo falla
-      if (text.toLowerCase().includes('morir')) finalRisk = 'alto';
+      if (text.toLowerCase().includes('morir')) finalRisk = 'ALTO';
     }
 
-    // 2. Comunicación Combinada (Amazon Lex + Motor AI Central para Interacción Avanzada)
+    // 2. Comunicación Combinada (Amazon Lex + Motor AI Central)
     try {
-      // 2.1 Enviar a Lex para mantener métricas e intents en AWS
       const realLexResponse = await sendToLex(user.id || sessionId || 'anonimo', text);
       if (realLexResponse) {
         if (realLexResponse.intent) lexResponse.intent = realLexResponse.intent;
-        if (realLexResponse.messages && realLexResponse.messages.length > 0) {
-          lexResponse.messages = realLexResponse.messages;
-        }
       }
 
-      // 2.2 Usar el Motor de IA Central para asegurar respuestas empáticas en lugar de las estáticas de Lex
       const respuestaDinamica = await centralAI.generarRespuesta({
         mensaje: text,
         nivelRiesgo: finalRisk,
@@ -108,14 +86,17 @@ router.post('/message', verifyToken, async (req, res) => {
       if (respuestaDinamica) {
         lexResponse.messages = [{ content: respuestaDinamica }];
       }
+      finalResponse = lexResponse.messages[0].content;
 
+      // 3. PERSISTENCIA Y MÉTRICAS (Producto Real)
+      await executeQuery(
+        `INSERT INTO chatbot_interacciones (session_id, user_input, response, risk, risk_score)
+         VALUES (?, ?, ?, ?, ?)`,
+        [user.id || sessionId || 'anonimo', text, finalResponse, finalRisk, finalScore]
+      );
     } catch (error) {
-      console.error('❌ Error en Motor AI o Lex, usando respaldo:', error.message);
-      if (finalRisk === 'alto') {
-        lexResponse.messages = [{ content: "Entiendo que estás pasando por un momento muy difícil. He escalado tu mensaje de forma urgente a los orientadores." }];
-      } else {
-        lexResponse.messages = [{ content: "Te escucho. Tu bienestar es clave para nosotros y he registrado el caso. ¿Quieres contarme más al respecto?" }];
-      }
+      console.error('❌ Error en Motor AI o Lex:', error.message);
+      finalResponse = lexResponse.messages[0].content;
     }
 
     // 3. Persistencia de Alertas (Todos los niveles de riesgo van al Dashboard de Admin)
