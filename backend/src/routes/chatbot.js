@@ -62,6 +62,7 @@ router.post('/message', verifyToken, async (req, res) => {
     let riskResult = { keywords_detectadas: [] };
 
     try {
+      // 1.1 Motor Local / Lambda
       riskResult = await invokeMotorVersaLambda({
         texto: text,
         tipoViolencia: 'no_especificado',
@@ -71,14 +72,20 @@ router.post('/message', verifyToken, async (req, res) => {
       finalRisk = riskResult.nivel_riesgo;
       finalScore = riskResult.score;
 
-      if (riskResult.requiere_gemini) {
-        try {
-          const geminiResult = await centralAI.analizarRiesgo({ mensaje: text });
-          finalRisk = geminiResult.nivel_riesgo || finalRisk;
-          finalScore = geminiResult.score || finalScore;
-        } catch (e) { console.error('Falló validación Gemini, usando motor local'); }
+      // 1.2 Potenciación con Gemini (LLM Analysis)
+      // Forzamos el uso de Gemini si el riesgo local es medio/alto o si el usuario quiere "Potente prompt"
+      const geminiResult = await centralAI.analizarRiesgo({ mensaje: text, historial });
+      if (geminiResult) {
+        finalRisk = geminiResult.nivel_riesgo || finalRisk;
+        finalScore = geminiResult.score || finalScore;
+        // Mezclamos resultados para la persistencia
+        riskResult = { ...riskResult, ...geminiResult };
       }
-    } catch (e) { console.error('⚠️ Falló motor de riesgo, continuando con respuesta Lex'); }
+    } catch (e) { 
+      console.error('⚠️ Error en análisis de riesgo:', e.message);
+      // Fallback básico si todo falla
+      if (text.toLowerCase().includes('morir')) finalRisk = 'alto';
+    }
 
     // 2. Comunicación Combinada (Amazon Lex + Motor AI Central para Interacción Avanzada)
     try {
@@ -120,11 +127,14 @@ router.post('/message', verifyToken, async (req, res) => {
         if (finalRisk === 'alto') tipoAlerta = 'Critica';
         else if (finalRisk === 'medio') tipoAlerta = 'Advertencia';
 
+        const alertSummary = riskResult.razon || `Intención: ${riskResult.intencion_principal || 'N/A'}`;
+        const detectedEmotions = (riskResult.emociones_detectadas || []).join(', ');
+
         await createAlert({
           studentName: user.name || 'Estudiante Lex',
           studentUsername: user.email || '',
           alertType: tipoAlerta,
-          description: `[ALERTA PREDIVERSA - ${finalRisk.toUpperCase()}]\n${text}\n\nResumen: ${riskResult.resumen || 'Análisis Automático'}`,
+          description: `[SISTEMA VERSA v2 - ${finalRisk.toUpperCase()}]\n\nMensaje: "${text}"\n\nAnálisis IA:\n- Razonamiento: ${alertSummary}\n- Emociones: ${detectedEmotions}\n- Palabras Clave: ${(riskResult.palabras_clave_criticas || []).join(', ')}`,
           ticketNumber: ticket,
           status: 'Pendiente'
         });
