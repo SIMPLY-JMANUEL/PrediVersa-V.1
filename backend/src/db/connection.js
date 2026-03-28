@@ -34,6 +34,14 @@ const pool = mysql.createPool({
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined
 });
 
+// Manejador de errores del pool para reconexión persistente
+pool.on('error', (err) => {
+  console.error('🚨 Error inesperado en el pool de RDS:', err.message);
+  if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+    console.log('🔄 Conexión perdida. El pool intentará reconectar en la próxima petición.');
+  }
+});
+
 // Función auxiliar para queries
 async function query(sql, params) {
   const [rows] = await pool.query(sql, params);
