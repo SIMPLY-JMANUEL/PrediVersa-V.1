@@ -121,7 +121,8 @@ class CentralAIService {
    */
   async generarRespuesta(datos) {
     if (!this.initialized && !this.init()) {
-       return "Hola, soy Versa. Estoy aquí para escucharte. ¿Cómo te sientes hoy? 💙";
+       console.warn("⚠️ Advertencia: No hay GEMINI_API_KEY. Devolviendo null para forzar cascada a Amazon Lex.");
+       return null;
     }
 
     const { mensaje, nivelRiesgo, historial = [] } = datos;

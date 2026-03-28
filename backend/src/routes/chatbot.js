@@ -88,7 +88,9 @@ router.post('/message', verifyToken, async (req, res) => {
         historial: historial
       });
       
-      lexResponse.messages = [{ content: respuestaDinamica }];
+      if (respuestaDinamica) {
+        lexResponse.messages = [{ content: respuestaDinamica }];
+      }
 
     } catch (error) {
        console.error('❌ Error en Motor AI o Lex, usando respaldo:', error.message);
