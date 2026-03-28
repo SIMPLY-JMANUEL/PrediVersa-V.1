@@ -106,10 +106,12 @@ class CentralAIService {
       const resText = response.output.message.content[0].text;
       const aiResult = JSON.parse(resText.replace(/```json|```/g, '').trim());
 
-      // REGLA DE SEGURIDAD HÍBRIDA: Si la detección directa fue ALTA, no dejamos que la IA la baje a menos que sea muy seguro.
-      if (nivel_riesgo === "ALTO" && aiResult.nivel_riesgo !== "ALTO") {
-        // Mantenemos ALTO solo si no es un saludo o broma obvia detectada por la IA
-        if (aiResult.score > 40) aiResult.nivel_riesgo = "ALTO";
+      // REGLA DE SEGURIDAD CRÍTICA - ZERO TOLERANCE: 
+      // Si el diccionario detectó un Riesgo ALTO (Palabra Crítica), se mantiene ALTO sin importar el análisis de la IA.
+      if (nivel_riesgo === "ALTO") {
+        aiResult.nivel_riesgo = "ALTO"; 
+        aiResult.score = Math.max(aiResult.score, 99); 
+        aiResult.requiere_intervencion_humana = true;
       }
 
       return aiResult;
@@ -136,7 +138,7 @@ class CentralAIService {
       Usa expresiones como "parce", "tranqui", "te entiendo". 
       REGLAS: Máximo 3-4 líneas, sin diagnósticos, fluidez total.
       RIESGO ACTUAL: ${nivelRiesgo.toUpperCase()}
-      ${nivelRiesgo.toUpperCase() === 'ALTO' ? 'REGLA CRÍTICA: Asegura que el usuario sepa que no está solo.' : ''}
+      ${nivelRiesgo.toUpperCase() === 'ALTO' ? 'REGLA CRÍTICA: Guía al usuario sutilmente pero con firmeza a buscar ayuda inmediata con un adulto de confianza o el orientador presencial del colegio al finalizar tu respuesta.' : ''}
     `;
 
     const userPrompt = `
@@ -162,7 +164,11 @@ class CentralAIService {
       if (nivelRiesgo.toUpperCase() === "ALTO") {
         const lowerRes = finalResponse.toLowerCase();
         if (!lowerRes.includes("no estás solo") && !lowerRes.includes("hablar con alguien")) {
-           finalResponse += "\n\nNo estás solo, parce. Sería bueno hablar con alguien de confianza (como un orientador) para no cargar con esto solo, ¿sí?";
+           const emergencyTips = [
+             "\n\nNo estás solo, parce. De verdad sería bueno hablar con un orientador presencial o alguien de tu total confianza ahora mismo, ¿sí?",
+             "\n\nHey, recuerda que hay personas que te quieren apoyar. ¿Te sentirías cómodo hablando con algún familiar o con el orientador del colegio hoy?"
+           ];
+           finalResponse += emergencyTips[Math.floor(Math.random() * emergencyTips.length)];
         }
       }
 

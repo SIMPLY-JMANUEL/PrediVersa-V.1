@@ -13,6 +13,7 @@ function AmazonLexChat({ user }) {
   const [botEmotion, setBotEmotion] = useState('smile') // smile, thinking, empathetic
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
+  const inputRef = useRef(null);
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognition = SpeechRecognition ? new SpeechRecognition() : null;
@@ -54,6 +55,13 @@ function AmazonLexChat({ user }) {
   useEffect(() => {
     scrollToBottom()
   }, [messages, isTyping])
+
+  // Mantener el cursor siempre en el input cuando no esté cargando
+  useEffect(() => {
+    if (!isTyping && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isTyping]);
 
   const handleSend = async (e) => {
     if (e) e.preventDefault()
@@ -152,6 +160,7 @@ function AmazonLexChat({ user }) {
           {isListening ? <MicOff size={20} color="#ef4444" className="animate-pulse" /> : <Mic size={20} color="#64748b" />}
         </button>
         <input
+          ref={inputRef}
           type="text"
           className="lex-input"
           placeholder="Escribe o dicta tu consulta..."
