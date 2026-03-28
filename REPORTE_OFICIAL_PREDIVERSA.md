@@ -1,36 +1,32 @@
-# 📜 REPORTE OFICIAL PREDIVERSA V.1.1 (MARZO 2026)
+# 📜 REPORTE OFICIAL PREDIVERSA V.1.5 (MARZO 2026)
 
 ## 🎯 RESUMEN EJECUTIVO
-PrediVersa es una plataforma educativa web de primer nivel enfocada en la inclusión y el bienestar institucional. A finales de marzo de 2026, la plataforma ha alcanzado su versión **1.1.0**, logrando una arquitectura robusta, una estética premium y una inteligencia artificial avanzada.
+PrediVersa es una plataforma educativa web de primer nivel enfocada en la inclusión y el bienestar institucional. A finales de marzo de 2026, la plataforma ha alcanzado su versión **1.5.0 (Enterprise Identity Update)**, logrando una arquitectura de identidades robusta, alta disponibilidad en la nube y blindaje contra fallos de red.
 
-## 🏗️ LOGROS ARQUITECTÓNICOS
-- ✅ **Backend Centralizado**: Implementación de Node.js + Express con arquitectura limpia, manejando rutas, controladores y servicios de IA.
-- ✅ **Persistencia en la Nube**: Migración exitosa de datos locales a **AWS RDS MySQL**, garantizando alta disponibilidad y escalabilidad.
-- ✅ **Seguridad Empresa**: Uso de **bcryptjs** para cifrado de contraseñas y **JWT** para manejo de sesiones seguras por 24 horas.
+## 🏗️ LOGROS ARQUITECTÓNICOS Y BLINDAJE
+- ✅ **Alta Disponibilidad RDS**: Implementación de un pool de conexiones resiliente con reconexión automática `PROTOCOL_CONNECTION_LOST`.
+- ✅ **Blindaje de Carga Masiva (50MB)**: Optimización del servidor Express para manejar paquetes de datos a gran escala, permitiendo la migración de miles de estudiantes vía Excel sin interrupciones.
+- ✅ **Salud Dinámica (Deep Health Check)**: Nuevo endpoint de diagnóstico real (`/api/health`) que valida físicamente la latencia y el estado de la base de datos AWS RDS.
+
+## 👤 GESTIÓN DE IDENTIDAD ENTERPRISE (v1.5)
+- ✅ **Formulario de Identidad Pro**: Interfaz multisección con navegación por pestañas (*Personales, Institucional, Representante, Acceso*).
+- ✅ **Lógica Condicional Activa**: Detección inteligente de minoría de edad que activa automáticamente el protocolo de "Representante Legal" para estudiantes.
+- ✅ **Seguridad Proactiva de Credenciales**: Sistema de generación de correos institucionales automáticos y contraseñas seguras aleatorias con hashing Bcrypt.
 
 ## 🤖 AVANCES EN INTELIGENCIA ARTIFICIAL
-- ✅ **Motor Híbrido de Riesgo**: Combinación de **Diccionario de Impacto Crítico** con la potencia de **Amazon Bedrock (Claude 3.5)** para detectar y validar riesgos psicosociales en tiempo real.
-- ✅ **Seguridad "Zero Tolerance"**: Sistema de alerta directa vía **SMS (SNS)** y **Email (SES)** que ignora falsos positivos cuando se detectan palabras de peligro inminente.
-- ✅ **Soporte Contextual y Empatía**: El asistente virtual (Versa) ahora utiliza técnicas de guía activa para referir a los estudiantes a ayuda presencial inmediata en casos de Riesgo Alto.
+- ✅ **Motor Híbrido de Riesgo**: Combinación de **Diccionario de Impacto Crítico (Regex)** con **Amazon Bedrock (Claude 3.5 Sonnet)** para detección preventiva y crítica.
+- ✅ **Chatbot SSE Optimizado**: Estabilización de la transmisión de eventos (Streaming) en AWS App Runner eliminando el buffering de proxy (X-Accel-Buffering: no).
 
 ## 🎨 DISEÑO Y EXPERIENCIA DE USUARIO (UX/UI)
-- ✅ **Luminous Glassmorphism**: Evolución hacia una estética de "Cristal Luminoso". Se eliminaron fondos pesados y oscuros, reemplazándolos por un **Mesh Gradient profesional** que mejora la legibilidad y reduce la fatiga visual.
-- ✅ **Rich Aesthetics**: La interfaz ha sido modernizada con un enfoque en la estética premium ("modern, beautiful, and dynamic").
-- ✅ **Secciones Corporativas**: Landing page renovada que incluye Quiénes Somos, Servicios, Planes y Contacto validado.
+- ✅ **Luminous Glassmorphism**: Estética premium de "Cristal Luminoso" con Mesh Gradients y micro-animaciones en React.
+- ✅ **Identidad Unificada**: Sincronización de avatars, sidebars dinámicos y estados de red en tiempo real.
 
-## 📈 ESTADÍSTICAS E INTELIGENCIA DE DATOS (v1.1)
-- El **AdminDashboard** cuenta ahora con una sección de **Inteligencia Analítica** premium:
-  - **Tendencia de Riesgo Emotional**: Gráficos de área sobre el clima de bienestar institucional.
-  - **Detección de Focos Críticos**: Identificación inmediata de sesiones con riesgo ALTO.
-  - **Distribución IA**: Clasificación automática de mensajes según su impacto emocional.
-  - **Métricas Operativas**: Seguimiento de eficiencia en la resolución de alertas.
-
-## 🚀 CONCLUSIÓN
-PrediVersa se posiciona como una herramienta líder en la gestión de la convivencia y el bienestar institucional. Con la base tecnológica actual (v1.1), el sistema está listo para escalar a funcionalidades de tiempo real y expansión móvil.
+## 📈 TRAYECTORIA PREDIVERSA (v1.5)
+El sistema ha evolucionado de una herramienta de registro a una **Plataforma de Identidad y Riesgo** completa, preparada para el despliegue a gran escala en instituciones educativas de alto volumen e impacto social.
 
 ---
 
-**Versión:** `v1.1.0` | **Licencia:** `Propietaria` | **© 2026 PrediVersa**
+**Versión:** `v1.5.0` | **Licencia:** `Propietaria` | **© 2026 PrediVersa**
 
 **Autores:**
 *Jmanuel Calvo/PrediVersa, Andrey Luna/PrediVersa, Harold Salcedo/PrediVersa*
