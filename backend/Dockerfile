@@ -13,8 +13,8 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Expose port 5000 (specified in render.yaml)
-EXPOSE 5000
+# Expose port 8080 (specified as default in server.js and render.yaml)
+EXPOSE 8080
 
 # Start command
 CMD ["npm", "start"]

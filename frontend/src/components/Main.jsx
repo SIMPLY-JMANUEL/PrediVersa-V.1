@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import './Main.css'
 import fondo2 from '../assets/images/fondo2.png'
 import img2 from '../assets/images/img2.png'
@@ -18,10 +19,7 @@ function Main() {
             convivencia y el bienestar, permitiendo a las organizaciones tomar
             decisiones informadas y preventivas.
           </p>
-          <button className="cta-btn" onClick={() => {
-            const el = document.getElementById('quienes-somos');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }}>Conocer Más</button>
+          <Link to="/quienes-somos" className="cta-btn" style={{ textDecoration: 'none' }}>Conocer Más</Link>
         </div>
         <div className="hero-image">
           <div className="image-circle">
