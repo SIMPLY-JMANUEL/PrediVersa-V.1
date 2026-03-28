@@ -14,12 +14,9 @@ PrediVersa es una plataforma educativa web de primer nivel enfocada en la inclus
 - ✅ **Soporte Contextual y Empatía**: El asistente virtual (Versa) ahora utiliza técnicas de guía activa para referir a los estudiantes a ayuda presencial inmediata en casos de Riesgo Alto.
 
 ## 🎨 DISEÑO Y EXPERIENCIA DE USUARIO (UX/UI)
+- ✅ **Luminous Glassmorphism**: Evolución hacia una estética de "Cristal Luminoso". Se eliminaron fondos pesados y oscuros, reemplazándolos por un **Mesh Gradient profesional** que mejora la legibilidad y reduce la fatiga visual.
 - ✅ **Rich Aesthetics**: La interfaz ha sido modernizada con un enfoque en la estética premium ("modern, beautiful, and dynamic").
-- ✅ **Secciones Corporativas**: Landing page renovada que incluye:
-  - Quiénes Somos (Misión y Visión).
-  - Servicios Académicos y Administrativos.
-  - Planes de Inclusión (Corporativos y Personales).
-  - Contacto Inteligente con formulario validado.
+- ✅ **Secciones Corporativas**: Landing page renovada que incluye Quiénes Somos, Servicios, Planes y Contacto validado.
 
 ## 📈 ESTADÍSTICAS E INTELIGENCIA DE DATOS (v1.1)
 - El **AdminDashboard** cuenta ahora con una sección de **Inteligencia Analítica** premium:
