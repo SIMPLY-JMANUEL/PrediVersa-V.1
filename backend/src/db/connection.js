@@ -69,16 +69,20 @@ async function testConnection() {
   }
 }
 
-// Función para ejecutar queries (similar a SQL Server pero para MySQL)
-async function executeQuery(sql, params) {
+// Función para ejecutar queries (Segura contra parámetros nulos)
+async function executeQuery(sql, params = null) {
+  let connection;
   try {
-    const connection = await pool.getConnection();
-    const [rows] = await connection.query(sql, Object.values(params || {}));
-    connection.release();
+    connection = await pool.getConnection();
+    // Si params es un array, se usa directamente. Si es un objeto, se extraen los valores. Si es null, se pasa array vacío.
+    const queryParams = params ? (Array.isArray(params) ? params : Object.values(params)) : [];
+    const [rows] = await connection.query(sql, queryParams);
     return { recordset: rows };
   } catch (error) {
-    console.error('Error executing query:', sql, error);
+    console.error('❌ Error ejecutando query SQL:', sql, error.message);
     throw error;
+  } finally {
+    if (connection) connection.release();
   }
 }
 
