@@ -62,10 +62,7 @@ services:
     publishDir: dist
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: prediversa-api
-          property: host
+        value: "https://jkwpuacezq.us-east-1.awsapprunner.com"
     routes:
       - type: rewrite
         source: /*
