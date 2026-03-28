@@ -1,26 +1,12 @@
-const { LexRuntimeV2Client, RecognizeTextCommand } = require("@aws-sdk/client-lex-runtime-v2");
+const { RecognizeTextCommand } = require("@aws-sdk/client-lex-runtime-v2");
+const { lexClient } = require("./awsConfig");
 require('dotenv').config();
-
-let lexClient = null;
-
-function getLexClient() {
-  if (!lexClient) {
-    lexClient = new LexRuntimeV2Client({
-      region: process.env.AWS_REGION || 'us-east-1',
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
-      }
-    });
-  }
-  return lexClient;
-}
 
 /**
  * Amazon Lex V2 - Enviar mensaje al bot PrediVersa_RiskBot_V1
  */
 async function sendToLex(userId, text, sessionState = {}) {
-  const client = getLexClient();
+  const client = lexClient; // Usando el cliente centralizado para mayor robustez v2.6
   try {
     const params = {
       botId: process.env.LEX_BOT_ID || 'DERGWSU1C8',

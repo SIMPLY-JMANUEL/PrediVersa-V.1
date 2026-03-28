@@ -1,73 +1,37 @@
-const { pool } = require('./connection');
+const { pool, query, querySingle } = require('./connection');
 
-// Funciones CRUD para usuarios usando MySQL
+// ─────────────────────────────────────────────────────
+// CRUD DE USUARIOS (Versión Optimizada v2.6)
+// ─────────────────────────────────────────────────────
 
 /**
  * Obtener todos los usuarios (sin contraseñas)
  */
-const getAllUsers = async () => {
-  try {
-    const [rows] = await pool.execute(
-      `SELECT id, documentId, email, name, role, phone, address, birthDate, edad, lugarNacimiento, 
-       nombrePadre, nombreMadre, grado, profilePicture, status, 
-       repName, repDocType, repDocId, repRelationship, repPhone, repEmail, repAddress,
-       institutionalEmail, isVerified, createdAt, updatedAt 
-       FROM users ORDER BY id ASC`
-    );
-    return rows;
-  } catch (error) {
-    console.error('❌ Error al obtener usuarios:', error.message);
-    throw error;
-  }
-};
+const getAllUsers = () => query(
+  `SELECT id, documentId, email, name, role, phone, address, birthDate, edad, lugarNacimiento, 
+   nombrePadre, nombreMadre, grado, profilePicture, status, 
+   repName, repDocType, repDocId, repRelationship, repPhone, repEmail, repAddress,
+   institutionalEmail, isVerified, createdAt, updatedAt 
+   FROM users ORDER BY id ASC`
+);
 
 /**
  * Obtener un usuario por ID (con contraseña para autenticación)
  */
-const getUserById = async (id) => {
-  try {
-    const [rows] = await pool.execute(
-      'SELECT * FROM users WHERE id = ?',
-      [id]
-    );
-    return rows[0] || null;
-  } catch (error) {
-    console.error('❌ Error al obtener usuario por ID:', error.message);
-    throw error;
-  }
-};
+const getUserById = (id) => querySingle('SELECT * FROM users WHERE id = ?', [id]);
 
 /**
  * Obtener un usuario por email (con contraseña para autenticación)
  */
-const getUserByEmail = async (email) => {
-  try {
-    const [rows] = await pool.execute(
-      'SELECT * FROM users WHERE email = ?',
-      [email]
-    );
-    return rows[0] || null;
-  } catch (error) {
-    console.error('❌ Error al obtener usuario por email:', error.message);
-    throw error;
-  }
-};
+const getUserByEmail = (email) => querySingle('SELECT * FROM users WHERE email = ?', [email]);
 
 /**
  * Obtener un usuario por documentId
  */
-const getUserByDocumentId = async (documentId) => {
-  try {
-    const [rows] = await pool.execute(
-      'SELECT id, documentId, email, name, role, phone, address, birthDate, status, createdAt, updatedAt FROM users WHERE documentId = ?',
-      [documentId]
-    );
-    return rows[0] || null;
-  } catch (error) {
-    console.error('❌ Error al obtener usuario por documento:', error.message);
-    throw error;
-  }
-};
+const getUserByDocumentId = (documentId) => querySingle(
+  'SELECT id, documentId, email, name, role, phone, address, birthDate, status, createdAt, updatedAt FROM users WHERE documentId = ?',
+  [documentId]
+);
 
 /**
  * Crear un nuevo usuario
@@ -366,44 +330,28 @@ const documentIdExists = async (documentId, excludeId = null) => {
   }
 };
 
-// ==================== FUNCIONES DE ALERTAS ====================
+// ==================== FUNCIONES DE ALERTAS (v2.6 OPT) ====================
 
 /**
  * Obtener todas las alertas
  */
-const getAllAlerts = async () => {
-  try {
-    const [rows] = await pool.execute(
-      `SELECT a.*, u.name as creatorName 
-       FROM alerts a 
-       LEFT JOIN users u ON a.createdBy = u.id 
-       ORDER BY a.createdAt DESC`
-    );
-    return rows;
-  } catch (error) {
-    console.error('❌ Error al obtener alertas:', error.message);
-    throw error;
-  }
-};
+const getAllAlerts = () => query(
+  `SELECT a.*, u.name as creatorName 
+   FROM alerts a 
+   LEFT JOIN users u ON a.createdBy = u.id 
+   ORDER BY a.createdAt DESC`
+);
 
 /**
  * Obtener una alerta por ID
  */
-const getAlertById = async (id) => {
-  try {
-    const [rows] = await pool.execute(
-      `SELECT a.*, u.name as creatorName 
-       FROM alerts a 
-       LEFT JOIN users u ON a.createdBy = u.id 
-       WHERE a.id = ?`,
-      [id]
-    );
-    return rows[0] || null;
-  } catch (error) {
-    console.error('❌ Error al obtener alerta por ID:', error.message);
-    throw error;
-  }
-};
+const getAlertById = (id) => querySingle(
+  `SELECT a.*, u.name as creatorName 
+   FROM alerts a 
+   LEFT JOIN users u ON a.createdBy = u.id 
+   WHERE a.id = ?`,
+  [id]
+);
 
 /**
  * Crear una nueva alerta

@@ -1,4 +1,5 @@
-const { BedrockRuntimeClient, ConverseCommand } = require("@aws-sdk/client-bedrock-runtime");
+const { ConverseCommand } = require("@aws-sdk/client-bedrock-runtime");
+const { bedrockClient, region } = require("./awsConfig");
 require('dotenv').config();
 
 const IMPACT_CATEGORIES = {
@@ -13,8 +14,8 @@ const IMPACT_CATEGORIES = {
  */
 class CentralAIService {
   constructor() {
-    this.client = new BedrockRuntimeClient({ region: process.env.AWS_REGION || "us-east-1" });
-    this.modelId = "us.anthropic.claude-3-5-haiku-20241022-v1:0"; // Claude 3.5 Haiku (US Profile)
+    this.client = bedrockClient; // Usando cliente centralizado Versa v2.6
+    this.modelId = "us.anthropic.claude-3-5-haiku-20241022-v1:0"; 
     this.initialized = true;
   }
 

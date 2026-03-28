@@ -6,13 +6,9 @@ const { invokeMotorVersaLambda } = require('../utils/lambdaService');
 const { createAlert } = require('../db/users');
 const centralAI = require('../utils/centralAIService');
 const { sendToLex } = require('../utils/lexService');
-const { SNSClient, PublishCommand } = require("@aws-sdk/client-sns");
-const { SESClient, SendEmailCommand } = require("@aws-sdk/client-ses");
-
-// Clientes AWS
-const awsRegion = process.env.AWS_REGION || "us-east-1";
-const snsClient = new SNSClient({ region: awsRegion });
-const sesClient = new SESClient({ region: awsRegion });
+const { PublishCommand } = require("@aws-sdk/client-sns");
+const { SendEmailCommand } = require("@aws-sdk/client-ses");
+const { snsClient, sesClient } = require('../utils/awsConfig');
 
 // SSE — Admin connection
 const { adminClients, notificarAdmins } = require('../utils/notificaciones');
