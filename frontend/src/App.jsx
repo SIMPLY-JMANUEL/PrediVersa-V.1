@@ -10,6 +10,7 @@ import CollaboratorDashboard from './components/CollaboratorDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 import RoleProtectedRoute from './components/RoleProtectedRoute'
 import QuienesSomos from './components/QuienesSomos'
+import Servicios from './components/Servicios'
 
 function AppRoutes({ user, isLoginOpen, setIsLoginOpen, handleLogin, handleLogout }) {
   const location = useLocation()
@@ -26,6 +27,12 @@ function AppRoutes({ user, isLoginOpen, setIsLoginOpen, handleLogin, handleLogou
           <>
             <Header onLoginClick={() => setIsLoginOpen(true)} />
             <QuienesSomos />
+          </>
+        } />
+        <Route path="/servicios" element={
+          <>
+            <Header onLoginClick={() => setIsLoginOpen(true)} />
+            <Servicios />
           </>
         } />
         <Route path="/student" element={

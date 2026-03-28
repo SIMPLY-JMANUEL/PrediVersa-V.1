@@ -21,7 +21,9 @@ function Header({ onLoginClick }) {
             <li>
               <Link to="/quienes-somos" style={{ color: 'inherit', textDecoration: 'none' }}>Quienes Somos</Link>
             </li>
-            <li style={{ cursor: 'pointer' }}>Servicios</li>
+            <li>
+              <Link to="/servicios" style={{ color: 'inherit', textDecoration: 'none' }}>Servicios</Link>
+            </li>
           </ul>
         </nav>
       </div>
