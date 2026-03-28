@@ -311,3 +311,57 @@
   font-weight: bold;
   font-size: 1.2rem;
 }
+
+/* ==============================================================
+   RESPONSIVIDAD UNIVERSAL
+   ============================================================== */
+
+@media (max-width: 1024px) {
+  .hero-content h1 { font-size: 3rem; }
+  .tabs-structured { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .main { padding: 1rem; }
+  
+  .hero {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+  
+  .hero-content h1 { font-size: 2.5rem; }
+  .hero-content .highlight { font-size: 1.8rem; }
+  .hero-content .tagline { font-size: 1.8rem; border: none; padding: 0; }
+  
+  .hero-image { display: none; } /* Ocultar círculos en móvil para ahorrar espacio */
+  
+  .about-header h2 { font-size: 2.2rem; }
+  .about-grid { grid-template-columns: 1fr; }
+  
+  .glass-panel { padding: 1.5rem; }
+  
+  .value-proposition { padding: 2rem 1rem; }
+  .value-proposition h3 { font-size: 1.8rem; }
+  
+  .prop-grid { grid-template-columns: 1fr 1fr; }
+  
+  .tabs-structured { gap: 1rem; }
+
+  .back-button-container {
+    top: 10px !important;
+    left: 10px !important;
+  }
+  
+  .back-button-container button {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-content h1 { font-size: 2rem; }
+  .prop-grid { grid-template-columns: 1fr; }
+  .general-objective h4, .specific-objectives h4 { font-size: 1.3rem; }
+  .about-header h2 { font-size: 1.8rem; }
+}
