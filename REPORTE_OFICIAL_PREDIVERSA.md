@@ -9,8 +9,9 @@ PrediVersa es una plataforma educativa web de primer nivel enfocada en la inclus
 - ✅ **Seguridad Empresa**: Uso de **bcryptjs** para cifrado de contraseñas y **JWT** para manejo de sesiones seguras por 24 horas.
 
 ## 🤖 AVANCES EN INTELIGENCIA ARTIFICIAL
-- ✅ **Amazon Lex Runtime V2**: Se ha integrado el motor de IA de Amazon Web Services, proporcionando un chatbot capaz de responder dudas académicas y administrativas con alta precisión.
-- ✅ **Soporte Contextual**: El chatbot ahora reconoce el rol y el nombre del estudiante logueado para una interacción personalizada y humana.
+- ✅ **Motor Híbrido de Riesgo**: Combinación de **Diccionario de Impacto Crítico** con la potencia de **Amazon Bedrock (Claude 3.5)** para detectar y validar riesgos psicosociales en tiempo real.
+- ✅ **Seguridad "Zero Tolerance"**: Sistema de alerta directa vía **SMS (SNS)** y **Email (SES)** que ignora falsos positivos cuando se detectan palabras de peligro inminente.
+- ✅ **Soporte Contextual y Empatía**: El asistente virtual (Versa) ahora utiliza técnicas de guía activa para referir a los estudiantes a ayuda presencial inmediata en casos de Riesgo Alto.
 
 ## 🎨 DISEÑO Y EXPERIENCIA DE USUARIO (UX/UI)
 - ✅ **Rich Aesthetics**: La interfaz ha sido modernizada con un enfoque en la estética premium ("modern, beautiful, and dynamic").

@@ -59,6 +59,9 @@ Se ha migrado de Botpress a **Amazon Lex** para ofrecer un chatbot más robusto 
 - ✅ **Migración a Amazon Lex**: Integración de IA avanzada.
 - ✅ **Landing Modernizada**: Diseño premium corporativo.
 - ✅ **Registro y Recuperación**: Flujos de usuario completos.
+- ✅ **Modelo Híbrido IA**: Detección inmediata mediante diccionario de impacto + Bedrock.
+- ✅ **Seguridad Zero Tolerance**: Blindaje SMS/Email ante riesgo crítico.
+- ✅ **Producción v1.1.0 Ready**: Limpieza de datos y responsividad universal aplicada.
 - ✅ **Despliegue AWS App Runner / Render**: Hosting en la nube profesional.
 
 ---

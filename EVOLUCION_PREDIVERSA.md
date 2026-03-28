@@ -5,12 +5,12 @@
 
 ## 📅 1. HITOS ALCANZADOS (RESUMEN v1.1)
 El proyecto ha pasado de ser un **MVP funcional básico** a una **plataforma corporativa premium**.
-- ✅ **Seguridad**: Registro de usuarios y recuperación de contraseña (Reset Password).
-- ✅ **Estética**: Rediseño total de la Web Corporativa con un estilo "Rich Aesthetic".
-- ✅ **IA Avanzada**: Migración de Botpress a **Amazon Lex** para el chatbot del estudiante.
-- ✅ **Admin Pro**: Gestión de usuarios completa en el dashboard del administrador.
-- ✅ **Despliegue**: Integración con Render y AWS App Runner para hosting escalable.
-- ✅ **Reportes**: Dashboard de estadísticas reales basadas en la base de datos AWS RDS.
+- ✅ **Motor Híbrido IA**: Detección mediante diccionario de impacto + Amazon Bedrock.
+- ✅ **Seguridad "Zero Tolerance"**: Blindaje de alertas críticas SMS/Email infalible.
+- ✅ **Responsividad Universal**: Interfaz premium compatible con Celulares y Tablets.
+- ✅ **IA Avanzada**: Migración exitosa a **Amazon Lex Runtime V2** y Versa AI.
+- ✅ **Clean Slate (Producción)**: Base de datos purificada y lista para el lanzamiento oficial.
+- ✅ **Admin Pro**: Gestión de usuarios, alertas y seguimiento de casos en tiempo real.
 
 ---
 

@@ -4,12 +4,12 @@ Una plataforma educativa web premium diseñada para facilitar la educación dive
 
 ## 🚀 Características Principales
 
-- ✅ **Autenticación Avanzada** - Sistema de login, registro y recuperación de contraseña.
-- ✅ **Dashboards Personalizados** - Interfaces específicas por rol (Estudiante, Admin, Colaborador) con diseño moderno.
-- ✅ **Chatbot Inteligente (Amazon Lex)** - Asistente virtual integrado en el dashboard de estudiantes para soporte especializado.
-- ✅ **Web Corporativa Modernizada** - Páginas profesionales de "Quiénes Somos", "Servicios", "Noticias", "Planes" y "Contacto".
-- ✅ **AWS RDS (MySQL)** - Persistencia de datos real en la nube.
-- ✅ **Diseño Premium & Responsive** - Estética de alta calidad compatible con todos los dispositivos.
+- ✅ **Motor Híbrido IA (Categorías de Impacto)** - Detección inmediata mediante diccionario crítico + Amazon Bedrock (Claude 3.5).
+- ✅ **Seguridad "Zero Tolerance"** - Blindaje automático para alertas urgentes (SMS/Email) al detectar riesgo alto.
+- ✅ **Dashboards Responsivos** - Interfaces específicas por rol optimizadas para Celulares, Tablets y Escritorio.
+- ✅ **Chatbot Lex & Versa** - Integración de soporte pedagógico y bienestar con auto-enfoque permanente.
+- ✅ **AWS RDS (MySQL)** - Persistencia robusta en la nube bajo infraestructura segura.
+- ✅ **Limpieza de Producción** - Base de datos purificada y lista para lanzamiento profesional (v1.1.0).
 - ✅ **Despliegue en la Nube** - Configurado para AWS App Runner y Render.
 
 ## 📋 Estructura del Proyecto
