@@ -21,11 +21,12 @@ PrediVersa es una plataforma educativa web de primer nivel enfocada en la inclus
   - Planes de Inclusión (Corporativos y Personales).
   - Contacto Inteligente con formulario validado.
 
-## 📈 ESTADÍSTICAS DEL SISTEMA
-- El **AdminDashboard** ahora presenta reportes dinámicos alimentados por la base de datos real:
-  - Registro de usuarios por mes (Gráficos de Barras).
-  - Distribución de Roles (Gráficos Doughnut).
-  - Estado de cuenta (Activos vs Inactivos).
+## 📈 ESTADÍSTICAS E INTELIGENCIA DE DATOS (v1.1)
+- El **AdminDashboard** cuenta ahora con una sección de **Inteligencia Analítica** premium:
+  - **Tendencia de Riesgo Emotional**: Gráficos de área sobre el clima de bienestar institucional.
+  - **Detección de Focos Críticos**: Identificación inmediata de sesiones con riesgo ALTO.
+  - **Distribución IA**: Clasificación automática de mensajes según su impacto emocional.
+  - **Métricas Operativas**: Seguimiento de eficiencia en la resolución de alertas.
 
 ## 🚀 CONCLUSIÓN
 PrediVersa se posiciona como una herramienta líder en la gestión de la convivencia y el bienestar institucional. Con la base tecnológica actual (v1.1), el sistema está listo para escalar a funcionalidades de tiempo real y expansión móvil.

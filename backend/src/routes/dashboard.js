@@ -20,7 +20,7 @@ router.get('/risk-trends', verifyToken, async (req, res) => {
       ORDER BY date DESC
       LIMIT 30
     `);
-    res.json({ success: true, data: results });
+    res.json({ success: true, data: results.recordset || [] });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -38,11 +38,11 @@ router.get('/critical-students', verifyToken, async (req, res) => {
       FROM chatbot_interacciones
       WHERE risk = 'ALTO'
       GROUP BY session_id
-      HAVING max_risk > 15
+      HAVING max_risk >= 0
       ORDER BY max_risk DESC
       LIMIT 10
     `);
-    res.json({ success: true, data: results });
+    res.json({ success: true, data: results.recordset || [] });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -56,7 +56,7 @@ router.get('/risk-distribution', verifyToken, async (req, res) => {
       FROM chatbot_interacciones 
       GROUP BY risk
     `);
-    res.json({ success: true, data: results });
+    res.json({ success: true, data: results.recordset || [] });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

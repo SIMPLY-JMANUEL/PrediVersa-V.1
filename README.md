@@ -5,6 +5,7 @@ Una plataforma educativa web premium diseñada para facilitar la educación dive
 ## 🚀 Características Principales
 
 - ✅ **Motor Híbrido IA (Categorías de Impacto)** - Detección inmediata mediante diccionario crítico + Amazon Bedrock (Claude 3.5).
+- ✅ **Inteligencia Analítica v1.1** - Nuevo dashboard con gráficos dinámicos de tendencia (AreaChart), clima emocional (PieChart) y detección de focos críticos en tiempo real.
 - ✅ **Seguridad "Zero Tolerance"** - Blindaje automático para alertas urgentes (SMS/Email) al detectar riesgo alto.
 - ✅ **Dashboards Responsivos** - Interfaces específicas por rol optimizadas para Celulares, Tablets y Escritorio.
 - ✅ **Chatbot Lex & Versa** - Integración de soporte pedagógico y bienestar con auto-enfoque permanente.

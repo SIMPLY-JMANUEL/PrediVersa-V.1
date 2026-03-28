@@ -5,10 +5,10 @@
 
 ## 📅 1. HITOS ALCANZADOS (RESUMEN v1.1)
 El proyecto ha pasado de ser un **MVP funcional básico** a una **plataforma corporativa premium**.
+- ✅ **Inteligencia Analítica v1.1**: Nuevo dashboard con gráficos dinámicos de tendencia (AreaChart), clima emocional (PieChart) y detección de focos críticos en tiempo real.
 - ✅ **Motor Híbrido IA**: Detección mediante diccionario de impacto + Amazon Bedrock.
 - ✅ **Seguridad "Zero Tolerance"**: Blindaje de alertas críticas SMS/Email infalible.
 - ✅ **Responsividad Universal**: Interfaz premium compatible con Celulares y Tablets.
-- ✅ **IA Avanzada**: Migración exitosa a **Amazon Lex Runtime V2** y Versa AI.
 - ✅ **Clean Slate (Producción)**: Base de datos purificada y lista para el lanzamiento oficial.
 - ✅ **Admin Pro**: Gestión de usuarios, alertas y seguimiento de casos en tiempo real.
 
