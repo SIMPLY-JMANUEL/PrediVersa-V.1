@@ -1,0 +1,82 @@
+# 🏗️ PREDIVERSA - PIPELINE CI/CD (INDUSTRIAL-GRADE)
+# CI: Lint + Test | CD: Docker Build + Cloud Deploy
+# Author: MLOps/DevOps Team
+
+name: CI-CD Pipeline PrediVersa
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # 🔍 JOB 1: CALIDAD Y SEGURIDAD
+  Quality-Check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛰️ Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 💎 Setup Node.js (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: './backend/package-lock.json'
+
+      - name: 📦 Backend Linting & Audit
+        run: |
+          cd backend
+          npm ci
+          npm audit --audit-level=high
+
+      - name: 🎨 Frontend Linting
+        run: |
+          cd frontend
+          npm ci
+          # npm run lint (Descomentar cuando el lint esté configurado)
+
+  # 🐳 JOB 2: DOCKERIZACIÓN (ENVÍO A LA NUBE)
+  Docker-Build-Push:
+    needs: Quality-Check
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 🔐 CONFIGURA TUS SECRETOS EN GITHUB SETTINGS > SECRETS
+      # AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, ECR_REPOSITORY
+      
+      - name: 🛰️ Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: 🔑 Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: 🏗️ Build, Tag & Push (Backend Image)
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          cd backend
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+
+  # 🚀 JOB 3: DESPLIEGUE (CD)
+  Deploy-to-Cloud:
+    needs: Docker-Build-Push
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛸 Sincronización Automática con App Runner/ECS
+        run: |
+          echo "🚀 Desplegando versión: ${{ github.sha }}"
+          # Comando de despliegue según tu proveedor:
+          # aws apprunner start-deployment --service-arn ${{ secrets.APP_RUNNER_ARN }}

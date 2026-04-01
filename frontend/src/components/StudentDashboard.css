@@ -1,0 +1,108 @@
+/* 🏛️ PrediVersa STUDENT DASHBOARD LUXE UI */
+.dashboard-wrapper {
+  padding: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-size: 2.2rem;
+  font-weight: 850;
+  letter-spacing: -0.04em;
+  color: hsl(var(--p-primary));
+  margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+  font-size: 1.1rem;
+  color: hsla(var(--p-text), 0.7);
+  font-weight: 500;
+  margin-bottom: 2.5rem;
+}
+
+/* 🧊 DISEÑO DE TABS CAPSULA */
+.management-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 0.5rem;
+  background: hsla(var(--p-text), 0.03);
+  border-radius: var(--radius-md);
+  width: fit-content;
+  overflow-x: auto;
+}
+
+.mgmt-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1.4rem;
+  border: none;
+  background: transparent;
+  color: hsla(var(--p-text), 0.6);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.mgmt-tab:hover {
+  background: hsla(var(--p-primary), 0.05);
+  color: hsl(var(--p-primary));
+}
+
+.mgmt-tab.active {
+  background: hsl(var(--p-white));
+  color: hsl(var(--p-primary));
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transform: translateY(-1px);
+}
+
+/* 🧬 CONTENIDO DE GESTIÓN */
+.mgmt-content {
+  min-height: 500px;
+  animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 🤖 CHATBOT FOOTER LUXE */
+.chatbot-footer-hint {
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: hsla(var(--p-primary), 0.04);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: hsl(var(--p-primary));
+}
+
+.dot-online {
+  width: 10px;
+  height: 10px;
+  background: hsl(160, 100%, 45%);
+  border-radius: 50%;
+  box-shadow: 0 0 10px hsl(160, 100%, 45%);
+  animation: pulseGreen 2s infinite;
+}
+
+@keyframes pulseGreen {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+}
+
+/* 📱 RESPONSIVIDAD */
+@media (max-width: 768px) {
+  .dashboard-wrapper { padding: 1rem; }
+  .page-title { font-size: 1.8rem; }
+  .management-tabs { width: 100%; }
+}

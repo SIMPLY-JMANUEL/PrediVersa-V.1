@@ -1,0 +1,91 @@
+/* 🏛️ PrediVersa HEADER LUXE UI */
+.header {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 85px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4rem;
+  z-index: 1000;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+}
+
+.header-logo {
+  height: 48px;
+  width: auto;
+  transition: transform 0.3s ease;
+}
+
+.header-logo:hover {
+  transform: scale(1.05);
+}
+
+.navbar-left ul, .navbar-right ul {
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+  align-items: center;
+}
+
+.header nav ul li a, .header nav ul li {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: hsla(var(--p-text), 0.7);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  text-decoration: none;
+}
+
+.header nav ul li a:hover, .header nav ul li:hover {
+  color: hsl(var(--p-primary));
+}
+
+.header nav ul li a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: hsl(var(--p-accent));
+  transition: width 0.3s ease;
+}
+
+.header nav ul li a:hover::after {
+  width: 100%;
+}
+
+/* 💎 BOTÓN LOGIN LUXE */
+.login-link {
+  background: linear-gradient(135deg, hsl(var(--p-primary)), hsl(var(--p-primary), 80%));
+  color: white !important;
+  padding: 0.7rem 1.6rem;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 14px hsla(var(--p-primary), 0.3);
+  opacity: 1 !important;
+}
+
+.login-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px hsla(var(--p-primary), 0.4);
+  filter: brightness(1.1);
+}
+
+@media (max-width: 1024px) {
+  .header { padding: 0 1.5rem; }
+  .header-left { gap: 1.5rem; }
+  .navbar-left { display: none; } /* Ocultar en móvil por simplicidad en este refactor */
+}

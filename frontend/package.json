@@ -1,0 +1,35 @@
+{
+  "name": "prediversa",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@huggingface/inference": "^4.13.15",
+    "@tanstack/react-query": "^5.95.2",
+    "chart.js": "^4.5.1",
+    "groq-sdk": "^1.1.1",
+    "lucide-react": "^0.577.0",
+    "react": "^18.2.0",
+    "react-chartjs-2": "^5.3.1",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.13.0",
+    "recharts": "^3.8.1",
+    "xlsx": "^0.18.5",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@vitejs/plugin-react": "^4.2.1",
+    "jsdom": "^29.0.1",
+    "vite": "^5.0.8",
+    "vitest": "^4.1.2"
+  }
+}

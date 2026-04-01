@@ -1,0 +1,131 @@
+/* 🏛️ PrediVersa COLLABORATOR DASHBOARD LUXE UI (Estación de Trabajo) */
+.collaborator-container {
+  padding: 2rem;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+/* 📋 CASELOAD SIDEBAR LUXE */
+.caseload-card {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.case-list-header {
+  padding: 1.5rem;
+  background: hsla(var(--p-primary), 0.03);
+  border-bottom: 1px solid hsla(var(--p-text), 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.case-list-header h4 {
+  font-weight: 900;
+  font-size: 0.85rem;
+  color: hsl(var(--p-primary));
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.case-item {
+  padding: 1.5rem;
+  border-bottom: 1px solid hsla(var(--p-text), 0.03);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+}
+
+.case-item:hover {
+  background: hsla(var(--p-primary), 0.02);
+}
+
+.case-item.active {
+  background: hsla(var(--p-primary), 0.05);
+  border-left-color: hsl(var(--p-primary));
+}
+
+/* Colores Dinámicos por Riesgo */
+.case-item.alto { border-left-color: hsl(var(--p-danger)); }
+.case-item.medio { border-left-color: hsl(var(--p-warning)); }
+.case-item.bajo { border-left-color: hsl(var(--p-accent)); }
+
+/* 🔘 NAVEGACIÓN CAPSULA COLLAB */
+.collab-tabs {
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 2rem;
+  background: hsla(var(--p-text), 0.04);
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  width: fit-content;
+}
+
+/* 📝 FORMULARIOS DE INTERVENCIÓN LUXE */
+.mgmt-content {
+  animation: slideInUp 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.selected-case-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: hsla(var(--p-primary), 0.1);
+  color: hsl(var(--p-primary));
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 0.8rem;
+  font-family: monospace;
+}
+
+.pro-field {
+  margin-bottom: 1.5rem;
+}
+
+.pro-field label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: hsla(var(--p-text), 0.5);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.03em;
+}
+
+.pro-field input, .pro-field select, .pro-field textarea {
+  width: 100%;
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid hsla(var(--p-text), 0.1);
+  font-weight: 500;
+  background: hsl(var(--p-white));
+  transition: all 0.3s ease;
+}
+
+.pro-field input:focus, .pro-field textarea:focus {
+  border-color: hsl(var(--p-primary));
+  box-shadow: 0 0 0 4px hsla(var(--p-primary), 0.1);
+  outline: none;
+}
+
+/* ✨ MODO BIENVENIDA (EMPTY STATE) */
+.welcome-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 5rem 2rem;
+}
+
+.icon-circle {
+  width: 80px;
+  height: 80px;
+  background: hsla(var(--p-primary), 0.05);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: hsla(var(--p-primary), 0.3);
+  margin-bottom: 2rem;
+}
