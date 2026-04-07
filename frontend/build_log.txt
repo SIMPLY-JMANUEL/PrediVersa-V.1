@@ -1,0 +1,53 @@
+
+> prediversa@0.0.1 build
+> vite build
+
+You are using Node.js 20.14.0. Vite requires Node.js version 20.19+ or 22.12+. Please upgrade your Node.js version.
+file:///C:/Users/User/AppData/Roaming/npm/node_modules/vite/node_modules/rolldown/dist/shared/binding-CkWPGrSM.mjs:507
+		if (loadErrors.length > 0) throw new Error("Cannot find native binding. npm has a bug related to optional dependencies (https://github.com/npm/cli/issues/4828). Please try `npm i` again after removing both package-lock.json and node_modules directory.", { cause: loadErrors.reduce((err, cur) => {
+		                                 ^
+
+Error: Cannot find native binding. npm has a bug related to optional dependencies (https://github.com/npm/cli/issues/4828). Please try `npm i` again after removing both package-lock.json and node_modules directory.
+    at file:///C:/Users/User/AppData/Roaming/npm/node_modules/vite/node_modules/rolldown/dist/shared/binding-CkWPGrSM.mjs:507:36
+    at file:///C:/Users/User/AppData/Roaming/npm/node_modules/vite/node_modules/rolldown/dist/shared/binding-CkWPGrSM.mjs:9:48
+    ... 2 lines matching cause stack trace ...
+    at async ModuleLoader.import (node:internal/modules/esm/loader:316:24)
+    at async CAC.<anonymous> (file:///C:/Users/User/AppData/Roaming/npm/node_modules/vite/dist/node/cli.js:764:28) {
+  [cause]: Error: Cannot find module '@rolldown/binding-win32-x64-msvc'
+  Require stack:
+  - C:\Users\User\AppData\Roaming\npm\node_modules\vite\node_modules\rolldown\dist\shared\binding-CkWPGrSM.mjs
+      at Module._resolveFilename (node:internal/modules/cjs/loader:1145:15)
+      ... 2 lines matching cause stack trace ...
+      at require (node:internal/modules/helpers:179:18)
+      at requireNative (file:///C:/Users/User/AppData/Roaming/npm/node_modules/vite/node_modules/rolldown/dist/shared/binding-CkWPGrSM.mjs:147:21)
+      at file:///C:/Users/User/AppData/Roaming/npm/node_modules/vite/node_modules/rolldown/dist/shared/binding-CkWPGrSM.mjs:475:18
+      at file:///C:/Users/User/AppData/Roaming/npm/node_modules/vite/node_modules/rolldown/dist/shared/binding-CkWPGrSM.mjs:9:48
+      at file:///C:/Users/User/AppData/Roaming/npm/node_modules/vite/node_modules/rolldown/dist/shared/parse-BGipdujE.mjs:39:46
+      at ModuleJob.run (node:internal/modules/esm/module_job:222:25)
+      at async ModuleLoader.import (node:internal/modules/esm/loader:316:24) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [
+      'C:\\Users\\User\\AppData\\Roaming\\npm\\node_modules\\vite\\node_modules\\rolldown\\dist\\shared\\binding-CkWPGrSM.mjs'
+    ],
+    cause: Error: Cannot find module './rolldown-binding.win32-x64-msvc.node'
+    Require stack:
+    - C:\Users\User\AppData\Roaming\npm\node_modules\vite\node_modules\rolldown\dist\shared\binding-CkWPGrSM.mjs
+        at Module._resolveFilename (node:internal/modules/cjs/loader:1145:15)
+        at Module._load (node:internal/modules/cjs/loader:986:27)
+        at Module.require (node:internal/modules/cjs/loader:1233:19)
+        at require (node:internal/modules/helpers:179:18)
+        at requireNative (file:///C:/Users/User/AppData/Roaming/npm/node_modules/vite/node_modules/rolldown/dist/shared/binding-CkWPGrSM.mjs:142:12)
+        at file:///C:/Users/User/AppData/Roaming/npm/node_modules/vite/node_modules/rolldown/dist/shared/binding-CkWPGrSM.mjs:475:18
+        at file:///C:/Users/User/AppData/Roaming/npm/node_modules/vite/node_modules/rolldown/dist/shared/binding-CkWPGrSM.mjs:9:48
+        at file:///C:/Users/User/AppData/Roaming/npm/node_modules/vite/node_modules/rolldown/dist/shared/parse-BGipdujE.mjs:39:46
+        at ModuleJob.run (node:internal/modules/esm/module_job:222:25)
+        at async ModuleLoader.import (node:internal/modules/esm/loader:316:24) {
+      code: 'MODULE_NOT_FOUND',
+      requireStack: [
+        'C:\\Users\\User\\AppData\\Roaming\\npm\\node_modules\\vite\\node_modules\\rolldown\\dist\\shared\\binding-CkWPGrSM.mjs'
+      ]
+    }
+  }
+}
+
+Node.js v20.14.0
