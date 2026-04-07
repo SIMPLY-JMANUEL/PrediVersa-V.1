@@ -211,6 +211,22 @@ const initializeDatabase = async () => {
     // TABLAS DEL CHATBOT PREDICTIVO
     // ─────────────────────────────────────────────────────
 
+    // Tabla para reporte de interacciones (MIGRACIÓN DDD)
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS chatbot_interacciones (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        session_id VARCHAR(100) NOT NULL,
+        user_input TEXT NOT NULL,
+        response TEXT NOT NULL,
+        risk VARCHAR(20) DEFAULT 'BAJO',
+        risk_score DECIMAL(5,2) DEFAULT 0,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_session (session_id),
+        INDEX idx_risk (risk)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+    console.log('✅ Tabla chatbot_interacciones verificada/creada');
+
     // Tabla para reportes del chatbot (riesgo bajo y medio)
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS chatbot_reportes (

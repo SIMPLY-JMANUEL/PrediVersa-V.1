@@ -14,6 +14,28 @@ const getAllUsers = async (req, res, next) => {
   }
 };
 
+const getStats = async (req, res, next) => {
+  try {
+    const users = await userService.getAll();
+    const activos = users.filter(u => u.status === 'Activo').length;
+    res.json({
+      success: true,
+      stats: {
+        totalUsers: users.length,
+        activeUsers: activos,
+        inactiveUsers: users.length - activos,
+        usersByRole: {
+          Estudiante: users.filter(u => u.role === 'Estudiante').length,
+          Colaboradores: users.filter(u => u.role === 'Colaboradores').length,
+          Administrador: users.filter(u => u.role === 'Administrador').length
+        }
+      }
+    });
+  } catch (error) {
+    next(new AppError(error.message, 500));
+  }
+};
+
 const getProfile = async (req, res, next) => {
   try {
     const user = await userService.getProfile(req.user.id);
@@ -57,5 +79,6 @@ module.exports = {
   getProfile,
   register,
   update,
-  deactivate
+  deactivate,
+  getStats
 };

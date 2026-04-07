@@ -15,6 +15,7 @@ router.get('/me', verifyToken, userController.getProfile);
 router.put('/profile', verifyToken, userController.update);
 
 // --- RUTAS ADMINISTRATIVAS ---
+router.get('/stats', verifyToken, authorizeRoles('Administrador'), userController.getStats);
 router.get('/', verifyToken, authorizeRoles('Administrador'), userController.getAllUsers);
 
 // Registro de nuevos estudiantes (Público)
