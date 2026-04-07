@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Send, Bot, User, Loader2, Mic, MicOff, Smile, HeartHandshake } from 'lucide-react'
 import { apiFetch } from '../utils/api'
-import './AmazonLexChat.css'
+import '../styles/components/AmazonLexChat.css'
 
 function AmazonLexChat({ user }) {
   const [messages, setMessages] = useState([

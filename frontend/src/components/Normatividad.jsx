@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BookOpen, ShieldCheck, UserCheck, AlertOctagon, ChevronDown, ChevronUp } from 'lucide-react';
-import './Normatividad.css';
+import '../styles/components/Normatividad.css';
 
 export default function Normatividad() {
   const [openSection, setOpenSection] = useState(null);

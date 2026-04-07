@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { apiFetch } from '../utils/api'
 import { Lock, CheckCircle2, AlertCircle, ArrowRight, Loader2 } from 'lucide-react'
-import './Login.css' // Reutilizamos estilos
+import '../styles/components/Login.css' // Reutilizamos estilos
 
 function ResetPassword() {
   const [searchParams] = useSearchParams()

@@ -6,8 +6,8 @@ import TestVersa from './TestVersa'
 import AmazonLexChat from './AmazonLexChat'
 import UniversalSidebar from './shared/UniversalSidebar'
 import { MessageSquare, AlertTriangle, Scale, ClipboardList, Info } from 'lucide-react'
-import '../ProfessionalTheme.css'
-import './StudentDashboard.css'
+import '../styles/components/ProfessionalTheme.css'
+import '../styles/components/StudentDashboard.css'
 
 function StudentDashboard({ user, onLogout }) {
   const [activeMenu, setActiveMenu] = useState('chat')

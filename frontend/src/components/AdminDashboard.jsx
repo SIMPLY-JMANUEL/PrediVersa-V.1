@@ -16,7 +16,7 @@ import UserForm from './admin/UserForm'
 import UserVerification from './admin/UserVerification'
 import UserRequestsAdmin from './admin/UserRequestsAdmin'
 
-import './AdminDashboard.css'
+import '../styles/components/AdminDashboard.css'
 
 /**
  * 🏛️ ADMIN DASHBOARD LUXE UI

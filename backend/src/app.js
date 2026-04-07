@@ -1,12 +1,12 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
-const alertRoutes = require('./routes/alerts');
-const chatbotRoutes = require('./routes/chatbot');
-const dashboardRoutes = require('./routes/dashboard');
-const configRoutes = require('./routes/config');
+const authRoutes = require('./modules/auth/auth.routes');
+const userRoutes = require('./modules/users/users.routes');
+const alertRoutes = require('./modules/alerts/alerts.routes');
+const chatbotRoutes = require('./modules/chatbot/chatbot.routes');
+const dashboardRoutes = require('./modules/dashboard/dashboard.routes');
+const configRoutes = require('./modules/config/config.routes');
 
 const app = express();
 

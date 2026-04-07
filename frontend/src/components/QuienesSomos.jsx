@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Main.css';
+import '../styles/components/Main.css';
 
 function QuienesSomos() {
   const navigate = useNavigate();

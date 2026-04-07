@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Settings, X, Sun, Moon, Monitor, Camera, UserCircle, LogOut, Check } from 'lucide-react'
 import { useUserPhoto } from '../hooks/useUserPhoto'
 import logo from '../assets/images/logo-prediversa.png'
-import './DashboardHeader.css'
+import '../styles/components/DashboardHeader.css'
 
 const THEMES = [
   { id: 'light',  label: 'Claro',    icon: Sun,     desc: 'Fondo blanco, tonos suaves' },

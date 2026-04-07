@@ -1,6 +1,6 @@
 import React from 'react';
 import { Activity, Bell, Users, ShieldCheck, LayoutDashboard, Database } from 'lucide-react';
-import './ControlPanelCard.css';
+import '../../styles/components/ControlPanelCard.css';
 
 const ControlPanelCard = ({ stats }) => {
   const activePercent = stats?.totalUsers > 0 ? (stats.activeUsers / stats.totalUsers) * 100 : 0;

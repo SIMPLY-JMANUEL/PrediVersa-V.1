@@ -1,4 +1,4 @@
-import './Header.css'
+import '../styles/components/Header.css'
 import logo from '../assets/images/logo-prediversa.png'
 
 import { Link, useNavigate } from 'react-router-dom'
