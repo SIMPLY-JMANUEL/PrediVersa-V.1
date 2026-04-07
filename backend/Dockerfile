@@ -1,20 +1,28 @@
-# Backend Dockerfile for AWS App Runner - Triggering Amplify Redeploy
-FROM node:18-alpine
+# 🏛️ PREDIVERSA BACKEND - DOCKER PRO STAGE
+# Multi-stage build for light & secure images
 
-# Set working directory
+# -- STAGE 1: Build & Dependencies --
+FROM node:20-alpine AS builder
+
 WORKDIR /app
-
-# Copy package.json and package-lock.json
 COPY package*.json ./
+RUN npm ci --only=production
 
-# Install dependencies
-RUN npm install
+# -- STAGE 2: Runtime --
+FROM node:20-alpine
 
-# Copy source code
+WORKDIR /app
+COPY --from=builder /app/node_modules ./node_modules
 COPY . .
 
-# Expose port 8080 (specified as default in server.js and render.yaml)
-EXPOSE 8080
+# 🛡️ SEGURIDAD: Usuario no-root para prevenir escalada
+RUN addgroup -S predigroup && adduser -S prediuser -G predigroup
+USER prediuser
 
-# Start command
-CMD ["npm", "start"]
+# 🛰️ PUERTO INSTITUCIONAL
+EXPOSE 3001
+
+# ⚡ VARIABLES BASE
+ENV NODE_ENV=production
+
+CMD ["node", "src/app.js"]

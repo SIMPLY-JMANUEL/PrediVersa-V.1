@@ -1,97 +1,43 @@
-# PrediVersa V.1.1 🎓
+# 🏛️ PREDIVERSA v3.1 (TITANIUM ALERT EDITION) 🎓🤖🛡️
+**"Inteligencia Preventiva Escolar de Grado Enterprise"**
 
-Una plataforma educativa web premium diseñada para facilitar la educación diversa e inclusiva. Ofrece dashboards personalizados para estudiantes, administradores y colaboradores, con integración de chatbot inteligente impulsado por **Amazon Lex**.
+PrediVersa es una plataforma educativa de élite diseñada para la detección temprana de riesgos psicosociales mediante un Motor de IA Híbrido (VERSA Engine), integrando seguridad institucional, bienestar emocional y analítica de datos en una sola consola de mando.
 
-## 🚀 Características Principales
+---
 
-- ✅ **Motor Híbrido IA (Categorías de Impacto)** - Detección inmediata mediante diccionario crítico + Amazon Bedrock (Claude 3.5).
-- ✅ **Inteligencia Analítica v1.1** - Nuevo dashboard con gráficos dinámicos de tendencia (AreaChart), clima emocional (PieChart) y detección de focos críticos en tiempo real.
-- ✅ **Seguridad "Zero Tolerance"** - Blindaje automático para alertas urgentes (SMS/Email) al detectar riesgo alto.
-- ✅ **Dashboards Responsivos** - Interfaces específicas por rol optimizadas para Celulares, Tablets y Escritorio.
-- ✅ **Chatbot Lex & Versa** - Integración de soporte pedagógico y bienestar con auto-enfoque permanente.
-- ✅ **AWS RDS (MySQL)** - Persistencia robusta en la nube bajo infraestructura segura.
-- ✅ **Limpieza de Producción** - Base de datos purificada y lista para lanzamiento profesional (v1.1.0).
-- ✅ **Despliegue en la Nube** - Configurado para AWS App Runner y Render.
+## 🚀 HI-TECH STACK (v3.1 Titanium)
+- **🧠 IA VERSA Engine v3.1**: Triple Sensor 360° (Riesgo + Identidad + Emoción) impulsado por **Amazon Bedrock (Claude 3.5 Haiku)**. 🛰️
+- **💰 FinOps Architecture**: Estrategia de ahorro de costos mediante Capa 0 (Diccionario), Capa 1 (Redis SHA-256 Cache) y Capa 2 (LLM). 📉📉
+- **💎 Luxe UI v4.0**: Interfaz premium basada en **Glassmorphism**, **Zustand** para estado global y **React Query** para sincronización de datos. ✨🎨
+- **🆘 SOS Alert Dispatch**: Motor de despacho multicanal determinístico con **AWS SNS (SMS)** y **AWS SES (Email)** garantizado por cifrado de punta a punta. 📲📧🚨
 
-## 📋 Estructura del Proyecto
+## 🏛️ ARQUITECTURA MODULAR (DDD-lite)
+El proyecto ha sido refactorizado para ser 100% escalable y mantenible:
+- **`backend/src/modules/`**: Estructura desacoplada por dominios (`auth`, `users`, `chatbot`, `alerts`, `dashboard`).
+- **`backend/Dockerfile`**: Imagen multi-etapa optimizada para despliegues de alto rendimiento.
+- **`frontend/src/store/`**: Cerebro de estado global con persistencia automática.
 
-```
-PrediVersa-V.1/
-├── backend/                    # Node.js + Express
-│   ├── src/
-│   │   ├── app.js             # Configuración Express
-│   │   ├── server.js          # Punto de entrada
-│   │   ├── routes/            # Rutas (Auth, Chatbot, Stats)
-│   │   ├── utils/             # Servicios (CentralAIService para Lex)
-│   │   └── db/                # Conexión RDS y CRUD de usuarios
-│   └── package.json
-│
-└── frontend/                   # React + Vite
-    ├── src/
-    │   ├── App.jsx            # Componente raíz & Routing
-    │   ├── components/        # Componentes UI (Landing, Dashboards)
-    │   ├── pages/             # Páginas corporativas (Modernizadas)
-    │   └── assets/            # Multimedia y estilos
-    └── package.json
-```
+## 📋 DOCUMENTACIÓN INSTITUCIONAL
+Para entender el corazón técnico de PrediVersa, consulta nuestros manuales maestros:
+- 📑 [DOCUMENTACION_OFICIAL_COMPLETA.md](./DOCUMENTACION_OFICIAL_COMPLETA.md) - Manual de Arquitectura, API y Sensores.
+- 📉 [EVOLUCION_PREDIVERSA.md](./EVOLUCION_PREDIVERSA.md) - Historial de versiones y roadmap alcanzado.
+- 🕵️‍♂️ [REPORTE_OFICIAL_PREDIVERSA.md](./REPORTE_OFICIAL_PREDIVERSA.md) - Acta de Auditoría, Seguridad y Despliegue.
+- 🛡️ [audit_report.md](./audit_report.md) - Certificación Técnica Titanium v3.1.
 
-## 🛠️ Stack Tecnológico
-
-### Backend
-- **Node.js** v18+
-- **Express.js** 4.x
-- **JWT** (jsonwebtoken) - Seguridad
-- **bcryptjs** - Cifrado de contraseñas
-- **AWS SDK** (Lex Runtime V2) - Integración IA
-- **MySQL2** - Conector de Base de Datos
-
-### Frontend
-- **React** 18.x
-- **React Router DOM** 7.x
-- **Vite** - Herramienta de construcción
-- **Vanilla CSS** - Estilos personalizados premium
-
-### Infraestructura
-- **AWS RDS** - Base de datos MySQL
-- **AWS App Runner** - Hosting del Backend
-- **Render** - Hosting del Frontend
-- **Amazon Lex** - Inteligencia Artificial / Chatbot
-
-## 🚀 Instalación y Ejecución
-
-### Backend
+## 🚀 INSTALACIÓN RÁPIDA (DOCKER READY)
 ```bash
+# Backend (Containerized)
 cd backend
-npm install
-npm run dev
-```
-**Puerto**: http://localhost:5000
+docker build -t prediversa-back .
+docker run -p 3001:3001 prediversa-back
 
-### Frontend
-```bash
+# Frontend (Vite)
 cd frontend
 npm install
 npm run dev
 ```
-**Puerto**: http://localhost:5173
-
-## 📚 Documentación Detallada
-
-- [DESCRIPCION_PROYECTO.md](./DESCRIPCION_PROYECTO.md) - Arquitectura y especificaciones técnicas.
-- [EVOLUCION_PREDIVERSA.md](./EVOLUCION_PREDIVERSA.md) - Roadmap y hitos alcanzados.
-- [REPORTE_OFICIAL_PREDIVERSA.md](./REPORTE_OFICIAL_PREDIVERSA.md) - Resumen ejecutivo del proyecto.
-
-## 🔒 Seguridad
-
-- ✅ Hash de contraseñas con salt rounds de 10.
-- ✅ Rutas protegidas por rol.
-- ✅ Validación de tokens JWT.
-- ✅ Variables de entorno protegidas.
 
 ---
-
-**Versión:** `v1.1.0` | **Licencia:** `Propietaria` | **© 2026 PrediVersa**
-
-**Autores:**
-*Jmanuel Calvo/PrediVersa, Andrey Luna/PrediVersa, Harold Salcedo/PrediVersa*
-**Departamento de Crecimiento Estratégico**
+**Versión:** `v3.1.0-TITANIUM` | **Seguridad:** `OWASP-Compliant` | **© 2026 PrediVersa**
+**Autores:** *Jmanuel Calvo, Andrey Luna, Harold Salcedo*
+**Departamento de Crecimiento Estratégico & MLOps**

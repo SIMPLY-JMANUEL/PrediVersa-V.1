@@ -13,18 +13,19 @@ import AlertList from './admin/AlertList'
 import AlertCaseView from './admin/AlertCaseView'
 import InstitutionalConfig from './admin/InstitutionalConfig'
 import UserForm from './admin/UserForm'
-import UserDetailsModal from './admin/UserDetailsModal'
 import UserVerification from './admin/UserVerification'
-import VersaNotifications from './admin/VersaNotifications'
-import AdminSidebar from './admin/AdminSidebar'
+import UserRequestsAdmin from './admin/UserRequestsAdmin'
 
-import '../ProfessionalTheme.css'
 import './AdminDashboard.css'
 
+/**
+ * 🏛️ ADMIN DASHBOARD LUXE UI
+ * Centro de Mando Institucional PrediVersa v3.0.
+ */
 function AdminDashboard({ user, onLogout }) {
   const token = localStorage.getItem('token')
   
-  // Hooks de Gestión de Datos
+  // 🔭 GESTIÓN DE DATOS (HOOKS BLINDADOS)
   const { 
     loadingUsers, searchTerm, setSearchTerm, paginatedUsers, totalPages, stats, 
     fetchUsers, currentPage, setCurrentPage, filteredUsers 
@@ -35,7 +36,6 @@ function AdminDashboard({ user, onLogout }) {
     alertStats
   } = useAlerts(token)
 
-  // Hook Central de Gestión de Usuarios (Filtro por Lupa)
   const {
     userForm, editingUser, saveMessage, formErrors,
     handleInputChange, handleSave, handleUpdate, handleDelete, handleEdit, handleClear
@@ -44,34 +44,29 @@ function AdminDashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('usuarios')
   const [selectedAlert, setSelectedAlert] = useState(null)
   const [showExcelUploader, setShowExcelUploader] = useState(false)
-  const [viewingUser, setViewingUser] = useState(null)
 
-  // Cambio de Tab Inteligente
+  // 🔘 CAMBIO DE CONSOLA (UX FLUIDA)
   const switchTab = (tabId) => {
     setActiveTab(tabId);
     if (tabId !== 'alertas') setSelectedAlert(null);
   };
 
-  // Notificaciones Sonoras para Riesgo Crítico
   useEffect(() => {
     if (notifVersa.length > 0) {
-      const latest = notifVersa[0];
-      if (latest.nivel === 'alto' && !latest.tipo?.includes('colaborador')) {
-        playCriticalAlertSound(880, 0.5);
-      }
+      if (notifVersa[0].nivel === 'alto') playCriticalAlertSound(880, 0.4);
     }
   }, [notifVersa]);
 
-  // Carga inicial
   useEffect(() => { 
     fetchAlerts(); 
     fetchUsers(); 
   }, [])
 
   return (
-    <div className="dashboard-wrapper profesional-theme">
+    <div className="luxe-theme-container min-h-screen bg-slate-50">
       <DashboardHeader user={user} onLogout={onLogout} />
       
+      {/* 🔔 NOTIFICACIONES DE ALTA PRIORIDAD */}
       <VersaNotifications 
         notifVisible={notifVisible} 
         notifVersa={notifVersa} 
@@ -80,46 +75,55 @@ function AdminDashboard({ user, onLogout }) {
         setActiveTab={setActiveTab} 
       />
 
-      <div className="dashboard-container profesional-theme">
-        <div className="dashboard-layout">
-          <AdminSidebar user={user} setActiveTab={switchTab} stats={stats} />
+      <div className="admin-dashboard-container py-10 px-6 max-w-[1600px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
+          
+          {/* 🛰️ SIDEBAR DE MANDO (ADMIN) */}
+          <aside className="lg:col-span-1">
+            <AdminSidebar user={user} setActiveTab={switchTab} stats={stats} />
+          </aside>
 
-          <main className="dashboard-main">
-            <div className="professional-header">
-              <h2 className="page-title">Panel de Administración</h2>
-              <p className="page-subtitle">Sincronización total de la comunidad PrediVersa.</p>
-            </div>
+          {/* 🏛️ ÁREA CENTRAL DE GESTIÓN */}
+          <main className="lg:col-span-3">
+            <header className="mb-12">
+              <h2 className="admin-page-title">Panel de Control</h2>
+              <p className="admin-page-subtitle">Monitoreo Psicosocial e Identidades Centralizadas.</p>
+            </header>
 
-            {/* Menú de Navegación Analítico */}
-            <div className="management-tabs">
+            {/* 🔘 CONSOLA DE TABS DE ALTA GAMA */}
+            <nav className="admin-nav-tabs">
               {[
-                { id: 'usuarios', label: 'Usuarios', icon: <Users size={18} /> },
-                { id: 'alertas', label: 'Monitoría', icon: <Bell size={18} /> },
-                { id: 'analitica', label: 'Inteligencia', icon: <BarChart3 size={18} /> },
-                { id: 'configuracion', label: 'Estructura', icon: <Settings size={18} /> }
+                { id: 'usuarios', label: 'Identidades', icon: <Users size={19} /> },
+                { id: 'solicitudes', label: 'Solicitudes', icon: <UserPlus size={19} /> },
+                { id: 'alertas', label: 'Monitoría', icon: <Bell size={19} /> },
+                { id: 'analitica', label: 'Inteligencia', icon: <BarChart3 size={19} /> },
+                { id: 'configuracion', label: 'Estructura', icon: <Settings size={19} /> }
               ].map(tab => (
                 <button 
                   key={tab.id}
-                  className={`mgmt-tab ${activeTab === tab.id ? 'active' : ''}`}
+                  className={`admin-tab ${activeTab === tab.id ? 'active' : ''}`}
                   onClick={() => switchTab(tab.id)}
                 >
                   {tab.icon}
                   {tab.label}
                 </button>
               ))}
-            </div>
+            </nav>
 
-            <div className="mgmt-content">
-              {/* VISTA: GESTIÓN DE USUARIOS */}
+            {/* 💎 PANEL DE ADMINISTRACIÓN (P-CARD) */}
+            <section className="p-card admin-mgmt-pane">
+              
+              {activeTab === 'solicitudes' && <UserRequestsAdmin />}
+
               {activeTab === 'usuarios' && (
-                <div className="animate-fade-in section-usuarios">
-                  <div className="mgmt-header-row">
+                <div className="animate-fade-in">
+                  <div className="mgmt-header-row border-b border-gray-100 mb-8 pb-6">
                     <div>
-                      <h3 className="mgmt-title-pro">Gestión de Identidades</h3>
-                      <p className="mgmt-subtitle-pro">Alta, baja y modificación de perfiles institucionales.</p>
+                      <h3 className="text-xl font-black text-slate-800">Gestión de Usuarios</h3>
+                      <p className="text-slate-500 text-sm mt-1">Alta, modificación y auditoría de perfiles institucionales.</p>
                     </div>
-                    <button className="btn-primary-pro" onClick={() => setShowExcelUploader(true)}>
-                      <FileSpreadsheet size={16} /> Carga Masiva (Excel)
+                    <button className="p-btn-primary flex items-center gap-2" onClick={() => setShowExcelUploader(true)}>
+                      <FileSpreadsheet size={16} /> Importar Excel (Masa)
                     </button>
                   </div>
                   
@@ -132,13 +136,16 @@ function AdminDashboard({ user, onLogout }) {
                     editingUser={editingUser} 
                     handleUpdate={handleUpdate} 
                     handleSave={handleSave} 
-                    handleClear={handleClear}
-                    cancelEdit={handleClear} 
+                    handleClear={handleClear} 
                   />
 
-                  {saveMessage && <div className={`flash-message ${saveMessage.includes('❌') ? 'error' : ''}`}>{saveMessage}</div>}
+                  {saveMessage && (
+                    <div className={`flash-message ${saveMessage.includes('❌') ? 'error' : ''} my-6`}>
+                      {saveMessage}
+                    </div>
+                  )}
                   
-                  <div className="users-list-section">
+                  <div className="mt-10">
                     <UserVerification 
                       searchTerm={searchTerm} setSearchTerm={setSearchTerm} 
                       paginatedUsers={paginatedUsers} 
@@ -149,15 +156,13 @@ function AdminDashboard({ user, onLogout }) {
                       exportToCSV={() => exportToCSV(filteredUsers)} 
                       filteredUsers={filteredUsers} 
                       fetchUsers={fetchUsers}
-                      onViewDetails={setViewingUser}
                     />
                   </div>
                 </div>
               )}
 
-              {/* VISTA: CENTRO DE ALERTAS */}
               {activeTab === 'alertas' && (
-                <div className="animate-fade-in section-alertas">
+                <div className="animate-fade-in">
                   {!selectedAlert ? (
                     <AlertList alerts={alerts} loadingAlerts={loadingAlerts} onSelectAlert={setSelectedAlert} />
                   ) : (
@@ -171,31 +176,13 @@ function AdminDashboard({ user, onLogout }) {
                 </div>
               )}
 
-              {/* VISTA: INTELIGENCIA PREDICTIVA */}
-              {activeTab === 'analitica' && (
-                <div className="animate-fade-in section-analitica">
-                  <AnalyticsDashboard stats={alertStats} />
-                </div>
-              )}
-              
-              {/* VISTA: CONFIGURACIÓN INSTITUCIONAL */}
-              {activeTab === 'configuracion' && (
-                <div className="animate-fade-in section-config">
-                  <InstitutionalConfig />
-                </div>
-              )}
-            </div>
+              {activeTab === 'analitica' && <AnalyticsDashboard stats={alertStats} />}
+              {activeTab === 'configuracion' && <InstitutionalConfig />}
+
+            </section>
           </main>
         </div>
       </div>
-
-      {viewingUser && (
-        <UserDetailsModal 
-          user={viewingUser} 
-          onClose={() => setViewingUser(null)} 
-          onEdit={handleEdit} 
-        />
-      )}
     </div>
   )
 }
