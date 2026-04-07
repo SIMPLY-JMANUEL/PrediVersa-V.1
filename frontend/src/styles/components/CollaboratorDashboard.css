@@ -1,131 +1,117 @@
-/* 🏛️ PrediVersa COLLABORATOR DASHBOARD LUXE UI (Estación de Trabajo) */
-.collaborator-container {
-  padding: 2rem;
-  max-width: 1500px;
-  margin: 0 auto;
+/* 🏛️ COLLABORATOR DASHBOARD LUXE */
+.luxe-theme-container {
+  background: var(--bg-main);
+  min-height: 100vh;
 }
 
-/* 📋 CASELOAD SIDEBAR LUXE */
+.collaborator-container {
+  position: relative;
+  z-index: 2;
+}
+
+/* 🛰️ SIDEBAR DE CARGA LABORAL (CASELOAD) */
 .caseload-card {
-  padding: 0 !important;
-  overflow: hidden;
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-glass);
 }
 
 .case-list-header {
-  padding: 1.5rem;
-  background: hsla(var(--p-primary), 0.03);
-  border-bottom: 1px solid hsla(var(--p-text), 0.05);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  border-bottom: 2px solid var(--border-light);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
 }
 
 .case-list-header h4 {
-  font-weight: 900;
-  font-size: 0.85rem;
-  color: hsl(var(--p-primary));
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-weight: 800;
+  color: var(--primary);
+  font-size: 1.1rem;
+  margin: 0;
 }
 
+/* Elementos de Caso */
 .case-item {
-  padding: 1.5rem;
-  border-bottom: 1px solid hsla(var(--p-text), 0.03);
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  border: 1px solid transparent;
+  background: #fff;
+  box-shadow: var(--shadow-xs);
   cursor: pointer;
-  transition: all 0.3s ease;
-  border-left: 4px solid transparent;
+  transition: all var(--smooth);
+  position: relative;
+  overflow: hidden;
 }
+
+.case-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--border-light);
+  transition: background var(--smooth);
+}
+
+/* Severidades */
+.case-item.alto::before { background: var(--accent); }
+.case-item.medio::before { background: #f59e0b; }
+.case-item.bajo::before { background: var(--secondary); }
 
 .case-item:hover {
-  background: hsla(var(--p-primary), 0.02);
+  transform: translateX(4px);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--border-light);
 }
 
 .case-item.active {
-  background: hsla(var(--p-primary), 0.05);
-  border-left-color: hsl(var(--p-primary));
+  background: var(--primary);
+  color: white;
+  transform: translateX(8px);
+  box-shadow: 0 10px 20px rgba(58, 111, 133, 0.2);
 }
 
-/* Colores Dinámicos por Riesgo */
-.case-item.alto { border-left-color: hsl(var(--p-danger)); }
-.case-item.medio { border-left-color: hsl(var(--p-warning)); }
-.case-item.bajo { border-left-color: hsl(var(--p-accent)); }
+.case-item.active .text-slate-800 { color: white; }
+.case-item.active .opacity-50, 
+.case-item.active .opacity-60 { color: rgba(255,255,255,0.8); opacity: 1; }
 
-/* 🔘 NAVEGACIÓN CAPSULA COLLAB */
+/* 🔳 NAVEGACIÓN CAPSULA COLLAB */
 .collab-tabs {
-  display: flex;
-  gap: 0.8rem;
-  margin-bottom: 2rem;
-  background: hsla(var(--p-text), 0.04);
-  padding: 0.5rem;
-  border-radius: var(--radius-md);
-  width: fit-content;
+  background: var(--bg-card);
+  backdrop-filter: blur(15px);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-sm);
 }
 
-/* 📝 FORMULARIOS DE INTERVENCIÓN LUXE */
-.mgmt-content {
-  animation: slideInUp 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-
-.selected-case-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: hsla(var(--p-primary), 0.1);
-  color: hsl(var(--p-primary));
-  padding: 0.4rem 1rem;
-  border-radius: 20px;
-  font-weight: 800;
-  font-size: 0.8rem;
-  font-family: monospace;
-}
-
-.pro-field {
-  margin-bottom: 1.5rem;
-}
-
-.pro-field label {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: hsla(var(--p-text), 0.5);
-  text-transform: uppercase;
-  margin-bottom: 0.5rem;
-  letter-spacing: 0.03em;
-}
-
-.pro-field input, .pro-field select, .pro-field textarea {
-  width: 100%;
-  padding: 1rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid hsla(var(--p-text), 0.1);
-  font-weight: 500;
-  background: hsl(var(--p-white));
-  transition: all 0.3s ease;
-}
-
-.pro-field input:focus, .pro-field textarea:focus {
-  border-color: hsl(var(--p-primary));
-  box-shadow: 0 0 0 4px hsla(var(--p-primary), 0.1);
-  outline: none;
-}
-
-/* ✨ MODO BIENVENIDA (EMPTY STATE) */
+/* 💎 PANEL DE GESTIÓN (P-CARD) */
 .welcome-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 5rem 2rem;
+  animation: pulseIn 1s var(--bezier-bounce);
 }
 
 .icon-circle {
-  width: 80px;
-  height: 80px;
-  background: hsla(var(--p-primary), 0.05);
+  width: 90px;
+  height: 90px;
+  background: linear-gradient(135deg, var(--bg-main) 0%, rgba(142, 207, 234, 0.2) 100%);
   border-radius: 50%;
-  display: grid;
-  place-items: center;
-  color: hsla(var(--p-primary), 0.3);
-  margin-bottom: 2rem;
+  border: 2px dashed var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+}
+
+.selected-case-badge {
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  box-shadow: var(--shadow-md);
+  animation: slideFadeIn 0.4s var(--bezier-bounce);
+  background: #fff;
+  border: 2px solid var(--primary);
+  color: var(--primary);
 }

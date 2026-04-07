@@ -1,83 +1,64 @@
 /* 🏛️ PrediVersa ADMIN DASHBOARD LUXE UI (Consola de Mando) */
 .admin-dashboard-container {
   padding: 2rem;
-  max-width: 1600px;
+  max-width: 1700px;
   margin: 0 auto;
 }
 
-/* 📊 DASHBOARD HEADER LUXE */
-.admin-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 3rem;
-}
-
-.admin-page-title {
-  font-size: 2.5rem;
-  font-weight: 900;
-  letter-spacing: -0.05em;
-  background: linear-gradient(135deg, hsl(var(--p-primary)), hsl(var(--p-accent)));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.admin-page-subtitle {
-  font-size: 1.1rem;
-  color: hsla(var(--p-text), 0.6);
-  font-weight: 500;
-  margin-top: 0.5rem;
-}
-
-/* 🔘 NAVEGACIÓN DE CONSOLA (TABS) */
+/* 🔘 NAVEGACIÓN DE CONSOLA (TABS) - SOBREESCRIBE HERENCIA PARA ADMIN */
 .admin-nav-tabs {
   display: flex;
-  gap: 1.25rem;
-  margin-bottom: 3rem;
-  padding: 0.6rem;
-  background: hsla(var(--p-text), 0.04);
-  border-radius: var(--radius-md);
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 2rem;
+  padding: 8px;
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid var(--border-glass);
   width: fit-content;
+  box-shadow: var(--shadow-sm);
 }
 
 .admin-tab {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  padding: 1rem 1.8rem;
+  gap: 8px;
+  padding: 12px 24px;
   border: none;
   background: transparent;
-  color: hsla(var(--p-text), 0.5);
-  font-weight: 800;
-  font-size: 0.95rem;
-  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: pointer;
-  border-radius: var(--radius-sm);
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  border-radius: 12px;
+  transition: all var(--smooth);
 }
 
 .admin-tab:hover {
-  background: hsla(var(--p-primary), 0.04);
-  color: hsl(var(--p-primary));
+  background: rgba(255,255,255,0.7);
+  color: var(--primary);
+  transform: translateY(-1px);
 }
 
 .admin-tab.active {
-  background: hsl(var(--p-white));
-  color: hsl(var(--p-primary));
-  box-shadow: var(--glass-shadow);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(58, 111, 133, 0.3);
   transform: translateY(-2px);
 }
 
 /* 🏢 CONTENEDOR DE GESTIÓN (ADMIN PANE) */
 .admin-mgmt-pane {
+  background: var(--bg-card);
+  border-radius: 24px;
+  padding: 3rem;
   min-height: 600px;
-  animation: slideFadeIn 0.6s ease-out;
-}
-
-@keyframes slideFadeIn {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-glass);
+  animation: slideFadeIn 0.6s var(--bezier-bounce);
 }
 
 .mgmt-header-row {
@@ -85,37 +66,90 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 2.5rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid hsla(var(--p-text), 0.05);
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-light);
 }
 
 /* 🔦 MENSAJES DE ESTADO (AUDITABLE) */
 .flash-message {
   margin: 1.5rem 0;
   padding: 1.25rem 2rem;
-  border-radius: var(--radius-sm);
+  border-radius: 12px;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   display: flex;
   align-items: center;
   gap: 1rem;
   border-left: 5px solid;
-  animation: pulseIn 0.4s ease;
-}
-
-@keyframes pulseIn {
-  from { opacity: 0; transform: scale(0.98); }
-  to { opacity: 1; transform: scale(1); }
+  animation: pulseIn 0.5s var(--bezier-bounce);
+  backdrop-filter: blur(10px);
 }
 
 .flash-message:not(.error) {
-  background: hsla(var(--p-accent), 0.1);
-  color: hsl(var(--p-accent));
-  border-color: hsl(var(--p-accent));
+  background: rgba(244, 63, 94, 0.1); 
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 .flash-message.error {
-  background: hsla(var(--p-danger), 0.1);
-  color: hsl(var(--p-danger));
-  border-color: hsl(var(--p-danger));
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+@keyframes slideFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseIn {
+  0% { opacity: 0; transform: scale(0.95); }
+  50% { transform: scale(1.02); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Tablas Premium en Admin (Si aplican) */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+
+th {
+  background: rgba(248, 250, 252, 0.8);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 1rem;
+  text-align: left;
+}
+
+td {
+  padding: 1rem;
+  background: #fff;
+  color: var(--text-main);
+  border-top: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+}
+
+td:first-child {
+  border-left: 1px solid var(--border-light);
+  border-radius: 12px 0 0 12px;
+}
+
+td:last-child {
+  border-right: 1px solid var(--border-light);
+  border-radius: 0 12px 12px 0;
+}
+
+tr {
+  transition: all var(--smooth);
+  box-shadow: var(--shadow-xs);
+}
+
+tr:hover td {
+  background: var(--bg-main);
+  transform: scale(1.01);
+  box-shadow: var(--shadow-sm);
 }

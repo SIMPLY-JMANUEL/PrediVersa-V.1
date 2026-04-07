@@ -1,108 +1,79 @@
-/* 🏛️ PrediVersa STUDENT DASHBOARD LUXE UI */
+/* 🎓 STUDENT DASHBOARD LUXE */
 .dashboard-wrapper {
-  padding: 1.5rem;
-  max-width: 1400px;
-  margin: 0 auto;
+  background: var(--bg-main);
+  min-height: 100vh;
 }
 
-.page-title {
-  font-size: 2.2rem;
-  font-weight: 850;
-  letter-spacing: -0.04em;
-  color: hsl(var(--p-primary));
-  margin-bottom: 0.5rem;
+/* Info Sidebar Student */
+.sidebar-info {
+  padding: 2rem;
+  background: linear-gradient(180deg, var(--bg-card) 0%, rgba(255,255,255,0.6) 100%);
+  border-top: 4px solid var(--primary);
 }
 
-.page-subtitle {
+.card-header-pro {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.card-header-pro h4 {
+  margin: 0;
+  font-weight: 800;
   font-size: 1.1rem;
-  color: hsla(var(--p-text), 0.7);
-  font-weight: 500;
-  margin-bottom: 2.5rem;
 }
 
-/* 🧊 DISEÑO DE TABS CAPSULA */
-.management-tabs {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  padding: 0.5rem;
-  background: hsla(var(--p-text), 0.03);
-  border-radius: var(--radius-md);
-  width: fit-content;
-  overflow-x: auto;
-}
-
-.mgmt-tab {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.8rem 1.4rem;
-  border: none;
-  background: transparent;
-  color: hsla(var(--p-text), 0.6);
-  font-weight: 700;
+.sidebar-info p {
+  color: var(--text-muted);
+  line-height: 1.6;
   font-size: 0.95rem;
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  white-space: nowrap;
+  margin: 0;
 }
 
-.mgmt-tab:hover {
-  background: hsla(var(--p-primary), 0.05);
-  color: hsl(var(--p-primary));
-}
-
-.mgmt-tab.active {
-  background: hsl(var(--p-white));
-  color: hsl(var(--p-primary));
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  transform: translateY(-1px);
-}
-
-/* 🧬 CONTENIDO DE GESTIÓN */
-.mgmt-content {
-  min-height: 500px;
-  animation: slideInUp 0.5s ease-out;
-}
-
-@keyframes slideInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* 🤖 CHATBOT FOOTER LUXE */
+/* Chat Footer Hint Glass */
 .chatbot-footer-hint {
-  margin-top: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: hsla(var(--p-primary), 0.04);
-  border-radius: var(--radius-sm);
-  font-size: 0.85rem;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 1.5rem;
+  padding: 12px;
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  border-radius: 30px;
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-muted);
   font-weight: 600;
-  color: hsl(var(--p-primary));
+  font-size: 0.85rem;
 }
 
 .dot-online {
   width: 10px;
   height: 10px;
-  background: hsl(160, 100%, 45%);
+  background: #22c55e;
   border-radius: 50%;
-  box-shadow: 0 0 10px hsl(160, 100%, 45%);
-  animation: pulseGreen 2s infinite;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.6);
+  animation: blink 2s infinite;
 }
 
-@keyframes pulseGreen {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+@keyframes blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
 }
 
-/* 📱 RESPONSIVIDAD */
-@media (max-width: 768px) {
-  .dashboard-wrapper { padding: 1rem; }
-  .page-title { font-size: 1.8rem; }
-  .management-tabs { width: 100%; }
+/* Mejoras al formulario de Denuncia Fácil y test */
+.student-form-container {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow var(--smooth);
+}
+
+.student-form-container:hover {
+  box-shadow: var(--shadow-md);
 }
