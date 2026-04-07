@@ -36,7 +36,8 @@ function Login({ isOpen, onClose }) {
     name: '',
     phone: '',
     documentId: '',
-    role: 'Estudiante'
+    role: 'Estudiante',
+    rememberMe: false
   })
   
   const [error, setError] = useState('')
@@ -44,7 +45,8 @@ function Login({ isOpen, onClose }) {
   const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
+    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    setFormData({ ...formData, [e.target.name]: value })
   }
 
   const handleSubmit = async (e) => {
@@ -108,7 +110,7 @@ function Login({ isOpen, onClose }) {
     setView('login')
     setError('')
     setSuccess('')
-    setFormData({ email: '', password: '', name: '', phone: '', documentId: '', role: 'Estudiante' })
+    setFormData({ email: '', password: '', name: '', phone: '', documentId: '', role: 'Estudiante', rememberMe: false })
   }
 
   if (!isOpen) return null
@@ -178,8 +180,21 @@ function Login({ isOpen, onClose }) {
                       required
                     />
                   </div>
-                  <div className="forgot-password-link">
-                    <span onClick={() => setView('forgot')}>¿Olvidaste tu contraseña?</span>
+                  <div className="login-options-row">
+                    <div className="remember-me-premium">
+                      <input 
+                        type="checkbox" 
+                        id="rememberMe" 
+                        name="rememberMe"
+                        checked={formData.rememberMe}
+                        onChange={handleChange}
+                        disabled={loading}
+                      />
+                      <label htmlFor="rememberMe">Mantener sesión</label>
+                    </div>
+                    <div className="forgot-password-link">
+                      <span onClick={() => setView('forgot')}>¿Olvidaste tu contraseña?</span>
+                    </div>
                   </div>
                 </div>
               )}

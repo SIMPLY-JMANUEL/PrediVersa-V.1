@@ -254,9 +254,62 @@
   transform: translateY(1px);
 }
 
+.login-options-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.remember-me-premium {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.remember-me-premium input[type="checkbox"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(226, 232, 240, 0.8);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all var(--smooth);
+  position: relative;
+}
+
+.remember-me-premium input[type="checkbox"]:checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.remember-me-premium input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  color: white;
+  font-size: 13px;
+  font-weight: 900;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.remember-me-premium label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--smooth);
+}
+
+.remember-me-premium:hover label {
+  color: var(--text-main);
+}
+
 .forgot-password-link {
   text-align: right;
-  margin-top: 0.5rem;
 }
 
 .forgot-password-link span {
