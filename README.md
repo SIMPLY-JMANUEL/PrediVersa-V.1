@@ -1,43 +1,95 @@
-# 🏛️ PREDIVERSA v3.1 (TITANIUM ALERT EDITION) 🎓🤖🛡️
-**"Inteligencia Preventiva Escolar de Grado Enterprise"**
+# 🏛️ PREDIVERSA v3.1 (TITANIUM SAAS EDITION) 🎓🤖🛡️
+**"Plataforma de Inteligencia Preventiva Escolar de Grado Empresarial"**
 
-PrediVersa es una plataforma educativa de élite diseñada para la detección temprana de riesgos psicosociales mediante un Motor de IA Híbrido (VERSA Engine), integrando seguridad institucional, bienestar emocional y analítica de datos en una sola consola de mando.
+PrediVersa es una plataforma tecnológica de vanguardia diseñada para detectar tempranamente riesgos psicosociales (acoso, problemas emocionales, convivencia) en entornos escolares, utilizando un Motor de IA Híbrido, interfaces "Glassmorphism" Premium y arquitectura de Alta Disponibilidad alojada enteramente en AWS.
 
 ---
 
-## 🚀 HI-TECH STACK (v3.1 Titanium)
-- **🧠 IA VERSA Engine v3.1**: Triple Sensor 360° (Riesgo + Identidad + Emoción) impulsado por **Amazon Bedrock (Claude 3.5 Haiku)**. 🛰️
-- **💰 FinOps Architecture**: Estrategia de ahorro de costos mediante Capa 0 (Diccionario), Capa 1 (Redis SHA-256 Cache) y Capa 2 (LLM). 📉📉
-- **💎 Luxe UI v4.0**: Interfaz premium basada en **Glassmorphism**, **Zustand** para estado global y **React Query** para sincronización de datos. ✨🎨
-- **🆘 SOS Alert Dispatch**: Motor de despacho multicanal determinístico con **AWS SNS (SMS)** y **AWS SES (Email)** garantizado por cifrado de punta a punta. 📲📧🚨
+## 🚀 HIGHLIGHTS TÉCNICOS (v3.1.2)
+1. **🤖 IA VERSA Engine**: Triple Sensor 360° (Riesgo + Identidad + Emoción) impulsado por *Amazon Lex* y *Amazon Bedrock*.
+2. **🛡️ Seguridad Bancaria (DevSecOps)**:
+   - Rotación Automática de JWT (Refresh Tokens).
+   - Bloqueo de Fuerza Bruta y Rate Limiting Global (`express-rate-limit`).
+   - Cifrado total HTTPS, Validaciones super estrictas de payloads usando Zod y políticas Helmet.
+3. **💎 Interfaz Luxe UI**: Rediseño total de la experiencia de usuario (SaaS 2026), paneles de diagnóstico en tiempo real usando Server-Sent Events (SSE) y persistencia segura de estado local con Zustand.
+4. **☁️ 100% Nube Nivel AWS**: Frontend gestionado por AWS Amplify, Backend escalado automáticamente en AWS App Runner (Docker/Linux), Persistencia distribuida en Amazon RDS MySQL.
 
-## 🏛️ ARQUITECTURA MODULAR (DDD-lite)
-El proyecto ha sido refactorizado para ser 100% escalable y mantenible:
-- **`backend/src/modules/`**: Estructura desacoplada por dominios (`auth`, `users`, `chatbot`, `alerts`, `dashboard`).
-- **`backend/Dockerfile`**: Imagen multi-etapa optimizada para despliegues de alto rendimiento.
-- **`frontend/src/store/`**: Cerebro de estado global con persistencia automática.
+---
 
-## 📋 DOCUMENTACIÓN INSTITUCIONAL
-Para entender el corazón técnico de PrediVersa, consulta nuestros manuales maestros:
-- 📑 [DOCUMENTACION_OFICIAL_COMPLETA.md](./DOCUMENTACION_OFICIAL_COMPLETA.md) - Manual de Arquitectura, API y Sensores.
-- 📉 [EVOLUCION_PREDIVERSA.md](./EVOLUCION_PREDIVERSA.md) - Historial de versiones y roadmap alcanzado.
-- 🕵️‍♂️ [REPORTE_OFICIAL_PREDIVERSA.md](./REPORTE_OFICIAL_PREDIVERSA.md) - Acta de Auditoría, Seguridad y Despliegue.
-- 🛡️ [audit_report.md](./audit_report.md) - Certificación Técnica Titanium v3.1.
+## 🏛️ ARQUITECTURA MODULAR (Domain-Driven Design)
+Para asegurar el escalamiento, el monolito fue desmantelado hacia una estructura limpia (DDD):
 
-## 🚀 INSTALACIÓN RÁPIDA (DOCKER READY)
-```bash
-# Backend (Containerized)
-cd backend
-docker build -t prediversa-back .
-docker run -p 3001:3001 prediversa-back
-
-# Frontend (Vite)
-cd frontend
-npm install
-npm run dev
+```
+📦 PrediVersa-V.1
+ ┣ 📂 backend/
+ ┃ ┣ 📂 src/
+ ┃ ┃ ┣ 📂 db/          # pool MySQL, Migraciones Automáticas OnBoot
+ ┃ ┃ ┣ 📂 modules/     # Dominios de negocio desacoplados
+ ┃ ┃ ┃ ┣ 📂 alerts     # Ciclo de vida y tracking de tickets.
+ ┃ ┃ ┃ ┣ 📂 auth       # Seguridad y emisión/rotación de tokens.
+ ┃ ┃ ┃ ┣ 📂 chatbot    # Stream SSE y comunicación directa con Amazon Lex.
+ ┃ ┃ ┃ ┣ 📂 config     # Manejo de roles, settings globales AWS.
+ ┃ ┃ ┃ ┣ 📂 dashboard  # Analíticas, IA Stats y consolidación general.
+ ┃ ┃ ┃ ┗ 📂 users      # Identidades, RBAC, Desactivaciones, Roles.
+ ┃ ┃ ┣ 📂 utils/       # LexService, Logger, AWS SDK Clients
+ ┃ ┃ ┗ 📜 app.js       # Express Pipeline (CORS, Helmet, Error Handling)
+ ┃ ┗ 📜 package.json   # Modificado con dependencias exactas para App Runner
+ ┗ 📂 frontend/
+   ┣ 📂 src/
+   ┃ ┣ 📂 components/  # Paneles visuales, Dashboards, Quienes Somos
+   ┃ ┣ 📂 hooks/       # useAlerts, useUsers, useAuth
+   ┃ ┣ 📂 store/       # Zustand auth_store (Gestión de Identidad Reactiva)
+   ┃ ┣ 📂 styles/      # Estilos premium modulares Glassmorphism
+   ┃ ┗ 📜 App.jsx      # Rutas Protegidas (RBAC interceptors)
 ```
 
 ---
-**Versión:** `v3.1.0-TITANIUM` | **Seguridad:** `OWASP-Compliant` | **© 2026 PrediVersa**
-**Autores:** *Jmanuel Calvo, Andrey Luna, Harold Salcedo*
-**Departamento de Crecimiento Estratégico & MLOps**
+
+## 🔐 CREDENCIALES DE ACCESO GENERAL
+El sistema ha erradicado las vulnerabilidades de contraseñas débiles "admin123". Controles integrales mediante Base de datos activa AWS:
+
+🔴 **CEO / PANEL DE ADMINISTRADOR GENERAL**
+ - Correo: `ceo@prediversa.com`
+ - Contraseña: `Prediversa2026*`
+
+🟡 **PANEL DE COLABORADOR (Profesores y Psicólogos)**
+ - Correo: `colaborador@prediversa.com`
+ - Contraseña: `Colaborador2026*`
+
+🟢 **PANEL DE ESTUDIANTE (Normativas y Chatbot P/S)**
+ - Correo: `estudiante@prediversa.com`
+ - Contraseña: `Estudiante2026*`
+
+---
+
+## 🛠️ DESPLIEGUE EN AWS O ENTORNO LOCAL
+El sistema está optimizado para reconfiguración automática.
+
+### VARIABLES ENTORNOS (Env AWS / Local)
+Debe proveer en AWS AppRunner o su respectivo `.env` local las claves:
+- `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_DATABASE` => apuntando al servidor relacional.
+- `JWT_SECRET` => Llave hiper-criptográfica (Para firma de tokens).
+- `AWS_REGION` => us-east-1
+
+*(AppRunner levanta el backend automáticamente utilizando el comando estándar de npm)*
+
+### AUTO-INICIALIZACIÓN (MIGRATOR)
+En cuanto el servidor de backend logra conectarse a la Base de datos, **auto-audita la existencia de las siguientes tablas, creándolas si están ausentes:**
+- `users`: (Integridad principal)
+- `alerts`: (Tickets de riesgo)
+- `refresh_tokens`: (Receptor de Tokens, con enlace FK ON CASCADE)
+- `chatbot_interacciones` y reportes: (Memoria IA).
+
+Esta actualización resolvió permanentemente un Error Crítico (500) en lanzamientos anteriores. 
+
+---
+
+## 🧪 TECNOLOGÍAS USADAS
+- **Frontend:** React 18, Vite, Zustand, Recharts (Gráficas Dashboards), Lucide-React, Vanila CSS Premium SaaS.
+- **Backend:** Node.js 18+, Express, Zod, JsonWebToken, express-rate-limit, AWS SDK v3.
+- **AWS Cloud Base:** Amazon Bedrock (Modelos Avanzados), Amazon Lex V2, AWS SES, AWS SNS (Desplantes Críticos a SMS).
+
+---
+
+🔥 **Auditado, Refactorizado y Cifrado por Departamento de Estabilidad e IA (2026)**
+🛡️ ¡Totalmente Preparado para Producción Escalable!
