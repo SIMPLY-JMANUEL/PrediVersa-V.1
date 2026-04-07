@@ -162,6 +162,22 @@ const initializeDatabase = async () => {
 
     console.log('✅ Tabla de usuarios verificada/actualizada correctamente');
 
+    // TABLA DE TOKENS (SISTEMA DDD MIGRACIÓN)
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS refresh_tokens (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        token VARCHAR(500) NOT NULL,
+        is_revoked BOOLEAN DEFAULT FALSE,
+        replaced_by_token VARCHAR(500) DEFAULT NULL,
+        expires_at TIMESTAMP NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_token (token),
+        CONSTRAINT fk_user_refresh FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+    console.log('✅ Tabla refresh_tokens (Auth) verificada/creada');
+
     // Crear tabla de alertas si no existe
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS alerts (
