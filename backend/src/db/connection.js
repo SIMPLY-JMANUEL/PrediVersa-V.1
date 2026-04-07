@@ -123,61 +123,12 @@ const initializeDatabase = async () => {
         isVerified BOOLEAN DEFAULT false,
 
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_role (role),
+        INDEX idx_status (status),
+        INDEX idx_createdAt (createdAt)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
-
-    // --- NORMALIZACIÓN BLOQUE 3: ROLES Y RELACIONES ---
-
-    // 1. Crear tabla maestro de Roles
-    await connection.execute(`
-      CREATE TABLE IF NOT EXISTS roles (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(50) NOT NULL UNIQUE,
-        description VARCHAR(255),
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      ) ENGINE=InnoDB
-    `);
-
-    // 2. Insertar roles base (Ignorar si ya existen)
-    await connection.execute(`
-      INSERT IGNORE INTO roles (name, description) VALUES 
-      ('Estudiante', 'Usuario final del chatbot'),
-      ('Administrador', 'Control total del sistema y dashboard'),
-      ('Colaborador', 'Personal de apoyo, psicólogos y docentes'),
-      ('Colaboradores', 'Alias legado para Colaborador')
-    `);
-
-    // 3. Crear tabla intermedia de Roles (Support for Multiple Roles)
-    await connection.execute(`
-      CREATE TABLE IF NOT EXISTS user_roles (
-        user_id INT NOT NULL,
-        role_id INT NOT NULL,
-        assignedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (user_id, role_id),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
-      ) ENGINE=InnoDB
-    `);
-
-    // 4. MIGRACIÓN AUTOMÁTICA: Mover roles de la columna legacy 'role' a la tabla relacional
-    try {
-      const [legacyUsers] = await connection.execute("SELECT id, role FROM users");
-      const [roleMapRows] = await connection.execute("SELECT id, name FROM roles");
-      const roleMap = roleMapRows.reduce((acc, r) => ({ ...acc, [r.name]: r.id }), {});
-
-      for (const user of legacyUsers) {
-        if (roleMap[user.role]) {
-          await connection.execute(
-            "INSERT IGNORE INTO user_roles (user_id, role_id) VALUES (?, ?)",
-            [user.id, roleMap[user.role]]
-          );
-        }
-      }
-      console.log('✅ Migración de roles completada (Legacy -> Relacional).');
-    } catch (migErr) {
-      console.warn('⚠️ Nota sobre migración de roles:', migErr.message);
-    }
 
     // 🔥 PARCHE DE ACTUALIZACIÓN: Agregar columnas si la tabla ya existía
     const columnsToPatch = [
@@ -209,25 +160,6 @@ const initializeDatabase = async () => {
       }
     }
 
-    // 🔥 PARCHE DE ÍNDICES: Mejorar velocidad de búsqueda en Users
-    const indexesToPatch = [
-      "idx_document_id (documentId)",
-      "idx_email (email)",
-      "idx_status_name (status, name)"
-    ];
-
-    for (const idxDef of indexesToPatch) {
-      const idxName = idxDef.split(' ')[0];
-      try {
-        await connection.execute(`ALTER TABLE users ADD INDEX ${idxDef};`);
-        console.log(`✅ Índice de parche añadido: ${idxName}`);
-      } catch (err) {
-        if (err.code !== 'ER_DUP_KEYNAME') {
-          console.warn(`⚠️ Aviso al añadir índice ${idxName}:`, err.message);
-        }
-      }
-    }
-
     console.log('✅ Tabla de usuarios verificada/actualizada correctamente');
 
     // Crear tabla de alertas si no existe
@@ -248,18 +180,12 @@ const initializeDatabase = async () => {
         deadline VARCHAR(50) DEFAULT '',
         assignedTo VARCHAR(100) DEFAULT '',
         status ENUM('Pendiente', 'En Proceso', 'Resuelta', 'Cerrada', 'Urgente') DEFAULT 'Pendiente',
-        severity ENUM('Baja', 'Media', 'Alta', 'Crítica') DEFAULT 'Baja',
         createdBy INT DEFAULT NULL,
-        last_updated_by INT DEFAULT NULL,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         INDEX idx_alertType (alertType),
         INDEX idx_status (status),
-        INDEX idx_severity (severity),
-        INDEX idx_createdAt (createdAt),
-        FOREIGN KEY (userId) REFERENCES users(id) ON DELETE SET NULL,
-        FOREIGN KEY (createdBy) REFERENCES users(id) ON DELETE SET NULL,
-        FOREIGN KEY (last_updated_by) REFERENCES users(id) ON DELETE SET NULL
+        INDEX idx_createdAt (createdAt)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
 
@@ -392,74 +318,6 @@ const initializeDatabase = async () => {
     console.log('✅ Tabla chatbot_interacciones (Scoring Engine) lista.');
 
     console.log('✅ Tabla case_actions verificada/creada');
-
-    // 🔥 TABLA DE SEGURIDAD: Refresh Tokens (Rotación y Prevención de Reuso)
-    await connection.execute(`
-      CREATE TABLE IF NOT EXISTS refresh_tokens (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        token VARCHAR(512) NOT NULL,
-        expires_at DATETIME NOT NULL,
-        is_revoked BOOLEAN DEFAULT FALSE,
-        replaced_by_token VARCHAR(512) DEFAULT NULL,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        INDEX idx_token (token),
-        INDEX idx_user_id (user_id),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-    `);
-    console.log('✅ Tabla refresh_tokens (Security Layer) lista.');
-    // 🛡️ NUEVAS TABLAS DE SEGURIDAD Y GESTIÓN (v2.7)
-    // 1. Tabla de Recuperación de Contraseña
-    await connection.execute(`
-      CREATE TABLE IF NOT EXISTS password_resets (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        token VARCHAR(255) NOT NULL,
-        expires_at DATETIME NOT NULL,
-        used BOOLEAN DEFAULT FALSE,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        INDEX idx_token (token),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-    `);
-    console.log('✅ Tabla password_resets (Auth Layer) lista.');
-
-    // 2. Tabla de Solicitudes de Registro (Aprobación Administrativa)
-    await connection.execute(`
-      CREATE TABLE IF NOT EXISTS user_requests (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        email VARCHAR(100) NOT NULL,
-        phone VARCHAR(20) DEFAULT '',
-        documentId VARCHAR(20) DEFAULT '',
-        role VARCHAR(50) DEFAULT 'Estudiante',
-        status ENUM('Pendiente', 'Aprobado', 'Rechazado') DEFAULT 'Pendiente',
-        processed_by INT DEFAULT NULL,
-        processed_at DATETIME DEFAULT NULL,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        INDEX idx_email (email),
-        INDEX idx_status (status),
-        FOREIGN KEY (processed_by) REFERENCES users(id) ON DELETE SET NULL
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-    `);
-    console.log('✅ Tabla user_requests (Admin Approval Layer) lista.');
-
-    // 3. Tabla de Logs de Auditoría
-    await connection.execute(`
-      CREATE TABLE IF NOT EXISTS audit_logs (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        action VARCHAR(100) NOT NULL,
-        user_id INT DEFAULT NULL,
-        details TEXT,
-        ip_address VARCHAR(45),
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        INDEX idx_action (action),
-        INDEX idx_user_id (user_id)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-    `);
-    console.log('✅ Tabla audit_logs (Compliance Layer) lista.');
 
     // 🚀 SEMILLA AUTOMÁTICA: Asegurar que existe al menos un Administrador
     const [adminCheck] = await connection.execute("SELECT id FROM users WHERE role = 'Administrador' LIMIT 1");

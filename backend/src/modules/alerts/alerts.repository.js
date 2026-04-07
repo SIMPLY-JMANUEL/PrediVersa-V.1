@@ -4,14 +4,35 @@ const { pool } = require('../../db/connection');
  * CAPA DE ACCESO A DATOS (REPOSITORY) - DOMINIO ALERTAS
  */
 
-const findAll = async () => {
+/**
+ * Busca todas las alertas con paginación server-side y filtros opcionales.
+ * @param {object} opts - { page, limit, status, alertType }
+ */
+const findAll = async ({ page = 1, limit = 20, status = null, alertType = null } = {}) => {
+  const offset = (page - 1) * limit;
+  const conditions = [];
+  const params = [];
+
+  if (status)    { conditions.push('a.status = ?');     params.push(status); }
+  if (alertType) { conditions.push('a.alertType = ?');  params.push(alertType); }
+
+  const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+  const [[{ total }]] = await pool.execute(
+    `SELECT COUNT(*) as total FROM alerts a ${where}`,
+    params
+  );
+
   const [rows] = await pool.execute(
     `SELECT a.*, u.name as creatorName 
      FROM alerts a 
      LEFT JOIN users u ON a.createdBy = u.id 
-     ORDER BY a.createdAt DESC`
+     ${where}
+     ORDER BY a.createdAt DESC
+     LIMIT ? OFFSET ?`,
+    [...params, limit, offset]
   );
-  return rows;
+  return { alerts: rows, total };
 };
 
 const findById = async (id) => {

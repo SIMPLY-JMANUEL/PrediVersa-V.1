@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ClipboardList, ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { apiFetch } from '../utils/api'; // FIX A-1: Usar utilitario centralizado
-import './TestVersa.css';
+import '../styles/components/TestVersa.css';
 
 export default function TestVersa({ user }) {
   const [activeTestId, setActiveTestId] = useState(null);

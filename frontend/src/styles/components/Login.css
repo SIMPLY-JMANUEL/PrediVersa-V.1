@@ -1,0 +1,212 @@
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: hsla(var(--p-text), 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.login-modal {
+  width: 90%;
+  max-width: 440px;
+  padding: 0 !important; /* Reseteamos padding para usar el del header/content */
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.login-header-premium {
+  padding: 3rem 2rem 2rem 2rem;
+  background: linear-gradient(135deg, hsl(var(--p-primary)), hsl(var(--p-primary), 110%));
+  color: white;
+  position: relative;
+  text-align: center;
+}
+
+.header-text h2 {
+  font-size: 1.8rem;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.header-text p {
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  opacity: 0.9;
+  font-weight: 400;
+}
+
+.login-close-premium {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: hsla(0, 0%, 100%, 0.15);
+  border: 1px solid hsla(0, 0%, 100%, 0.1);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: grid;
+  place-items: center;
+}
+
+.login-close-premium:hover {
+  background: hsla(0, 0%, 100%, 0.25);
+  transform: rotate(90deg);
+}
+
+.login-form-scrollable {
+  max-height: 450px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--p-primary-light)) transparent;
+}
+
+.login-form-scrollable::-webkit-scrollbar {
+  width: 6px;
+}
+
+.login-form-scrollable::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--p-primary-light));
+  border-radius: 10px;
+}
+
+.login-form-content {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group-premium {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 480px) {
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.input-label-premium {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: hsla(var(--p-text), 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-left: 0.2rem;
+}
+
+.login-success-state {
+  padding: 3rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.login-success-state h3 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: hsl(var(--p-text));
+}
+
+.login-success-state p {
+  color: hsla(var(--p-text), 0.6);
+  line-height: 1.6;
+}
+
+.login-alert-ui {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: hsla(var(--p-danger), 0.08);
+  border: 1px solid hsla(var(--p-danger), 0.2);
+  color: hsl(var(--p-danger));
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.login-btn-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, hsl(var(--p-primary)), hsl(var(--p-primary), 90%));
+  color: white;
+  border: none;
+  padding: 1.15rem;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 20px -5px hsla(var(--p-primary), 0.4);
+}
+
+.login-btn-action:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px -10px hsla(var(--p-primary), 0.5);
+}
+
+.forgot-password-link {
+  text-align: right;
+  margin-top: 0.4rem;
+}
+
+.forgot-password-link span {
+  font-size: 0.85rem;
+  color: hsl(var(--p-primary));
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.forgot-password-link span:hover {
+  text-decoration: underline;
+}
+
+.login-footer-professional {
+  padding: 1rem 2rem 2.5rem 2rem;
+  text-align: center;
+  border-top: 1px solid hsla(var(--p-text), 0.05);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: hsl(var(--p-primary));
+  font-weight: 750;
+  cursor: pointer;
+  margin-left: 0.3rem;
+  text-decoration: underline;
+}

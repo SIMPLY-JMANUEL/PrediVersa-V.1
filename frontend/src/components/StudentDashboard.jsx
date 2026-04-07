@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import DashboardHeader from './DashboardHeader'
 import DenunciaFacil from './DenunciaFacil'
 import Normatividad from './Normatividad'
@@ -6,77 +6,80 @@ import TestVersa from './TestVersa'
 import AmazonLexChat from './AmazonLexChat'
 import UniversalSidebar from './shared/UniversalSidebar'
 import { MessageSquare, AlertTriangle, Scale, ClipboardList, Info } from 'lucide-react'
-import './StudentDashboard.css'
+import '../styles/components/ProfessionalTheme.css'
+import '../styles/components/StudentDashboard.css'
 
-/**
- * 🏛️ STUDENT DASHBOARD LUXE
- * Portal de Bienestar y Apoyo Psicosocial PrediVersa.
- */
 function StudentDashboard({ user, onLogout }) {
   const [activeMenu, setActiveMenu] = useState('chat')
 
-  // Catálogo de servicios disponibles para el estudiante
-  const menuItems = [
-    { id: 'chat', label: 'Orientación IA', icon: <MessageSquare size={19} /> },
-    { id: 'denuncia', label: 'Denuncia Fácil', icon: <AlertTriangle size={19} /> },
-    { id: 'normatividad', label: 'Normatividad', icon: <Scale size={19} /> },
-    { id: 'test', label: 'Test Preventivo', icon: <ClipboardList size={19} /> }
-  ];
-
   return (
-    <div className="dashboard-wrapper luxe-theme">
+    <div className="dashboard-wrapper profesional-theme">
       <DashboardHeader user={user} onLogout={onLogout} />
       
-      <div className="dashboard-layout mt-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
-        
-        {/* 🛰️ SIDEBAR DE CONTEXTO (ESTUDIANTE) */}
-        <aside className="lg:col-span-1">
-          <UniversalSidebar user={user} stats={{ activeUsers: 1, totalAlerts: 0, dbConnected: true }}>
-            <div className="p-card sidebar-info mb-6">
-              <div className="flex items-center gap-3 text-primary font-extrabold mb-4">
+      <div className="dashboard-container profesional-theme">
+        <div className="dashboard-layout">
+          
+          <UniversalSidebar user={user} stats={{ totalUsers: 1, activeUsers: 1, totalAlerts: 0, verifiedUsers: 0, dbConnected: true }}>
+            <div className="dashboard-card sidebar-info">
+              <div className="card-header-pro">
                 <Info size={18} />
-                <h4 className="uppercase tracking-widest text-xs">Información Vital</h4>
+                <h4>PANEL ESTUDIANTIL</h4>
               </div>
-              <p className="text-sm text-text-light">Bienvenido a tu centro de apoyo digital. Aquí puedes reportar situaciones de riesgo o hablar con VERSA IA.</p>
+              <p>Gestiona tus reportes, consultas y normatividad institucional.</p>
             </div>
           </UniversalSidebar>
-        </aside>
 
-        {/* 🏛️ ÁREA DE ACCIÓN PRINCIPAL */}
-        <main className="lg:col-span-3">
-          <header className="mb-10">
-            <h2 className="page-title">Centro de Apoyo Versa</h2>
-            <p className="page-subtitle">Hola, {user?.name.split(' ')[0]}. Tu seguridad y bienestar son nuestra prioridad absoluta.</p>
-          </header>
+          <main className="dashboard-main">
+            <div className="professional-header">
+              <h2 className="page-title">Centro de Apoyo Versa</h2>
+              <p className="page-subtitle">Bienvenido de nuevo, {user?.name}. ¿En qué podemos ayudarte hoy?</p>
+            </div>
 
-          {/* 🔘 NAVEGACIÓN CAPSULA (UX FLUIDA) */}
-          <nav className="management-tabs">
-            {menuItems.map(item => (
-              <button 
-                key={item.id}
-                className={`mgmt-tab ${activeMenu === item.id ? 'active' : ''}`}
-                onClick={() => setActiveMenu(item.id)}
-              >
-                {item.icon}
-                {item.label}
-              </button>
-            ))}
-          </nav>
-          
-          {/* 💎 CONTENEDOR DE CRISTAL (DINÁMICO) */}
-          <section className="p-card mgmt-content min-h-[500px]">
-            {activeMenu === 'chat' && (
-              <div className="animate-fade-in">
-                <AmazonLexChat user={user} />
-              </div>
-            )}
+            <div className="management-tabs">
+              {[
+                { id: 'chat', label: '1. Chatbot Evalúa', icon: <MessageSquare size={18} /> },
+                { id: 'denuncia', label: '2. Denuncia Fácil', icon: <AlertTriangle size={18} /> },
+                { id: 'normatividad', label: '3. Normatividad', icon: <Scale size={18} /> },
+                { id: 'test', label: '4. Test Versa', icon: <ClipboardList size={18} /> }
+              ].map(tab => (
+                <button 
+                  key={tab.id}
+                  className={`mgmt-tab ${activeMenu === tab.id ? 'active' : ''}`}
+                  onClick={() => setActiveMenu(tab.id)}
+                >
+                  {tab.icon}
+                  {tab.label}
+                </button>
+              ))}
+            </div>
             
-            {activeMenu === 'denuncia' && <DenunciaFacil user={user} />}
-            {activeMenu === 'normatividad' && <Normatividad />}
-            {activeMenu === 'test' && <TestVersa user={user} />}
-          </section>
-        </main>
+            <div className="dashboard-card mgmt-content">
+              {activeMenu === 'chat' && (
+                <div className="animate-fade-in" style={{ padding: '0.5rem 0' }}>
+                  <AmazonLexChat user={user} />
+                  
+                  <div className="chatbot-footer-hint">
+                    <div className="dot-online"></div>
+                    <span>Conexión Protegida — Amazon Lex & Motor Versa IA</span>
+                  </div>
+                </div>
+              )}
+              
+              {activeMenu === 'denuncia' && (
+                <DenunciaFacil user={user} />
+              )}
 
+              {activeMenu === 'normatividad' && (
+                <Normatividad />
+              )}
+
+              {activeMenu === 'test' && (
+                <TestVersa user={user} />
+              )}
+            </div>
+          </main>
+
+        </div>
       </div>
     </div>
   )

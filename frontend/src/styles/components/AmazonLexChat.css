@@ -1,0 +1,136 @@
+.lex-chat-container {
+  width: 100%;
+  height: 480px; /* Altura compacta */
+  max-height: 70vh; 
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.08); /* Sombra más sutil */
+  animation: animate-fade-in 0.5s ease-out;
+}
+
+.lex-chat-header {
+  padding: 1rem 1.5rem; /* Reducido para más espacio visual */
+  background: linear-gradient(135deg, #0c4a6e 0%, #075985 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 10;
+}
+
+.lex-chat-messages {
+  flex: 1;
+  padding: 1.25rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: #f8fafc;
+  scroll-behavior: smooth; /* Movimiento suave */
+}
+
+/* Scrollbar personalizada para que no estorbe visualmente */
+.lex-chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+.lex-chat-messages::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 10px;
+}
+
+.lex-message {
+  max-width: 82%;
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  position: relative;
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lex-message.bot {
+  align-self: flex-start;
+  background: white;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  border-bottom-left-radius: 4px;
+}
+
+.lex-message.user {
+  align-self: flex-end;
+  background: #0ea5e9;
+  color: white;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 4px 10px -2px rgba(14, 165, 233, 0.25);
+}
+
+.lex-chat-input-area {
+  padding: 1rem 1.25rem; 
+  background: white;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.lex-input {
+  flex: 1;
+  padding: 0.7rem 1.1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  outline: none;
+  font-size: 0.88rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #f8fafc;
+}
+
+.lex-input:focus {
+  background: #fff;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.08);
+  transform: translateY(-1px); /* Efecto de "ajuste" al escribir */
+}
+
+.lex-send-btn {
+  background: #0c4a6e;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lex-send-btn:hover:not(:disabled) {
+  background: #0ea5e9;
+  transform: scale(1.05);
+}
+
+.lex-typing {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-top: -8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 2px;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes animate-fade-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}

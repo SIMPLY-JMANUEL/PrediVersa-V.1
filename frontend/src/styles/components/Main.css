@@ -1,0 +1,443 @@
+.main {
+  padding: 2rem;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+  padding: 3rem 0;
+}
+
+.hero-content {
+  flex: 1;
+}
+
+.hero-content h1 {
+  font-size: 3.8rem;
+  color: #3A6F85;
+  line-height: 1.3;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+}
+
+.hero-content .highlight {
+  color: #8ECFEA;
+  font-size: 2.5rem;
+}
+
+.hero-content .tagline {
+  font-size: 2.6rem;
+  color: #2A4E5F;
+  font-style: italic;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.5px;
+  border-left: 4px solid #8ECFEA;
+  padding-left: 1rem;
+}
+
+.hero-content p {
+  font-size: 1.4rem;
+  color: #555;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.cta-btn {
+  background-color: #8ECFEA;
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.cta-btn:hover {
+  background-color: #6ab3d5;
+}
+
+.hero-image {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+}
+
+.image-circle {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f0f0;
+}
+
+.image-circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-circle:first-child img {
+  transform: scaleX(-1);
+}
+
+/* Estilos para placeholders */
+.placeholder-image {
+  background: linear-gradient(135deg, #8ECFEA 0%, #3A6F85 100%);
+}
+
+.placeholder-icon {
+  font-size: 5rem;
+  color: white;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* ==============================================================
+   ABOUT SECTION (QUIÉNES SOMOS)
+   ============================================================== */
+.about-section {
+  padding: 5rem 0;
+  color: #333;
+}
+
+.about-header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 4rem auto;
+}
+
+.about-header h2 {
+  font-size: 2.8rem;
+  color: #2A4E5F;
+  margin-bottom: 1rem;
+}
+
+.section-divider {
+  height: 4px;
+  width: 80px;
+  background-color: #8ECFEA;
+  margin: 0 auto 1.5rem auto;
+  border-radius: 2px;
+}
+
+.about-subtitle {
+  font-size: 1.25rem;
+  line-height: 1.7;
+  color: #555;
+}
+
+/* Glassmorphism Panels */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-panel:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
+}
+
+/* About Grid */
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.about-card {
+  text-align: center;
+}
+
+.card-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.about-card h3 {
+  color: #3A6F85;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.about-card p {
+  line-height: 1.6;
+  color: #666;
+}
+
+/* Propuesta de Valor */
+.value-proposition {
+  background: linear-gradient(135deg, #2A4E5F 0%, #3A6F85 100%);
+  border-radius: 20px;
+  padding: 4rem 2rem;
+  color: white;
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.value-proposition h3 {
+  font-size: 2.2rem;
+  margin-bottom: 3rem;
+  color: #fff;
+}
+
+.prop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+}
+
+.prop-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.prop-icon {
+  font-size: 2.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.prop-item span:last-child {
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+/* Tabs Structured */
+.tabs-structured {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.tab-pane h4 {
+  color: #3A6F85;
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tab-pane p {
+  line-height: 1.7;
+  color: #555;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+  text-align: center;
+}
+
+.full-width h4 {
+  justify-content: center;
+}
+
+/* Objectives Section */
+.objectives-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.general-objective {
+  background: rgba(142, 207, 234, 0.15);
+  border-left: 5px solid #3A6F85;
+}
+
+.general-objective h4, .specific-objectives h4 {
+  color: #3A6F85;
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+}
+
+.general-objective p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: #444;
+}
+
+.obj-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.obj-list li {
+  position: relative;
+  padding-left: 2rem;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: #555;
+}
+
+.obj-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #10b981;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+/* ==============================================================
+   RESPONSIVIDAD UNIVERSAL
+   ============================================================== */
+
+@media (max-width: 1024px) {
+  .hero-content h1 { font-size: 2.8rem; }
+  .tabs-structured { grid-template-columns: 1fr; }
+  .hero { gap: 2rem; }
+}
+
+@media (max-width: 768px) {
+  .main { padding: 1.5rem 1rem; }
+  
+  .hero {
+    flex-direction: column-reverse; /* Imagen arriba en móviles puede ser mejor o simplemente apilar */
+    text-align: center;
+    gap: 2rem;
+    padding: 2rem 0;
+  }
+  
+  .hero-content h1 { 
+    font-size: 2.2rem; 
+    line-height: 1.2;
+  }
+  
+  .hero-content .highlight { font-size: 1.6rem; }
+  .hero-content .tagline { 
+    font-size: 1.5rem; 
+    border-left: none; 
+    border-top: 3px solid #8ECFEA;
+    padding: 1rem 0 0 0; 
+    margin-top: 1rem;
+  }
+  
+  .hero-image { 
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .image-circle {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .about-header h2 { font-size: 2rem; }
+  .about-grid { grid-template-columns: 1fr; }
+  
+  .glass-panel { padding: 1.5rem; }
+  
+  .value-proposition { padding: 3rem 1.5rem; }
+  .value-proposition h3 { font-size: 1.6rem; }
+  
+  .prop-grid { grid-template-columns: 1fr 1fr; }
+
+  .back-button-holder {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-content h1 { font-size: 1.8rem; }
+  .hero-content p { font-size: 1.1rem; }
+  .image-circle {
+    width: 120px;
+    height: 120px;
+  }
+  .prop-grid { grid-template-columns: 1fr; }
+}
+
+/* ==============================================================
+   ESTILO GLOBAL: DISEÑO HOMOGÉNEO DE PÁGINAS INTERNAS
+   ============================================================== */
+.page-internal-standard {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  padding: 2rem 1.5rem 5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.page-content-wrapper {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* BOTÓN DE REGRESO ESTANDARIZADO */
+.back-button-holder {
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.back-button-global {
+  background: white;
+  color: #3A6F85;
+  border: 2px solid #8ECFEA;
+  box-shadow: 0 4px 15px rgba(142,207,234,0.35);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.7rem 1.4rem;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-decoration: none;
+}
+
+.back-button-global:hover {
+  transform: translateY(-3px) scale(1.02);
+  background: #fdfdfd;
+  box-shadow: 0 6px 20px rgba(142,207,234,0.5);
+  border-color: #3A6F85;
+}
+
+@media (max-width: 768px) {
+  .page-internal-standard {
+    padding: 1rem 1rem 4rem 1rem;
+  }
+  .back-button-global {
+    padding: 0.5rem 1.1rem;
+    font-size: 0.9rem;
+  }
+}

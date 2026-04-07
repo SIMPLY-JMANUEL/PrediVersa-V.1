@@ -16,7 +16,7 @@ import {
   FileText,
   Loader2
 } from 'lucide-react'
-import './Login.css'
+import '../styles/components/Login.css'
 
 /**
  * 🏛️ LOGIN PREDIVERSA LUXE UI (v2.7)

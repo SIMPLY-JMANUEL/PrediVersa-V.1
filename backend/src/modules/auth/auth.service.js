@@ -2,8 +2,13 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const userRepository = require('../users/users.repository');
 const authRepository = require('./auth.repository');
+const logger = require('../../utils/logger');
 
 const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  logger.error('❌ CRÍTICO: JWT_SECRET no definido. El servidor no puede iniciar de forma segura.');
+  process.exit(1);
+}
 
 /**
  * CAPA DE SERVICIO (BUSINESS LOGIC) - DOMINIO AUTENTICACIÓN
@@ -26,36 +31,22 @@ const generateTokens = (user) => {
 };
 
 const login = async (email, password) => {
-  // ── MODO DE RESCATE LOCAL (DevSecOps Emergency) ──
-  const isAdminRescue = (email === 'admin@prediversa.edu.co' || email === 'admin@prediversa.com') && 
-                        (password === 'admin123' || password === 'Admin123!');
-  const isStudentRescue = (email === 'estudiante@prediversa.edu.co' || email === 'estudiante@prediversa.com') && 
-                          (password === 'estudiante123' || password === 'Estudiante123!');
-
-  if (isAdminRescue || isStudentRescue) {
-    const rescueUser = isAdminRescue ? 
-      { id: 0, email: 'admin@prediversa.edu.co', role: 'Administrador', name: 'Admin de Rescate' } :
-      { id: 999, email: 'estudiante@prediversa.edu.co', role: 'Estudiante', name: 'Estudiante de Prueba' };
-    
-    const { accessToken, refreshToken } = generateTokens(rescueUser);
-    return { accessToken, refreshToken, user: rescueUser };
-  }
-
-  // ── ORIGINAL: Consultar DB ──
+  // ── SEGURIDAD: Sin backdoors hardcodeadas. Toda autenticación pasa por la DB. ──
   const user = await userRepository.findByEmail(email);
   if (!user) throw new Error('Credenciales inválidas');
 
   const match = await bcrypt.compare(password, user.password);
   if (!match) throw new Error('Credenciales inválidas');
 
-  if (user.status !== 'Activo') throw new Error('Cuenta inactiva');
+  if (user.status !== 'Activo') throw new Error('Cuenta inactiva. Contacte al administrador.');
 
   const { accessToken, refreshToken } = generateTokens(user);
-  
+
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 7);
   await authRepository.saveRefreshToken(user.id, refreshToken, expiresAt);
 
+  logger.info({ event: 'USER_LOGIN_SUCCESS', userId: user.id, email: user.email, role: user.role });
   return { accessToken, refreshToken, user };
 };
 

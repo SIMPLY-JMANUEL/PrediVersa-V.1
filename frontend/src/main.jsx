@@ -2,8 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App.jsx';
-import './index.css';
-import './global.css';
+import './styles/base.css';
+import './styles/global.css';
 
 // 📡 CONFIGURACIÓN DEL CACHÉ DE SERVIDOR (REACT QUERY)
 const queryClient = new QueryClient({

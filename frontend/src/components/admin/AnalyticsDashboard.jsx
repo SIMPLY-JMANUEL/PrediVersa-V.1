@@ -5,7 +5,7 @@ import {
 } from 'recharts';
 import { Activity, ShieldAlert, TrendingUp, PieChart as PieIcon, Brain, AlertTriangle, Zap } from 'lucide-react';
 import { apiFetch } from '../../utils/api';
-import './AnalyticsDashboard.css';
+import '../../styles/components/AnalyticsDashboard.css';
 
 const AnalyticsDashboard = ({ stats }) => {
   const [aiStats, setAiStats] = useState({ trends: [], critical: [], distribution: [] });

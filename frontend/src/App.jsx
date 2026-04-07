@@ -1,65 +1,71 @@
-import { useEffect, lazy, Suspense } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { useAuthStore } from './store/useAuthStore'
-import { useUIStore } from './store/useUIStore'
-
-// 🏛️ Componentes Críticos (Carga Inmediata)
+import { useState, useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Main from './components/Main'
 import Footer from './components/Footer'
 import Login from './components/Login'
+import StudentDashboard from './components/StudentDashboard'
+import AdminDashboard from './components/AdminDashboard'
+import CollaboratorDashboard from './components/CollaboratorDashboard'
+import ProtectedRoute from './components/ProtectedRoute'
 import RoleProtectedRoute from './components/RoleProtectedRoute'
+import QuienesSomos from './components/QuienesSomos'
+import Servicios from './components/Servicios'
+import Noticias from './components/Noticias'
+import Planes from './components/Planes'
+import Contacto from './components/Contacto'
 
-// ⚡ Componentes Lazy (Code Splitting - Carga diferida)
-const StudentDashboard = lazy(() => import('./components/StudentDashboard'))
-const AdminDashboard = lazy(() => import('./components/AdminDashboard'))
-const CollaboratorDashboard = lazy(() => import('./components/CollaboratorDashboard'))
-const ResetPassword = lazy(() => import('./components/ResetPassword'))
-const QuienesSomos = lazy(() => import('./components/QuienesSomos'))
-const Servicios = lazy(() => import('./components/Servicios'))
-const Noticias = lazy(() => import('./components/Noticias'))
-const Planes = lazy(() => import('./components/Planes'))
-const Contacto = lazy(() => import('./components/Contacto'))
-
-/**
- * 🧊 LUXE LOADER (Suspense Fallback)
- */
-const LuxeLoader = () => (
-  <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-50/50 backdrop-blur-xl z-[3000]">
-    <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-    <p className="mt-4 font-black text-primary text-xs uppercase tracking-[0.2em] animate-pulse">Sincronizando PrediVersa...</p>
-  </div>
-);
-
-/**
- * 🏛️ PREDIVERSA - ORQUESTADOR DE RUTAS (OPTIMIZED)
- */
-function AppRoutes({ user, handleLogout }) {
-  const { isLoginOpen, setLoginOpen } = useUIStore();
-  
+function AppRoutes({ user, isLoginOpen, setIsLoginOpen, handleLogin, handleLogout }) {
+  const location = useLocation()
   return (
-    <Suspense fallback={<LuxeLoader />}>
+    <>
       <Routes>
-        <Route path="/" element={<><Header onLoginClick={() => setLoginOpen(true)} /><Main /></>} />
-        <Route path="/quienes-somos" element={<><Header onLoginClick={() => setLoginOpen(true)} /><QuienesSomos /></>} />
-        <Route path="/servicios" element={<><Header onLoginClick={() => setLoginOpen(true)} /><Servicios /></>} />
-        <Route path="/noticias" element={<><Header onLoginClick={() => setLoginOpen(true)} /><Noticias /></>} />
-        <Route path="/planes" element={<><Header onLoginClick={() => setLoginOpen(true)} /><Planes /></>} />
-        <Route path="/contacto" element={<><Header onLoginClick={() => setLoginOpen(true)} /><Contacto /></>} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        
+        <Route path="/" element={
+          <>
+            <Header onLoginClick={() => setIsLoginOpen(true)} />
+            <Main />
+          </>
+        } />
+        <Route path="/quienes-somos" element={
+          <>
+            <Header onLoginClick={() => setIsLoginOpen(true)} />
+            <QuienesSomos />
+          </>
+        } />
+        <Route path="/servicios" element={
+          <>
+            <Header onLoginClick={() => setIsLoginOpen(true)} />
+            <Servicios />
+          </>
+        } />
+        <Route path="/noticias" element={
+          <>
+            <Header onLoginClick={() => setIsLoginOpen(true)} />
+            <Noticias />
+          </>
+        } />
+        <Route path="/planes" element={
+          <>
+            <Header onLoginClick={() => setIsLoginOpen(true)} />
+            <Planes />
+          </>
+        } />
+        <Route path="/contacto" element={
+          <>
+            <Header onLoginClick={() => setIsLoginOpen(true)} />
+            <Contacto />
+          </>
+        } />
         <Route path="/student" element={
           <RoleProtectedRoute user={user} allowedRoles={['Estudiante']}>
             <StudentDashboard user={user} onLogout={handleLogout} />
           </RoleProtectedRoute>
         } />
-        
         <Route path="/admin" element={
           <RoleProtectedRoute user={user} allowedRoles={['Administrador']}>
             <AdminDashboard user={user} onLogout={handleLogout} />
           </RoleProtectedRoute>
         } />
-        
         <Route path="/collaborator" element={
           <RoleProtectedRoute user={user} allowedRoles={['Colaborador', 'Colaboradores']}>
             <CollaboratorDashboard user={user} onLogout={handleLogout} />
@@ -69,29 +75,61 @@ function AppRoutes({ user, handleLogout }) {
       <Footer />
       <Login 
         isOpen={isLoginOpen} 
-        onClose={() => setLoginOpen(false)}
+        onClose={() => setIsLoginOpen(false)}
+        onLoginSuccess={handleLogin}
       />
-    </Suspense>
+    </>
   )
 }
 
 function App() {
-  const { user, logout } = useAuthStore();
-  
+  const [isLoginOpen, setIsLoginOpen] = useState(false)
+  const [user, setUser] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+
   useEffect(() => {
+    // Cargar usuario del localStorage al iniciar
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      setUser(JSON.parse(storedUser))
+    }
+    setIsLoading(false)
+
+    // FIX E-3: Escuchar el evento de sesión expirada disparado por apiFetch o useAlerts
     const handleAuthExpired = () => {
-      logout();
-      useUIStore.getState().setLoginOpen(true);
-    };
-    window.addEventListener('auth:expired', handleAuthExpired);
-    return () => window.removeEventListener('auth:expired', handleAuthExpired);
-  }, [logout]);
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      setUser(null)
+      setIsLoginOpen(true) // Abrir el modal de login automáticamente
+      console.warn('⚠️ Sesión expirada. Redirigiendo al login...')
+    }
+    window.addEventListener('auth:expired', handleAuthExpired)
+    return () => window.removeEventListener('auth:expired', handleAuthExpired)
+  }, [])
+
+  const handleLogin = (userData) => {
+    setUser(userData)
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    setUser(null)
+  }
+
+  // Mostrar loading mientras se verifica el usuario
+  if (isLoading) {
+    return <div style={{ padding: '20px', textAlign: 'center' }}>Cargando...</div>
+  }
 
   return (
     <Router>
       <AppRoutes 
         user={user}
-        handleLogout={logout}
+        isLoginOpen={isLoginOpen}
+        setIsLoginOpen={setIsLoginOpen}
+        handleLogin={handleLogin}
+        handleLogout={handleLogout}
       />
     </Router>
   )

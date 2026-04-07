@@ -10,7 +10,7 @@ import ActuacionForm from './collaborator/ActuacionForm'
 import SoporteForm from './collaborator/SoporteForm'
 import NormatividadForm from './collaborator/NormatividadForm'
 
-import './CollaboratorDashboard.css'
+import '../styles/components/CollaboratorDashboard.css'
 
 /**
  * 🏛️ COLLABORATOR DASHBOARD LUXE

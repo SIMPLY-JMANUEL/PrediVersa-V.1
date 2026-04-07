@@ -7,8 +7,19 @@ const AppError = require('../../utils/appError');
 
 const getAlerts = async (req, res, next) => {
   try {
-    const alerts = await alertService.listAlerts();
-    res.json({ success: true, alerts, requestId: req.requestId });
+    // Paginación server-side: ?page=1&limit=20&status=&alertType=
+    const page    = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit   = Math.min(100, parseInt(req.query.limit) || 20);
+    const status  = req.query.status  || null;
+    const alertType = req.query.alertType || null;
+
+    const { alerts, total } = await alertService.listAlerts({ page, limit, status, alertType });
+    res.json({
+      success: true,
+      alerts,
+      pagination: { total, page, limit, pages: Math.ceil(total / limit) },
+      requestId: req.requestId
+    });
   } catch (error) {
     next(error);
   }

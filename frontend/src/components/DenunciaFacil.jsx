@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ShieldAlert, Info, UploadCloud, CheckCircle2 } from 'lucide-react';
-import './DenunciaFacil.css';
+import '../styles/components/DenunciaFacil.css';
 
 import { apiFetch, API_CHATBOT as API } from '../utils/api'; // FIX A-1: Usar utilitario centralizado
 

@@ -10,8 +10,8 @@ const getStats = async () => {
   return await alertRepository.getStats();
 };
 
-const listAlerts = async () => {
-  return await alertRepository.findAll();
+const listAlerts = async ({ page = 1, limit = 20, status = null, alertType = null } = {}) => {
+  return await alertRepository.findAll({ page, limit, status, alertType });
 };
 
 const createManualAlert = async (alertData, userId) => {

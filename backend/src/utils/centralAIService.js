@@ -1,16 +1,6 @@
 const { ConverseCommand } = require("@aws-sdk/client-bedrock-runtime");
-const { bedrockClient } = require("./awsConfig");
-const aiCache = require('./aiCache');
-const logger = require('./logger');
-const { calculateCost } = require('./aiMetrics');
-const { performance } = require('perf_hooks');
-const crypto = require('crypto');
+const { bedrockClient, region } = require("./awsConfig");
 require('dotenv').config();
-
-/**
- * 🏛️ MOTOR VERSA v3 - ENTERPRISE HYBRID ENGINE
- * Determinístico + Heurístico + Inteligencia Artificial
- */
 
 const IMPACT_CATEGORIES = {
   CRITICO: ["suicidio", "matarme", "no quiero vivir", "morirme", "muerte", "violan", "abuso", "quitarme la vida", "ahorcarme"],
@@ -18,169 +8,147 @@ const IMPACT_CATEGORIES = {
   EMOCIONAL: ["solo", "triste", "ansiedad", "llorar", "paila", "desespero", "vacio"]
 };
 
+/**
+ * SERVICIO CENTRAL DE IA (BEDROCK EDITION)
+ * Migrado de Gemini a Amazon Bedrock (Claude 3 Sonnet) para alta disponibilidad.
+ */
 class CentralAIService {
   constructor() {
-    this.client = bedrockClient;
+    this.client = bedrockClient; // Usando cliente centralizado Versa v2.6
     this.modelId = "us.anthropic.claude-3-5-haiku-20241022-v1:0"; 
+    this.initialized = true;
   }
 
-  // 🛡️ PARSER SEGURO CON VALIDACIÓN DE ESQUEMA
-  safeParse(text) {
-    try {
-      const clean = text.replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(clean);
-      if (!parsed.riesgo || !parsed.identidad || !parsed.emocion) throw new Error("Schema Incompleto");
-      return parsed;
-    } catch (e) {
-      logger.error('❌ Fallo de Parsing AI:', e.message);
-      return null;
-    }
+  /**
+   * 🧼 PRE-PROCESAMIENTO: Normaliza input
+   */
+  preprocess(text) {
+    if (!text) return "";
+    return text.toLowerCase().trim().replace(/\s+/g, ' ');
   }
 
-  // 🔑 CACHE KEY ROBUSTA (SHA-256)
-  buildCacheKey(text) {
-    return crypto.createHash('sha256').update(`v3|${text}`).digest('hex');
-  }
+  /**
+   * 🧠 CATEGORIZACIÓN DIRECTA: Identifica el nivel base por palabras clave
+   */
+  async categorizeMessage(text) {
+    const cleanText = this.preprocess(text);
+    const result = { nivel: "BAJO", detectadas: [] };
 
-  // 🧬 HEURÍSTICA DE GÉNERO (Pre-LLM)
-  detectGenderHeuristic(text) {
-    const t = text.toLowerCase();
-    if (t.includes("soy mujer") || t.includes("cansada") || t.includes("lista")) 
-      return { genero: "femenino", confianza: 0.75, fuente: 'heuristica' };
-    if (t.includes("soy hombre") || t.includes("cansado") || t.includes("listo")) 
-      return { genero: "masculino", confianza: 0.75, fuente: 'heuristica' };
-    if (t.includes("soy no binarie") || t.includes("cansade"))
-      return { genero: "no_binario", confianza: 0.8, fuente: 'heuristica' };
-    return { genero: "indeterminado", confianza: 0.2, fuente: 'default' };
-  }
-
-  // 💰 DECISOR FINOPS: ¿Necesitamos realmente gastar en Bedrock?
-  shouldUseLLM({ riesgo, generoHeur, text }) {
-    if (riesgo.nivel === "ALTO") return true; // Seguridad ante todo
-    if (generoHeur.confianza < 0.6) return true; // Necesitamos contexto lingüístico
-    if (text.length > 50) return true; // Mensajes largos requieren razonamiento
-    return false;
-  }
-
-  // 🧪 FUSIÓN INTELIGENTE DE CONTEXTO
-  mergeContext(diccionario, heuristica, llm) {
-    return {
-      riesgo: llm?.riesgo || { nivel: diccionario.nivel, score: 50, requiere_intervencion: diccionario.nivel === 'ALTO' },
-      identidad: llm?.identidad || heuristica,
-      emocion: llm?.emocion || { clase: "neutro", intensidad: 30 },
-      meta: {
-        engine: llm ? "V3_HYBRID_LLM" : "V3_DETERMINISTIC",
-        timestamp: new Date().toISOString()
+    // 1. Prioridad Máxima: Crítico
+    for (const word of IMPACT_CATEGORIES.CRITICO) {
+      if (cleanText.includes(word)) {
+        result.nivel = "ALTO";
+        result.detectadas.push(word);
       }
-    };
+    }
+    if (result.nivel === "ALTO") return result;
+
+    // 2. Prioridad Media: Moderado
+    for (const word of IMPACT_CATEGORIES.MODERADO) {
+      if (cleanText.includes(word)) {
+        result.nivel = "MEDIO";
+        result.detectadas.push(word);
+      }
+    }
+    if (result.nivel === "MEDIO") return result;
+
+    // 3. Prioridad Baja: Emocional
+    for (const word of IMPACT_CATEGORIES.EMOCIONAL) {
+      if (cleanText.includes(word)) {
+        result.detectadas.push(word);
+      }
+    }
+
+    return result;
   }
 
   /**
-   * 📡 VERSA v3.1: MOTOR DE ANÁLISIS DE RIEGO ENTERPRISE (TITANIO)
-   * Función: Determinar Riesgo, Alerta Institucional, Emoción y Auditoría.
+   * Analiza un mensaje para detectar niveles de riesgo de forma anónima.
    */
-  async analizarContextoTotalV3(mensaje) {
-    const cleanText = mensaje.toLowerCase().trim();
-    const cacheKey = this.buildCacheKey(cleanText);
-    const start = performance.now();
-
-    // 🧊 1. CAPA CACHÉ CRIPTOGRÁFICA (SHA-256)
-    const cached = await aiCache.get(cacheKey, 'v3_context');
-    if (cached) return cached;
-
-    // 🧩 2. CAPA DICCIONARIO CLÍNICO
-    const riesgoDic = await this.categorizeMessage(cleanText);
-    const generoHeur = this.detectGenderHeuristic(cleanText);
-
-    // 💰 3. DECISOR FINOPS: ¿Llamamos a Bedrock?
-    const useLLM = this.shouldUseLLM({ riesgo: riesgoDic, generoHeur, text: cleanText });
-
-    let llmResult = null;
-    if (useLLM) {
-      const systemPrompt = `Actúa como VERSA v3.1: Alert Engine de PrediVersa (Sistema Certificado). 
-        Analiza mensajes de menores con enfoque clínico y ético.
-        ACTIVAR ALERTA SI: Intención de autolesión, suicidio, evidencia de abuso, amenazas graves o colapso emocional.
-        REGLAS: Si hay duda entre MEDIO y ALTO -> elige ALTO. Prioriza seguridad sobre precisión.`;
-
-      const userPrompt = `MENSAJE: "${mensaje}"
-        SALIDA JSON ESTRICTO:
-        {
-          "riesgo": { "nivel": "BAJO|MEDIO|ALTO", "score": 0-100, "requiere_intervencion": boolean },
-          "alerta": { 
-            "activar": boolean, 
-            "tipo": "SUICIDIO|ABUSO|VIOLENCIA|BULLYING|EMOCIONAL", 
-            "urgencia": "INMEDIATA|ALTA|MEDIA|BAJA", 
-            "justificacion": "string",
-            "evidencia": []
-          },
-          "emocion": { "clase": "tristeza|ira|ansiedad|miedo|neutro", "intensidad": 0-100 },
-          "auditoria": { "decision_confianza": 0-1.0, "requiere_revision_humana": boolean }
-        }`;
-
-      try {
-        const command = new ConverseCommand({
-          modelId: this.modelId,
-          messages: [{ role: "user", content: [{ text: userPrompt }] }],
-          system: [{ text: systemPrompt }],
-          inferenceConfig: { maxTokens: 1000, temperature: 0 }
-        });
-
-        const response = await this.client.send(command);
-        llmResult = this.safeParse(response.output.message.content[0].text);
-        
-        logger.info({
-          ai_event: 'v3.1_inference_completed',
-          latencyMs: Math.round(performance.now() - start),
-          costUsd: calculateCost(this.modelId, response.usage),
-          alert_status: llmResult?.alerta?.activar ? 'TRIGGERED' : 'QUIET'
-        });
-      } catch (err) { logger.error('⚠️ Bedrock v3.1 Fail:', err.message); }
-    }
-
-    // 5. FUSIÓN FINAL E IDIOMA DETERMINÍSTICO 🧪
-    const finalContext = this.mergeContext(riesgoDic, generoHeur, llmResult);
+  async analizarRiesgo(datosAnonimos) {
+    const { mensaje, historial = [] } = datosAnonimos;
     
-    // Inyección de Hardening Determinístico post-fusión
-    if (riesgoDic.nivel === 'ALTO') {
-       finalContext.riesgo.nivel = 'ALTO';
-       finalContext.alerta = finalContext.alerta || { activar: true, tipo: 'EMOCIONAL', urgencia: 'ALTA', justificacion: 'Detectado por diccionario clínico (ALTO)' };
-       finalContext.alerta.activar = true;
-    }
+    // 1. Detección Directa (Filtro Rojo/Naranja/Amarillo)
+    const categoria = await this.categorizeMessage(mensaje);
+    let nivel_riesgo = categoria.nivel;
 
-    await aiCache.set(cacheKey, finalContext, 'v3_context');
-    return finalContext;
+    // 2. Validación y Contexto con Bedrock (IA Superior)
+    const systemPrompt = `Eres un motor de detección de riesgos psicosociales para PrediVersa. 
+    Analiza el mensaje y devuelve un JSON estricto. 
+    Si el mensaje es una broma clara, saludo o no tiene riesgo real, clasifícalo como BAJO aunque use palabras ruidosas.`;
+    
+    const userPrompt = `
+      MENSAJE DEL ESTUDIANTE: "${mensaje}"
+      DETECCIÓN PALABRAS CLAVE: ${categoria.detectadas.join(', ') || 'Ninguna'}
+      NIVEL BASE DETECTADO: ${nivel_riesgo}
+      HISTORIAL RECIENTE: ${historial.length ? historial.map(h => h.text).slice(-3).join(' | ') : 'N/A'}
+
+      RESPONDE ÚNICAMENTE CON ESTE FORMATO JSON:
+      {
+        "nivel_riesgo": "BAJO" | "MEDIO" | "ALTO",
+        "score": (0-100 calculo interno),
+        "intencion_principal": "string",
+        "emociones_detectadas": ["string"],
+        "palabras_clave_criticas": ["string"],
+        "razon": "Explicación breve de por qué se asignó este nivel",
+        "requiere_intervencion_humana": boolean
+      }
+    `;
+
+    try {
+      const command = new ConverseCommand({
+        modelId: this.modelId,
+        messages: [{ role: "user", content: [{ text: userPrompt }] }],
+        system: [{ text: systemPrompt }],
+        inferenceConfig: { maxTokens: 512, temperature: 0 }
+      });
+
+      const response = await this.client.send(command);
+      const resText = response.output.message.content[0].text;
+      const aiResult = JSON.parse(resText.replace(/```json|```/g, '').trim());
+
+      // REGLA DE SEGURIDAD CRÍTICA - ZERO TOLERANCE: 
+      // Si el diccionario detectó un Riesgo ALTO (Palabra Crítica), se mantiene ALTO sin importar el análisis de la IA.
+      if (nivel_riesgo === "ALTO") {
+        aiResult.nivel_riesgo = "ALTO"; 
+        aiResult.score = Math.max(aiResult.score, 99); 
+        aiResult.requiere_intervencion_humana = true;
+      }
+
+      return aiResult;
+    } catch (error) {
+      console.warn('⚠️ Bedrock falló, usando Detección Directa:', error.message);
+      return {
+        nivel_riesgo,
+        score: nivel_riesgo === 'ALTO' ? 90 : (nivel_riesgo === 'MEDIO' ? 50 : 10),
+        razon: "Fallo de conexión API - Usando Diccionario de Impacto",
+        requiere_intervencion_humana: nivel_riesgo === 'ALTO'
+      };
+    }
   }
 
   /**
-   * 🎭 GENERADOR DE RESPUESTA v3.1 (IDENTIDAD ADAPTATIVA & PERSONALIZACIÓN)
-   * Adapta el lenguaje (género y tono) según el ADN del mensaje.
+   * Genera respuestas empáticas (VERSA Persona).
    */
-  async generarRespuestaV3(datos) {
-    const { mensaje, contexto } = datos;
-    const cleanText = mensaje.toLowerCase().trim();
-    const cacheKey = this.buildCacheKey(`res|${cleanText}`);
+  async generarRespuesta(datos) {
+    const { mensaje, nivelRiesgo, historial = [] } = datos;
+    let chatHistory = historial.map(m => `${m.type === 'user' ? 'Estudiante' : 'Versa'}: ${m.text}`).join('\n');
 
-    const cached = await aiCache.get(cacheKey, 'v3_res');
-    if (cached) return cached;
+    const systemPrompt = `
+      Eres VERSA, orientador colombiano empático. Tu estilo es el de un "pana que sabe escuchar".
+      Usa expresiones como "parce", "tranqui", "te entiendo". 
+      REGLAS: Máximo 3-4 líneas, sin diagnósticos, fluidez total.
+      RIESGO ACTUAL: ${nivelRiesgo.toUpperCase()}
+      ${nivelRiesgo.toUpperCase() === 'ALTO' ? 'REGLA CRÍTICA: Guía al usuario sutilmente pero con firmeza a buscar ayuda inmediata con un adulto de confianza o el orientador presencial del colegio al finalizar tu respuesta.' : ''}
+    `;
 
-    // 🕵️‍♂️ Lógica de Adaptación de Identidad (Género)
-    const genero = contexto.identidad.genero;
-    const esConfiable = contexto.identidad.confianza > 0.85;
-    
-    // Determinar tono basado en emoción y riesgo
-    let tonoDescription = "neutral-amigable";
-    if (contexto.riesgo.nivel === "ALTO") tonoDescription = "urgente, altamente empático, serio";
-    else if (contexto.emocion.clase === "tristeza") tonoDescription = "cálido, cercano, apoyo incondicional";
-
-    const systemPrompt = `Eres VERSA v3.1, orientador colombiano (Pana). 
-      REGLA DE IDENTIDAD (CRÍTICA): 
-      - Género detectado: ${genero} (Confianza: ${contexto.identidad.confianza}).
-      - SI es confiable (${esConfiable}): Adapta TODA la gramática al género (ej: "amigo/parce" o "amiga/parcera").
-      - SI NO es confiable: Usa lenguaje NEUTRO e inclusivo (ej: "parce", "estudiante", "te escucho").
-      TONO: ${tonoDescription}. 
-      Respuesta breve (2-4 líneas). No uses estereotipos.`;
-
-    const userPrompt = `MENSAJE DEL ESTUDIANTE: "${mensaje}"`;
+    const userPrompt = `
+      HISTORIAL:
+      ${chatHistory}
+      
+      ESTUDIANTE DICE: "${mensaje}"
+      VERSA RESPONDE:
+    `;
 
     try {
       const command = new ConverseCommand({
@@ -191,26 +159,25 @@ class CentralAIService {
       });
 
       const response = await this.client.send(command);
-      const finalRes = response.output.message.content[0].text.trim();
-      
-      await aiCache.set(cacheKey, finalRes, 'v3_res');
-      return finalRes;
-    } catch (error) {
-      return "Acá estoy para escucharte, parce. Decime qué pasa.";
-    }
-  }
+      let finalResponse = response.output.message.content[0].text.trim();
 
-  async categorizeMessage(text) {
-    const result = { nivel: "BAJO", detectadas: [] };
-    for (const key in IMPACT_CATEGORIES) {
-      for (const word of IMPACT_CATEGORIES[key]) {
-        if (text.includes(word)) {
-          result.nivel = key === 'CRITICO' ? "ALTO" : (key === 'MODERADO' ? "MEDIO" : "BAJO");
-          result.detectadas.push(word);
+      // Post-procesamiento de seguridad
+      if (nivelRiesgo.toUpperCase() === "ALTO") {
+        const lowerRes = finalResponse.toLowerCase();
+        if (!lowerRes.includes("no estás solo") && !lowerRes.includes("hablar con alguien")) {
+           const emergencyTips = [
+             "\n\nNo estás solo, parce. De verdad sería bueno hablar con un orientador presencial o alguien de tu total confianza ahora mismo, ¿sí?",
+             "\n\nHey, recuerda que hay personas que te quieren apoyar. ¿Te sentirías cómodo hablando con algún familiar o con el orientador del colegio hoy?"
+           ];
+           finalResponse += emergencyTips[Math.floor(Math.random() * emergencyTips.length)];
         }
       }
+
+      return finalResponse;
+    } catch (error) {
+      console.error('❌ Error Bedrock:', error.message);
+      return null;
     }
-    return result;
   }
 }
 
