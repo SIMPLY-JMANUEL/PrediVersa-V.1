@@ -23,10 +23,10 @@ router.post('/logout', verifyToken, authController.logout);
 router.post('/register', validate(schemas.registerSchema), authController.register);
 
 // Recuperación de contraseña (Rate limited + validación)
-router.post('/forgot-password', forgotPasswordLimiter, validate(schemas.forgotPasswordSchema), authController.forgotPassword);
+// router.post('/forgot-password', forgotPasswordLimiter, validate(schemas.forgotPasswordSchema), authController.forgotPassword);
 
 // Reset de contraseña con validación de esquema fuerte
-router.post('/reset-password', validate(schemas.resetPasswordSchema), authController.resetPassword);
+// router.post('/reset-password', validate(schemas.resetPasswordSchema), authController.resetPassword);
 
 // Obtener usuario actual
 router.get('/me', verifyToken, authController.me);

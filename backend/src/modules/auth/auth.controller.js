@@ -60,8 +60,48 @@ const logout = async (req, res, next) => {
   }
 };
 
+const register = async (req, res, next) => {
+  try {
+    const userRepository = require('../users/users.repository');
+    const bcrypt = require('bcryptjs');
+    const data = req.body;
+
+    const existingUser = await userRepository.findByEmail(data.email);
+    if (existingUser) return res.status(409).json({ success: false, message: 'El email ya está registrado' });
+
+    // Validate Document ID exists function? The legacy used documentIdExists
+    // I will let users.repository handle this if it throws.
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const result = await userRepository.create({ ...data, password: hashedPassword });
+    
+    res.status(201).json({ success: true, message: 'Usuario registrado exitosamente', user: { id: result.insertId, ...data, password: '' } });
+  } catch (error) {
+    next(new AppError('Error interno del servidor en registro', 500));
+  }
+};
+
+const me = async (req, res, next) => {
+  try {
+    const userRepository = require('../users/users.repository');
+    // Using req.user hydrated by verifyToken middleware
+    const user = await userRepository.findById(req.user.id);
+    if (!user || user.status !== 'Activo') return res.status(403).json({ success: false, message: 'Sesión inválida o cuenta inactiva' });
+    
+    res.json({
+      success: true,
+      user: {
+        id: user.id, email: user.email, name: user.name, role: user.role, profilePicture: user.profilePicture
+      }
+    });
+  } catch (error) {
+    res.status(401).json({ success: false, message: 'Token expirado o inválido' });
+  }
+};
+
 module.exports = {
   login,
   refresh,
-  logout
+  logout,
+  register,
+  me
 };
