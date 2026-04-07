@@ -25,6 +25,7 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^8.5.1",
     "mysql2": "^3.20.0",
+    "winston": "^3.11.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
