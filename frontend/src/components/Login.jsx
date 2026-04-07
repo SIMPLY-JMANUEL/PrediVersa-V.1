@@ -22,7 +22,7 @@ import '../styles/components/Login.css'
  * 🏛️ LOGIN PREDIVERSA LUXE UI (v2.7)
  * Implementa flujos de recuperación y registro por aprobación.
  */
-function Login({ isOpen, onClose }) {
+function Login({ isOpen, onClose, onLoginSuccess }) {
   const navigate = useNavigate()
   const login = useAuthStore(state => state.login)
   
@@ -64,6 +64,10 @@ function Login({ isOpen, onClose }) {
 
         if (data.success) {
           login(data.user, data.token)
+          // Integración con el estado global de App.jsx para que el Dashboard lo permita entrar
+          if (onLoginSuccess) onLoginSuccess(data.user)
+          localStorage.setItem('user', JSON.stringify(data.user))
+          
           setTimeout(() => {
             onClose()
             const role = data.user.role || 'Estudiante'
