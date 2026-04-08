@@ -1,25 +1,33 @@
-/* 🏛️ PrediVersa PREMIUM DESIGN SYSTEM - IA Optimized 🎨 */
+/* 🏛️ PrediVersa PREMIUM DESIGN SYSTEM - LUXE UI 🎨 */
 :root {
-  /* 💎 Paleta de Colores HSL (Vibrantes & Profesionales) */
-  --p-primary: 210, 84%, 38%;    /* Azul Confianza PrediVersa */
-  --p-accent: 160, 84%, 39%;     /* Verde Esmeralda Salud */
-  --p-warning: 38, 92%, 50%;     /* Naranja Alerta */
-  --p-danger: 350, 89%, 60%;     /* Rojo Crítico */
-  --p-text: 210, 60%, 15%;       /* Texto Profundo */
-  --p-text-light: 210, 20%, 45%; 
-  --p-bg: 210, 40%, 98%;         /* Fondo Aireado */
-  --p-white: 0, 0%, 100%;
+  /* 💎 Paleta Oficial PrediVersa (ProfessionalTheme) */
+  --primary: #3A6F85;
+  --primary-light: #4A8CA8;
+  --primary-dark: #2A4E5F;
+  --secondary: #8ECFEA;
+  --accent: #f43f5e;
+  
+  /* 📊 Variables de Fondo y Superficie */
+  --bg-main: #f0f4f8;
+  --bg-card: #ffffff;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  
+  /* ✨ Tokens Glassmorphism / Luxe */
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --border-light: rgba(226, 232, 240, 0.8);
+  
+  /* 🌥️ Sombras Dinámicas */
+  --shadow-xs: 0 2px 4px rgba(58, 111, 133, 0.05);
+  --shadow-sm: 0 4px 12px rgba(58, 111, 133, 0.08);
+  --shadow-md: 0 10px 20px rgba(58, 111, 133, 0.12);
+  --shadow-lg: 0 20px 40px rgba(58, 111, 133, 0.15);
+  --shadow-glow: 0 0 20px rgba(58, 111, 133, 0.3);
 
-  /* ✨ Tokens de Glassmorphism (Efecto Cristal) */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.3);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
-  --glass-blur: blur(12px);
-
-  /* 📏 Elevación y Bordes */
-  --radius-sm: 8px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
+  /* ⏳ Transiciones */
+  --smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --bezier-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 * {
@@ -31,48 +39,57 @@
 }
 
 body {
-  font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: hsl(var(--p-bg));
+  font-family: 'Inter', 'Outfit', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-main);
   background-image: 
-    radial-gradient(at 0% 0%, hsla(var(--p-primary), 0.05) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, hsla(var(--p-accent), 0.05) 0px, transparent 50%);
-  color: hsl(var(--p-text));
+    radial-gradient(at 0% 0%, rgba(142, 207, 234, 0.2) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(58, 111, 133, 0.1) 0px, transparent 50%);
+  color: var(--text-main);
   min-height: 100vh;
   line-height: 1.6;
 }
 
-/* 🧊 Clase Global para Contenedores Premium */
+/* 🧊 Contenedor Premium Luxe */
 .p-card {
   background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
-  border-radius: var(--radius-md);
-  padding: 2rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: var(--shadow-md);
+  border-radius: 20px;
+  padding: 2.5rem;
+  transition: transform var(--smooth), box-shadow var(--smooth);
 }
 
 .p-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
+  box-shadow: var(--shadow-lg);
 }
 
 /* 🚀 Botones PrediVersa Luxe */
 .p-btn-primary {
-  background: linear-gradient(135deg, hsl(var(--p-primary)), hsl(var(--p-primary), 80%));
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: white;
-  border: none;
-  padding: 0.8rem 1.6rem;
-  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 0.8rem 1.8rem;
+  border-radius: 12px;
   font-weight: 600;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 14px 0 hsla(var(--p-primary), 0.3);
+  transition: all var(--smooth);
+  box-shadow: 0 4px 15px rgba(58, 111, 133, 0.3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .p-btn-primary:hover {
-  filter: brightness(1.1);
-  transform: scale(1.02);
-  box-shadow: 0 6px 20px 0 hsla(var(--p-primary), 0.4);
+  filter: brightness(1.15);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(58, 111, 133, 0.4);
+}
+
+.p-btn-primary:active {
+  transform: translateY(0) scale(0.98);
 }
