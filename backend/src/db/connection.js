@@ -17,19 +17,19 @@ if (missingVars.length > 0) {
 }
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE,
-  port: process.env.DB_PORT || 3306,
+  host: (process.env.DB_HOST || '').trim(),
+  user: (process.env.DB_USER || '').trim(),
+  password: (process.env.DB_PASSWORD || '').trim(),
+  database: (process.env.DB_DATABASE || '').trim(),
+  port: parseInt(process.env.DB_PORT || '3306'),
   waitForConnections: true,
-  connectionLimit: 15, // Aumentado ligeramente para mayor concurrencia
+  connectionLimit: 15,
   queueLimit: 0,
-  connectTimeout: 20000, // 20s para asegurar conexión inicial en App Runner
-  acquireTimeout: 20000, // 20s para obtener conexión del pool
-  timeout: 30000,        // 30s de timeout de query por defecto
+  connectTimeout: 20000, 
+  acquireTimeout: 20000, 
+  timeout: 30000,        
   enableKeepAlive: true,
-  keepAliveInitialDelay: 10000, // Empezar pings de red a los 10s
+  keepAliveInitialDelay: 10000, 
   charset: 'utf8mb4',
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined
 });

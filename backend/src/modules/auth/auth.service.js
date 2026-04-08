@@ -4,7 +4,7 @@ const userRepository = require('../users/users.repository');
 const authRepository = require('./auth.repository');
 const logger = require('../../utils/logger');
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = (process.env.JWT_SECRET || '').trim();
 if (!JWT_SECRET) {
   logger.error('❌ CRÍTICO: JWT_SECRET no definido. El servidor no puede iniciar de forma segura.');
   process.exit(1);
