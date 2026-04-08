@@ -47,9 +47,34 @@ app.use('/api/config', configRoutes);
 
 // --- SERVIDOR ESTÁTICO Y FALLBACK DE SPA (PARA EVITAR 404 EN /student) ---
 const frontendPath = path.join(__dirname, '../../frontend/dist');
+const fs = require('fs');
 
-// Servir archivos estáticos del build del frontend
-app.use(express.static(frontendPath));
+if (fs.existsSync(frontendPath)) {
+  // Servir archivos estáticos del build del frontend
+  app.use(express.static(frontendPath));
+
+  // 🔥 CLAVE: SPA Fallback
+  // Cualquier ruta que NO empiece por /api y no sea un archivo real, sirve el index.html
+  app.get('*', (req, res) => {
+    if (!req.url.startsWith('/api')) {
+      const indexPath = path.join(frontendPath, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+      } else {
+        res.status(404).json({ success: false, message: 'Frontend dist/index.html no encontrado.' });
+      }
+    }
+  });
+} else {
+  console.warn('⚠️ ADVERTENCIA: No se encontró la carpeta frontend/dist. El servidor funcionará solo como API.');
+  app.get('/', (req, res) => {
+    res.json({ 
+      success: true, 
+      message: 'PrediVersa API Online', 
+      frontendStatus: 'Not served by this instance' 
+    });
+  });
+}
 
 // Health checks con prueba de vida a la base de datos
 const { testConnection } = require('./db/connection');
@@ -63,14 +88,6 @@ app.get('/api/health', async (req, res) => {
     });
   } catch (e) {
     res.status(500).json({ status: 'error', database: 'DESCONECTADO ❌', error: e.message });
-  }
-});
-
-// 🔥 CLAVE: SPA Fallback
-// Cualquier ruta que NO empiece por /api y no sea un archivo real, sirve el index.html
-app.get('*', (req, res) => {
-  if (!req.url.startsWith('/api')) {
-    res.sendFile(path.join(frontendPath, 'index.html'));
   }
 });
 
