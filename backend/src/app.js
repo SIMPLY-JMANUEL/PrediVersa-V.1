@@ -16,12 +16,20 @@ const corsOptions = {
     const allowedPatterns = [
       /https:\/\/.*\.amplifyapp\.com$/, 
       /https:\/\/.*\.awsapprunner\.com$/,
-      /http:\/\/localhost:\d+$/
+      /http:\/\/localhost:\d+$/,
+      /https:\/\/localhost:\d+$/
     ];
-    if (!origin || allowedPatterns.some(pattern => pattern.test(origin))) {
+    
+    const isAllowed = !origin || allowedPatterns.some(pattern => pattern.test(origin));
+    
+    if (isAllowed) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.error(`🚨 CORS BLOQUEADO: El origen "${origin}" no está en la lista blanca.`);
+      // Retornar error con código 403 para que no parezca un error 500 del servidor
+      const corsError = new Error('No permitido por políticas de seguridad CORS');
+      corsError.statusCode = 403;
+      callback(corsError);
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
