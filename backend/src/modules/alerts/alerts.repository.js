@@ -29,8 +29,8 @@ const findAll = async ({ page = 1, limit = 20, status = null, alertType = null }
      LEFT JOIN users u ON a.createdBy = u.id 
      ${where}
      ORDER BY a.createdAt DESC
-     LIMIT ? OFFSET ?`,
-    [...params, limit, offset]
+     LIMIT ${limit} OFFSET ${offset}`,
+    params
   );
   return { alerts: rows, total };
 };
