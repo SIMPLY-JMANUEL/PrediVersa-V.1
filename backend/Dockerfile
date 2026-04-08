@@ -25,4 +25,4 @@ EXPOSE 3001
 # ⚡ VARIABLES BASE
 ENV NODE_ENV=production
 
-CMD ["node", "src/app.js"]
+CMD ["node", "src/server.js"]

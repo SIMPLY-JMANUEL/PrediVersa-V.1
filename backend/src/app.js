@@ -84,12 +84,18 @@ app.use((req, res) => {
 
 // Manejo global de errores (al final)
 app.use((err, req, res, next) => {
-  console.error('❌ Error API:', err.message, err.stack);
-  res.status(500).json({ 
+  const statusCode = err.statusCode || 500;
+  const message = err.message || 'Error interno del servidor';
+  
+  console.error(`❌ [${statusCode}] Error API:`, message, err.stack);
+  
+  res.status(statusCode).json({ 
     success: false, 
-    message: 'Error interno del servidor',
-    // Exponiendo el error temporalmente para diagnóstico en App Runner
-    error: err.message || 'Error desconocido'
+    message,
+    // Exponiendo el error para diagnóstico en App Runner
+    error: message,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    requestId: req.requestId
   });
 });
 
