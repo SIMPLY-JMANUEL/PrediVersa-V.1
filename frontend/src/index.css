@@ -1,78 +1,29 @@
-/* 🏛️ PrediVersa PREMIUM DESIGN SYSTEM - IA Optimized 🎨 */
-:root {
-  /* 💎 Paleta de Colores HSL (Vibrantes & Profesionales) */
-  --p-primary: 210, 84%, 38%;    /* Azul Confianza PrediVersa */
-  --p-accent: 160, 84%, 39%;     /* Verde Esmeralda Salud */
-  --p-warning: 38, 92%, 50%;     /* Naranja Alerta */
-  --p-danger: 350, 89%, 60%;     /* Rojo Crítico */
-  --p-text: 210, 60%, 15%;       /* Texto Profundo */
-  --p-text-light: 210, 20%, 45%; 
-  --p-bg: 210, 40%, 98%;         /* Fondo Aireado */
-  --p-white: 0, 0%, 100%;
-
-  /* ✨ Tokens de Glassmorphism (Efecto Cristal) */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.3);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
-  --glass-blur: blur(12px);
-
-  /* 📏 Elevación y Bordes */
-  --radius-sm: 8px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-}
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  min-height: 100vh;
+  overflow-x: hidden; /* Evitar scroll horizontal accidental */
+}
+
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 body {
-  font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: hsl(var(--p-bg));
-  background-image: 
-    radial-gradient(at 0% 0%, hsla(var(--p-primary), 0.05) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, hsla(var(--p-accent), 0.05) 0px, transparent 50%);
-  color: hsl(var(--p-text));
-  min-height: 100vh;
-  line-height: 1.6;
-}
-
-/* 🧊 Clase Global para Contenedores Premium */
-.p-card {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
-  border-radius: var(--radius-md);
-  padding: 2rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.p-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
-}
-
-/* 🚀 Botones PrediVersa Luxe */
-.p-btn-primary {
-  background: linear-gradient(135deg, hsl(var(--p-primary)), hsl(var(--p-primary), 80%));
-  color: white;
-  border: none;
-  padding: 0.8rem 1.6rem;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 14px 0 hsla(var(--p-primary), 0.3);
-}
-
-.p-btn-primary:hover {
-  filter: brightness(1.1);
-  transform: scale(1.02);
-  box-shadow: 0 6px 20px 0 hsla(var(--p-primary), 0.4);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #F2F9FC;
+  color: #3A6F85;
 }

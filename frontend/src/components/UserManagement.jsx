@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BASE_URL } from '../utils/api'
-import '../styles/components/UserManagement.css'
+import './UserManagement.css'
 
 function UserManagement({ onClose }) {
   const [users, setUsers] = useState([])

@@ -1,121 +1,92 @@
-/* 🏛️ PrediVersa ADMIN DASHBOARD LUXE UI (Consola de Mando) */
-.admin-dashboard-container {
-  padding: 2rem;
+.dashboard-wrapper.profesional-theme {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.dashboard-container.profesional-theme {
+  padding: 1.5rem 2rem;
   max-width: 1600px;
   margin: 0 auto;
 }
 
-/* 📊 DASHBOARD HEADER LUXE */
-.admin-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 3rem;
+.professional-header {
+  margin-bottom: 2rem;
 }
 
-.admin-page-title {
-  font-size: 2.5rem;
-  font-weight: 900;
-  letter-spacing: -0.05em;
-  background: linear-gradient(135deg, hsl(var(--p-primary)), hsl(var(--p-accent)));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.admin-page-subtitle {
-  font-size: 1.1rem;
-  color: hsla(var(--p-text), 0.6);
-  font-weight: 500;
-  margin-top: 0.5rem;
-}
-
-/* 🔘 NAVEGACIÓN DE CONSOLA (TABS) */
-.admin-nav-tabs {
-  display: flex;
-  gap: 1.25rem;
-  margin-bottom: 3rem;
-  padding: 0.6rem;
-  background: hsla(var(--p-text), 0.04);
-  border-radius: var(--radius-md);
-  width: fit-content;
-}
-
-.admin-tab {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  padding: 1rem 1.8rem;
-  border: none;
-  background: transparent;
-  color: hsla(var(--p-text), 0.5);
+.page-title {
+  color: #0c4a6e;
+  font-size: 1.75rem;
   font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.page-subtitle {
+  color: #64748b;
   font-size: 0.95rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  font-weight: 500;
 }
 
-.admin-tab:hover {
-  background: hsla(var(--p-primary), 0.04);
-  color: hsl(var(--p-primary));
-}
-
-.admin-tab.active {
-  background: hsl(var(--p-white));
-  color: hsl(var(--p-primary));
-  box-shadow: var(--glass-shadow);
-  transform: translateY(-2px);
-}
-
-/* 🏢 CONTENEDOR DE GESTIÓN (ADMIN PANE) */
-.admin-mgmt-pane {
-  min-height: 600px;
-  animation: slideFadeIn 0.6s ease-out;
-}
-
-@keyframes slideFadeIn {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
+/* Tablas y Listas */
 .mgmt-header-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2.5rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid hsla(var(--p-text), 0.05);
-}
-
-/* 🔦 MENSAJES DE ESTADO (AUDITABLE) */
-.flash-message {
-  margin: 1.5rem 0;
-  padding: 1.25rem 2rem;
-  border-radius: var(--radius-sm);
-  font-weight: 700;
-  font-size: 0.9rem;
-  display: flex;
   align-items: center;
-  gap: 1rem;
-  border-left: 5px solid;
-  animation: pulseIn 0.4s ease;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
 }
 
-@keyframes pulseIn {
-  from { opacity: 0; transform: scale(0.98); }
-  to { opacity: 1; transform: scale(1); }
+.mgmt-title-pro {
+  color: #1e293b;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
 }
 
-.flash-message:not(.error) {
-  background: hsla(var(--p-accent), 0.1);
-  color: hsl(var(--p-accent));
-  border-color: hsl(var(--p-accent));
+.mgmt-subtitle-pro {
+  color: #64748b;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.flash-message {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbfcce;
+  animation: fadeIn 0.3s ease;
 }
 
 .flash-message.error {
-  background: hsla(var(--p-danger), 0.1);
-  color: hsl(var(--p-danger));
-  border-color: hsl(var(--p-danger));
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.users-list-section {
+  margin-top: 1.5rem;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.mgmt-content {
+  background: white;
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  border: 1px solid #f1f5f9;
 }

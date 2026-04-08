@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/components/Main.css';
+import './Main.css';
 
 function Planes() {
   const navigate = useNavigate();

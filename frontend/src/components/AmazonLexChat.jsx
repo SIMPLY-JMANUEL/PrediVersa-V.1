@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { Send, Bot, User, Loader2, Mic, MicOff, Smile, HeartHandshake } from 'lucide-react'
 import { apiFetch } from '../utils/api'
-import '../styles/components/AmazonLexChat.css'
+import './AmazonLexChat.css'
 
 function AmazonLexChat({ user }) {
   const [messages, setMessages] = useState([
-    { id: 1, text: `Hola ${user?.name || 'Estudiante'}, soy tu Asistente Virtual Versa. ¿Cómo estás hoy?`, sender: 'bot' }
+    { id: 1, text: `Hola ${user?.name || 'Estudiante'}, soy tu Asistente Versa. ¿Como estas hoy?`, sender: 'bot' }
   ])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
@@ -124,9 +124,27 @@ function AmazonLexChat({ user }) {
                 <Smile size={24} color="#10b981" />}
           </div>
           <div>
-            <h4 style={{ margin: 0 }}>Versa Asistente Virtual</h4>
+            <h4 style={{ margin: 0 }}>Versa Assitente Vitual</h4>
             <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Apoyo Pedagógico y Bienestar IA</span>
           </div>
+        </div>
+        
+        {/* Banner Central de Conexión Protegida */}
+        <div style={{ 
+          fontSize: '0.65rem', 
+          backgroundColor: '#f0fdf4', 
+          color: '#166534', 
+          padding: '4px 10px', 
+          borderRadius: '20px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '6px',
+          border: '1px solid #bbf7d0',
+          fontWeight: 600,
+          margin: '0 auto'
+        }}>
+          <span style={{ width: '8px', height: '8px', backgroundColor: '#22c55e', borderRadius: '50%', display: 'inline-block', boxShadow: '0 0 5px rgba(34, 197, 94, 0.5)' }}></span>
+          Conexión Protegida — Amazon Lex & Motor Versa IA
         </div>
       </div>
 
@@ -136,7 +154,7 @@ function AmazonLexChat({ user }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
               {msg.sender === 'bot' ? <Bot size={14} /> : <User size={14} />}
               <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>
-                {msg.sender === 'bot' ? 'Versa Asistente Virtual' : 'Tú'}
+                {msg.sender === 'bot' ? 'Versa Assitente Vitual' : 'Tú'}
               </span>
             </div>
             {msg.text}

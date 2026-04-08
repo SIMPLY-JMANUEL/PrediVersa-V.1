@@ -11,7 +11,7 @@ import {
   Title
 } from 'chart.js'
 import { BASE_URL } from '../utils/api'
-import '../styles/components/Reports.css'
+import './Reports.css'
 
 // Registrar componentes de Chart.js
 ChartJS.register(

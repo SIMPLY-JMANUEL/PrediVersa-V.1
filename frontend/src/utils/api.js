@@ -29,7 +29,7 @@ export const apiFetch = async (endpoint, options = {}) => {
     headers,
   });
 
-  // Interceptor de sesión expirada (evitar en el login para mostrar credenciales inválidas)
+  // Interceptor de sesión expirada (excepto peticiones de login)
   if (response.status === 401 && !endpoint.includes('/login')) {
     window.dispatchEvent(new Event('auth:expired'));
     return { success: false, message: 'Sesión expirada' };

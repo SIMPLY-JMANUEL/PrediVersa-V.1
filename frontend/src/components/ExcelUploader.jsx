@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { BASE_URL } from '../utils/api';
 import { UploadCloud, FileSpreadsheet, Download, CheckCircle2, XCircle, AlertTriangle, X, Users } from 'lucide-react';
-import '../styles/components/ExcelUploader.css';
+import './ExcelUploader.css';
 
 // Columnas esperadas en el Excel
 const EXPECTED_COLUMNS = ['documentId', 'name', 'email', 'role', 'phone', 'address', 'birthDate', 'edad', 'grado', 'lugarNacimiento', 'nombrePadre', 'nombreMadre'];

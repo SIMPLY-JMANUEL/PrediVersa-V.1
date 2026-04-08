@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import '../styles/components/Main.css'
+import './Main.css'
 import fondo2 from '../assets/images/fondo2.png'
 import img2 from '../assets/images/img2.png'
 

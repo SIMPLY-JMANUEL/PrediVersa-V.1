@@ -1,6 +1,6 @@
 import React from 'react';
 import UniversalSidebar from '../shared/UniversalSidebar';
-import { LayoutDashboard, Users, UserPlus, Bell, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, Bell, Settings } from 'lucide-react';
 
 const AdminSidebar = ({ user, setActiveTab, stats }) => {
   return (
@@ -13,7 +13,6 @@ const AdminSidebar = ({ user, setActiveTab, stats }) => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {[
             { id: 'usuarios', label: 'Gestión Usuarios', icon: <Users size={16} /> },
-            { id: 'solicitudes', label: 'Solicitudes Acceso', icon: <UserPlus size={16} /> },
             { id: 'alertas', label: 'Centro Alertas', icon: <Bell size={16} /> },
             { id: 'configuracion', label: 'Estructura', icon: <Settings size={16} /> }
           ].map(item => (

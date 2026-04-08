@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { UserCircle, Camera } from 'lucide-react';
 import { useUserPhoto } from '../../hooks/useUserPhoto';
 import ControlPanelCard from './ControlPanelCard';
-import '../../styles/components/UniversalSidebar.css';
+import './UniversalSidebar.css';
 
 const UniversalSidebar = ({ user, stats, children }) => {
   const [photo, setPhoto] = useUserPhoto();
