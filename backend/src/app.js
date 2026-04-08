@@ -10,6 +10,12 @@ const configRoutes = require('./modules/config/config.routes');
 
 const app = express();
 
+// Log de Petición Entrante (Trazabilidad Base)
+app.use((req, res, next) => {
+  console.log(`📡 [${new Date().toISOString()}] ${req.method} ${req.url} - IP: ${req.ip}`);
+  next();
+});
+
 // Middlewares
 const corsOptions = {
   origin: (origin, callback) => {
@@ -111,16 +117,20 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Error interno del servidor';
+  const errorName = err.name || 'Error';
   
-  console.error(`❌ [${statusCode}] Error API:`, message, err.stack);
+  // Log masivo para diagnóstico total
+  console.error(`🚨 [${errorName} - ${statusCode}] FALLO EN RUTA: ${req.method} ${req.originalUrl}`);
+  console.error(`👉 Mensaje: ${message}`);
+  if (err.stack) console.error(`📚 Stack: ${err.stack}`);
   
   res.status(statusCode).json({ 
     success: false, 
-    message,
-    // Exponiendo el error para diagnóstico en App Runner
-    error: message,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-    requestId: req.requestId
+    type: errorName,
+    message: message,
+    // Exponiendo detalles técnicos para que el usuario pueda enviármelos
+    errorDetails: err.message,
+    requestId: req.requestId || 'no-id'
   });
 });
 
