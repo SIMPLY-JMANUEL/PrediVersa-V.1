@@ -2,6 +2,7 @@ const dashboardRepository = require('./dashboard.repository');
 
 /**
  * SERVICE - DOMINIO DASHBOARD
+ * Lógica de negocio para analíticas.
  */
 
 const getAnalytics = async () => {
@@ -10,14 +11,24 @@ const getAnalytics = async () => {
     dashboardRepository.getCriticalStudents(),
     dashboardRepository.getRiskDistribution()
   ]);
+  return { trends, critical, distribution };
+};
 
-  return {
-    trends,
-    critical,
-    distribution
-  };
+const getRiskTrends = async (days) => {
+  return await dashboardRepository.getRiskTrends(days);
+};
+
+const getCriticalStudents = async (limit) => {
+  return await dashboardRepository.getCriticalStudents(limit);
+};
+
+const getRiskDistribution = async () => {
+  return await dashboardRepository.getRiskDistribution();
 };
 
 module.exports = {
-  getAnalytics
+  getAnalytics,
+  getRiskTrends,
+  getCriticalStudents,
+  getRiskDistribution
 };

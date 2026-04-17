@@ -1,0 +1,184 @@
+{
+    "OperationSummaryList": [
+        {
+            "Id": "057ee1b092d14184992414c8a4223319",
+            "Type": "START_DEPLOYMENT",
+            "Status": "IN_PROGRESS",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-04-07T21:58:24-05:00",
+            "UpdatedAt": "2026-04-07T21:58:24-05:00"
+        },
+        {
+            "Id": "6c89a960adb64973b94546476378a1d3",
+            "Type": "START_DEPLOYMENT",
+            "Status": "SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-04-07T21:51:40-05:00",
+            "EndedAt": "2026-04-07T21:56:37-05:00",
+            "UpdatedAt": "2026-04-07T21:56:37-05:00"
+        },
+        {
+            "Id": "79f9b9f86a634332bbf4d0baeb2893be",
+            "Type": "START_DEPLOYMENT",
+            "Status": "SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-04-06T23:46:40-05:00",
+            "EndedAt": "2026-04-06T23:52:57-05:00",
+            "UpdatedAt": "2026-04-06T23:52:57-05:00"
+        },
+        {
+            "Id": "9758cedb18e4407baf83600ded0f4cfe",
+            "Type": "START_DEPLOYMENT",
+            "Status": "ROLLBACK_SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-04-06T23:37:10-05:00",
+            "EndedAt": "2026-04-06T23:40:07-05:00",
+            "UpdatedAt": "2026-04-06T23:40:07-05:00"
+        },
+        {
+            "Id": "782eb32869594c3f9b5cc8a80ee14685",
+            "Type": "START_DEPLOYMENT",
+            "Status": "ROLLBACK_SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-04-06T23:28:56-05:00",
+            "EndedAt": "2026-04-06T23:31:40-05:00",
+            "UpdatedAt": "2026-04-06T23:31:40-05:00"
+        },
+        {
+            "Id": "c5d150c23a104ba4a2d402aaaa2fb6f0",
+            "Type": "START_DEPLOYMENT",
+            "Status": "ROLLBACK_SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-04-06T23:17:17-05:00",
+            "EndedAt": "2026-04-06T23:20:12-05:00",
+            "UpdatedAt": "2026-04-06T23:20:12-05:00"
+        },
+        {
+            "Id": "d2bf75bb06bc49fb86564a793efb61ab",
+            "Type": "START_DEPLOYMENT",
+            "Status": "ROLLBACK_SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-04-06T23:10:18-05:00",
+            "EndedAt": "2026-04-06T23:13:05-05:00",
+            "UpdatedAt": "2026-04-06T23:13:05-05:00"
+        },
+        {
+            "Id": "d1d45cd097a24ea4b0c3cdd5fcda3136",
+            "Type": "START_DEPLOYMENT",
+            "Status": "ROLLBACK_SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-04-06T23:04:53-05:00",
+            "EndedAt": "2026-04-06T23:07:42-05:00",
+            "UpdatedAt": "2026-04-06T23:07:42-05:00"
+        },
+        {
+            "Id": "4f43db50a5d441a895f6b83ba949e288",
+            "Type": "START_DEPLOYMENT",
+            "Status": "ROLLBACK_SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-04-06T22:56:12-05:00",
+            "EndedAt": "2026-04-06T22:59:04-05:00",
+            "UpdatedAt": "2026-04-06T22:59:04-05:00"
+        },
+        {
+            "Id": "aa767e4ce1b7416e969cec4e5b277ccc",
+            "Type": "START_DEPLOYMENT",
+            "Status": "ROLLBACK_SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-04-06T22:51:32-05:00",
+            "EndedAt": "2026-04-06T22:54:08-05:00",
+            "UpdatedAt": "2026-04-06T22:54:08-05:00"
+        },
+        {
+            "Id": "487a67267ae64004b2d54a65aa69dcc1",
+            "Type": "START_DEPLOYMENT",
+            "Status": "ROLLBACK_SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-04-06T22:21:05-05:00",
+            "EndedAt": "2026-04-06T22:24:00-05:00",
+            "UpdatedAt": "2026-04-06T22:24:00-05:00"
+        },
+        {
+            "Id": "fe2d354ba55b4b66af32315099c881c3",
+            "Type": "START_DEPLOYMENT",
+            "Status": "SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-04-06T22:13:36-05:00",
+            "EndedAt": "2026-04-06T22:18:51-05:00",
+            "UpdatedAt": "2026-04-06T22:18:51-05:00"
+        },
+        {
+            "Id": "7c2ef5fc9d804babbf4b5cd5b48468aa",
+            "Type": "UPDATE_SERVICE",
+            "Status": "SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-04-06T20:34:16-05:00",
+            "EndedAt": "2026-04-06T20:38:44-05:00",
+            "UpdatedAt": "2026-04-06T20:38:44-05:00"
+        },
+        {
+            "Id": "0aeb8b70e22b4306a3c0358422032619",
+            "Type": "START_DEPLOYMENT",
+            "Status": "SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-04-06T18:39:03-05:00",
+            "EndedAt": "2026-04-06T18:44:30-05:00",
+            "UpdatedAt": "2026-04-06T18:44:30-05:00"
+        },
+        {
+            "Id": "b6dde294d5624aacb0679506d225a860",
+            "Type": "START_DEPLOYMENT",
+            "Status": "SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-03-30T20:15:57-05:00",
+            "EndedAt": "2026-03-30T20:20:52-05:00",
+            "UpdatedAt": "2026-03-30T20:20:52-05:00"
+        },
+        {
+            "Id": "817cd47e41124926985edb90b5a047a3",
+            "Type": "START_DEPLOYMENT",
+            "Status": "SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-03-30T20:07:57-05:00",
+            "EndedAt": "2026-03-30T20:13:59-05:00",
+            "UpdatedAt": "2026-03-30T20:13:59-05:00"
+        },
+        {
+            "Id": "6613709189e24d7da91a39b50c8e6677",
+            "Type": "START_DEPLOYMENT",
+            "Status": "SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-03-30T19:48:44-05:00",
+            "EndedAt": "2026-03-30T19:54:00-05:00",
+            "UpdatedAt": "2026-03-30T19:54:00-05:00"
+        },
+        {
+            "Id": "ec03228d13804c8e8c174ea707e943e4",
+            "Type": "START_DEPLOYMENT",
+            "Status": "SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-03-28T18:33:11-05:00",
+            "EndedAt": "2026-03-28T18:38:20-05:00",
+            "UpdatedAt": "2026-03-28T18:38:20-05:00"
+        },
+        {
+            "Id": "6ca762ca362b440fa6b0781932594a72",
+            "Type": "START_DEPLOYMENT",
+            "Status": "SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-03-28T16:29:03-05:00",
+            "EndedAt": "2026-03-28T16:34:44-05:00",
+            "UpdatedAt": "2026-03-28T16:34:44-05:00"
+        },
+        {
+            "Id": "c10166dfc8db489c826815f071228049",
+            "Type": "START_DEPLOYMENT",
+            "Status": "SUCCEEDED",
+            "TargetArn": "arn:aws:apprunner:us-east-1:649536287623:service/prediversa-backend/8ff7be9d96004a8bb6f7506f48125416",
+            "StartedAt": "2026-03-28T12:20:04-05:00",
+            "EndedAt": "2026-03-28T12:25:16-05:00",
+            "UpdatedAt": "2026-03-28T12:25:16-05:00"
+        }
+    ],
+    "NextToken": "eyJIYXNoS2V5IjoiNjQ5NTM2Mjg3NjIzIzhmZjdiZTlkOTYwMDRhOGJiNmY3NTA2ZjQ4MTI1NDE2I2MxMDE2NmRmYzhkYjQ4OWM4MjY4MTVmMDcxMjI4MDQ5IiwiU2VydmljZUFybiI6ImFybjphd3M6YXBwcnVubmVyOnVzLWVhc3QtMTo2NDk1MzYyODc2MjM6c2VydmljZS9wcmVkaXZlcnNhLWJhY2tlbmQvOGZmN2JlOWQ5NjAwNGE4YmI2Zjc1MDZmNDgxMjU0MTYiLCJTdGFydGVkQXQiOjE3NzQ3MTg0MDR9"
+}

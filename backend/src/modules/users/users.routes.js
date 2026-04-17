@@ -1,6 +1,7 @@
 const express = require('express');
 const userController = require('./users.controller');
 const { verifyToken, authorizeRoles } = require('../../middleware/auth');
+const { validate, schemas } = require('../../middleware/validate');
 
 const router = express.Router();
 
@@ -19,7 +20,7 @@ router.get('/stats', verifyToken, authorizeRoles('Administrador'), userControlle
 router.get('/', verifyToken, authorizeRoles('Administrador'), userController.getAllUsers);
 
 // Registro de nuevos estudiantes (Público)
-router.post('/register', userController.register);
+router.post('/register', validate(schemas.registerSchema), userController.register);
 
 // Desactivar usuario (Admin)
 router.patch('/:id/deactivate', verifyToken, authorizeRoles('Administrador'), userController.deactivate);

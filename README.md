@@ -45,20 +45,8 @@ Para asegurar el escalamiento, el monolito fue desmantelado hacia una estructura
 
 ---
 
-## 🔐 CREDENCIALES DE ACCESO GENERAL
-El sistema ha erradicado las vulnerabilidades de contraseñas débiles "admin123". Controles integrales mediante Base de datos activa AWS:
-
-🔴 **CEO / PANEL DE ADMINISTRADOR GENERAL**
- - Correo: `ceo@prediversa.com`
- - Contraseña: `Prediversa2026*`
-
-🟡 **PANEL DE COLABORADOR (Profesores y Psicólogos)**
- - Correo: `colaborador@prediversa.com`
- - Contraseña: `Colaborador2026*`
-
-🟢 **PANEL DE ESTUDIANTE (Normativas y Chatbot P/S)**
- - Correo: `estudiante@prediversa.com`
- - Contraseña: `Estudiante2026*`
+## 🔐 CONTROL DE ACCESO
+El acceso a la plataforma está restringido por roles. Las credenciales deben ser gestionadas por el Administrador General a través del panel de control. **Nunca comparta contraseñas en texto plano.**
 
 ---
 

@@ -5,7 +5,8 @@ const { PublishCommand } = require("@aws-sdk/client-sns");
 const { SendEmailCommand } = require("@aws-sdk/client-ses");
 const { snsClient, sesClient } = require('../../utils/awsConfig');
 const { adminClients, notificarAdmins } = require('../../utils/notificaciones');
-const alertRepository = require('../alerts/alerts.repository'); // Para persistir alertas
+const alertRepository = require('../alerts/alerts.repository');
+const logger = require('../../utils/logger');
 
 /**
  * CAPA DE SERVICIO (BUSINESS LOGIC) - DOMINIO CHATBOT
@@ -160,11 +161,11 @@ const dispatchAlertEnterprise = async (text, user, context, requestId) => {
 
   // SMS: AWS SNS 📲
   if (channels.includes("SMS")) {
-    const adminPhones = ["+573206708788", "+573225892184", "+573234071416"];
+    const adminPhones = (process.env.ADMIN_PHONES || "").split(',').filter(p => p.trim() !== "");
     adminPhones.forEach(phone => {
       dispatchPromises.push(snsClient.send(new PublishCommand({
         Message: `🚨 [ALERTA CRÍTICA PREDIVERSA]\nTipo: ${payload.alertType}\nEstudiante: ${payload.studentName}\nUrgencia: ${payload.urgency}`,
-        PhoneNumber: phone,
+        PhoneNumber: phone.trim(),
         MessageAttributes: { 'AWS.SNS.SMS.SMSType': { DataType: 'String', StringValue: 'Transactional' } }
       })));
     });
@@ -172,27 +173,32 @@ const dispatchAlertEnterprise = async (text, user, context, requestId) => {
 
   // EMAIL: AWS SES 📧
   if (channels.includes("EMAIL")) {
-    const emailBody = `
-      <h2>🚨 ALERTA CRÍTICA - PREDIVERSA v3.1</h2>
-      <p><b>Estudiante:</b> ${payload.studentName}</p>
-      <p><b>Nivel de Riesgo:</b> ${payload.riskLevel}</p>
-      <p><b>Tipo de Alerta:</b> ${payload.alertType}</p>
-      <p><b>Urgencia:</b> ${payload.urgency}</p>
-      <hr/>
-      <p><b>Detalle:</b> ${payload.message}</p>
-      <p><b>Evidencia Detectada:</b> ${payload.evidence.join(", ")}</p>
-      <br/>
-      <p><i>Acción requerida: Intervención inmediata del equipo institucional.</i></p>
-    `;
-    
-    dispatchPromises.push(sesClient.send(new SendEmailCommand({
-      Source: "ha.l@lanuevaamerica.edu.co",
-      Destination: { ToAddresses: ["ha.l@lanuevaamerica.edu.co", "jm.calvou@lanuevaamerica.edu.co"] },
-      Message: {
-        Subject: { Data: `🚨 Alerta Crítica [${payload.alertType}] - ${payload.studentName}` },
-        Body: { Html: { Data: emailBody } }
-      }
-    })));
+    const emailSource = process.env.SES_SOURCE_EMAIL;
+    const emailDestinations = (process.env.ADMIN_EMAILS || "").split(',').filter(e => e.trim() !== "");
+
+    if (emailSource && emailDestinations.length > 0) {
+      const emailBody = `
+        <h2>🚨 ALERTA CRÍTICA - PREDIVERSA v3.1</h2>
+        <p><b>Estudiante:</b> ${payload.studentName}</p>
+        <p><b>Nivel de Riesgo:</b> ${payload.riskLevel}</p>
+        <p><b>Tipo de Alerta:</b> ${payload.alertType}</p>
+        <p><b>Urgencia:</b> ${payload.urgency}</p>
+        <hr/>
+        <p><b>Detalle:</b> ${payload.message}</p>
+        <p><b>Evidencia Detectada:</b> ${payload.evidence.join(", ")}</p>
+        <br/>
+        <p><i>Acción requerida: Intervención inmediata del equipo institucional.</i></p>
+      `;
+      
+      dispatchPromises.push(sesClient.send(new SendEmailCommand({
+        Source: emailSource,
+        Destination: { ToAddresses: emailDestinations },
+        Message: {
+          Subject: { Data: `🚨 Alerta Crítica [${payload.alertType}] - ${payload.studentName}` },
+          Body: { Html: { Data: emailBody } }
+        }
+      })));
+    }
   }
 
   await Promise.allSettled(dispatchPromises);

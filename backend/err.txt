@@ -1,0 +1,36 @@
+Ignoring invalid configuration option passed to Connection: acquireTimeout. This is currently a warning, but in future versions of MySQL2, an error will be thrown if you pass an invalid configuration option to a Connection
+Ignoring invalid configuration option passed to Connection: timeout. This is currently a warning, but in future versions of MySQL2, an error will be thrown if you pass an invalid configuration option to a Connection
+node:internal/modules/cjs/loader:1148
+  throw err;
+  ^
+
+Error: Cannot find module 'winston'
+Require stack:
+- D:\PrediVersa-V.1-main\PrediVersa-V.1-main\backend\src\utils\logger.js
+- D:\PrediVersa-V.1-main\PrediVersa-V.1-main\backend\src\modules\auth\auth.service.js
+- D:\PrediVersa-V.1-main\PrediVersa-V.1-main\backend\src\modules\auth\auth.controller.js
+- D:\PrediVersa-V.1-main\PrediVersa-V.1-main\backend\src\modules\auth\auth.routes.js
+- D:\PrediVersa-V.1-main\PrediVersa-V.1-main\backend\src\app.js
+- D:\PrediVersa-V.1-main\PrediVersa-V.1-main\backend\src\server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1145:15)
+    at Module._load (node:internal/modules/cjs/loader:986:27)
+    at Module.require (node:internal/modules/cjs/loader:1233:19)
+    at require (node:internal/modules/helpers:179:18)
+    at Object.<anonymous> (D:\PrediVersa-V.1-main\PrediVersa-V.1-main\backend\src\utils\logger.js:1:17)
+    at Module._compile (node:internal/modules/cjs/loader:1358:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1416:10)
+    at Module.load (node:internal/modules/cjs/loader:1208:32)
+    at Module._load (node:internal/modules/cjs/loader:1024:12)
+    at Module.require (node:internal/modules/cjs/loader:1233:19) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'D:\\PrediVersa-V.1-main\\PrediVersa-V.1-main\\backend\\src\\utils\\logger.js',
+    'D:\\PrediVersa-V.1-main\\PrediVersa-V.1-main\\backend\\src\\modules\\auth\\auth.service.js',
+    'D:\\PrediVersa-V.1-main\\PrediVersa-V.1-main\\backend\\src\\modules\\auth\\auth.controller.js',
+    'D:\\PrediVersa-V.1-main\\PrediVersa-V.1-main\\backend\\src\\modules\\auth\\auth.routes.js',
+    'D:\\PrediVersa-V.1-main\\PrediVersa-V.1-main\\backend\\src\\app.js',
+    'D:\\PrediVersa-V.1-main\\PrediVersa-V.1-main\\backend\\src\\server.js'
+  ]
+}
+
+Node.js v20.14.0

@@ -2,6 +2,7 @@ const dashboardService = require('./dashboard.service');
 
 /**
  * CONTROLLER - DOMINIO DASHBOARD
+ * Manejo de peticiones de analítica.
  */
 
 const getFullAnalytics = async (req, res, next) => {
@@ -15,8 +16,9 @@ const getFullAnalytics = async (req, res, next) => {
 
 const getTrends = async (req, res, next) => {
   try {
-    const data = await dashboardService.getAnalytics();
-    res.json({ success: true, data: data.trends, requestId: req.requestId });
+    const days = parseInt(req.query.days) || 30;
+    const data = await dashboardService.getRiskTrends(days);
+    res.json({ success: true, data, requestId: req.requestId });
   } catch (error) {
     next(error);
   }
@@ -24,8 +26,9 @@ const getTrends = async (req, res, next) => {
 
 const getCritical = async (req, res, next) => {
   try {
-    const data = await dashboardService.getAnalytics();
-    res.json({ success: true, data: data.critical, requestId: req.requestId });
+    const limit = parseInt(req.query.limit) || 10;
+    const data = await dashboardService.getCriticalStudents(limit);
+    res.json({ success: true, data, requestId: req.requestId });
   } catch (error) {
     next(error);
   }
@@ -33,8 +36,8 @@ const getCritical = async (req, res, next) => {
 
 const getDistribution = async (req, res, next) => {
   try {
-    const data = await dashboardService.getAnalytics();
-    res.json({ success: true, data: data.distribution, requestId: req.requestId });
+    const data = await dashboardService.getRiskDistribution();
+    res.json({ success: true, data, requestId: req.requestId });
   } catch (error) {
     next(error);
   }

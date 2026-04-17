@@ -1,67 +1,24 @@
 const express = require('express');
-const { verifyToken } = require('../../middleware/auth');
-const { executeQuery } = require('../../db/connection');
+const dashboardController = require('./dashboard.controller');
+const { verifyToken, authorizeRoles } = require('../../middleware/auth');
 
 const router = express.Router();
 
 /**
- * 🔥 DASHBOARD DE ANALÍTICA DE RIESGO - Estructura DDD
- * Proporciona datos agregados para la visualización de riesgos en el panel administrativo.
+ * 🔒 RUTAS ADMINISTRATIVAS - DASHBOARD
+ * Solo accesibles por Administradores y Colaboradores.
  */
 
-// 1. Tendencia de Riesgo (Últimos 30 días)
-router.get('/risk-trends', verifyToken, async (req, res) => {
-  try {
-    const results = await executeQuery(`
-      SELECT 
-        DATE(createdAt) as date, 
-        ROUND(AVG(risk_score), 2) as avg_risk,
-        COUNT(*) as total_messages
-      FROM chatbot_interacciones
-      GROUP BY DATE(createdAt)
-      ORDER BY date DESC
-      LIMIT 30
-    `);
-    // executeQuery retorna { recordset: [...] }
-    res.json({ success: true, data: results?.recordset || [] });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
+// 1. Obtener analítica completa (Dashboard Summary)
+router.get('/', verifyToken, authorizeRoles('Administrador', 'Colaboradores'), dashboardController.getFullAnalytics);
 
-// 2. Estudiantes en Riesgo (Liderando el ranking de criticidad)
-router.get('/critical-students', verifyToken, async (req, res) => {
-  try {
-    const results = await executeQuery(`
-      SELECT 
-        session_id as student_id, 
-        MAX(risk_score) as max_risk,
-        COUNT(*) as total_interacciones,
-        MAX(createdAt) as last_seen
-      FROM chatbot_interacciones
-      WHERE risk = 'ALTO'
-      GROUP BY session_id
-      ORDER BY max_risk DESC
-      LIMIT 10
-    `);
-    res.json({ success: true, data: results?.recordset || [] });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
+// 2. Tendencia de Riesgo (Últimos 30 días)
+router.get('/risk-trends', verifyToken, authorizeRoles('Administrador', 'Colaboradores'), dashboardController.getTrends);
 
-// 3. Distribución de Niveles de Riesgo
-router.get('/risk-distribution', verifyToken, async (req, res) => {
-  try {
-    const results = await executeQuery(`
-      SELECT risk, COUNT(*) as count 
-      FROM chatbot_interacciones 
-      GROUP BY risk
-    `);
-    res.json({ success: true, data: results?.recordset || [] });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
+// 3. Estudiantes en Riesgo (Critical Rankings)
+router.get('/critical-students', verifyToken, authorizeRoles('Administrador', 'Colaboradores'), dashboardController.getCritical);
+
+// 4. Distribución de Niveles de Riesgo
+router.get('/risk-distribution', verifyToken, authorizeRoles('Administrador', 'Colaboradores'), dashboardController.getDistribution);
 
 module.exports = router;

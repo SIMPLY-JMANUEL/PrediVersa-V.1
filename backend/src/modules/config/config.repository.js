@@ -1,62 +1,62 @@
 const { pool } = require('../../db/connection');
 
 /**
- * REPOSITORY - DOMINIO CONFIGURACIÓN & ADMIN
+ * REPOSITORY - DOMINIO CONFIGURACIÓN
  */
 
-/** --- DEPENDENCIAS --- */
-const getDependencies = async () => {
+// --- DEPENDENCIAS ---
+const getDependencias = async () => {
   const [rows] = await pool.execute('SELECT * FROM dependencias ORDER BY id_dependencia DESC');
   return rows;
 };
 
-const createDependency = async (data) => {
-  const { nombre, tipo, id_responsable, correo, telefono, estado } = data;
-  const [result] = await pool.execute(
+const createDependencia = async (d) => {
+  const [r] = await pool.execute(
     'INSERT INTO dependencias (nombre, tipo, id_responsable, correo, telefono, estado) VALUES (?,?,?,?,?,?)',
-    [nombre, tipo || 'Otro', id_responsable || null, correo || '', telefono || '', estado || 'Activa']
+    [d.nombre, d.tipo || 'Otro', d.id_responsable || null, d.correo || '', d.telefono || '', d.estado || 'Activa']
   );
-  return result.insertId;
+  return r.insertId;
 };
 
-const updateDependency = async (id, data) => {
-  const { nombre, tipo, id_responsable, correo, telefono, estado } = data;
+const updateDependencia = async (id, d) => {
   await pool.execute(
     'UPDATE dependencias SET nombre=?, tipo=?, id_responsable=?, correo=?, telefono=?, estado=? WHERE id_dependencia=?',
-    [nombre, tipo, id_responsable || null, correo || '', telefono || '', estado, id]
+    [d.nombre, d.tipo, d.id_responsable || null, d.correo || '', d.telefono || '', d.estado, id]
   );
 };
 
-const deleteDependency = async (id) => {
+const deleteDependencia = async (id) => {
   await pool.execute('DELETE FROM dependencias WHERE id_dependencia=?', [id]);
 };
 
-/** --- ROLES --- */
+// --- ROLES ---
 const getRoles = async () => {
-  const [rows] = await pool.execute('SELECT * FROM roles ORDER BY id DESC');
+  const [rows] = await pool.execute('SELECT * FROM roles ORDER BY id_rol DESC');
   return rows;
 };
 
-/** --- AUDITORÍA --- */
-const logAudit = async (data) => {
-  const { userId, userName, action, module, ip } = data;
+const createRol = async (r) => {
   await pool.execute(
-    'INSERT INTO auditoria (id_usuario, usuario_nombre, accion, modulo, ip) VALUES (?,?,?,?,?)',
-    [userId || null, userName || 'Sistema', action, module, ip || '']
+    'INSERT INTO roles (nombre_rol, descripcion, permisos, estado) VALUES (?,?,?,?)',
+    [r.nombre_rol, r.descripcion, r.permisos ? JSON.stringify(r.permisos) : null, r.estado || 'Activo']
   );
 };
 
+// --- AUDITORÍA ---
 const getAuditLogs = async (limit = 200) => {
-  const [rows] = await pool.execute('SELECT * FROM auditoria ORDER BY fecha DESC LIMIT ?', [limit]);
+  const [rows] = await pool.execute(
+    'SELECT * FROM audit_logs ORDER BY createdAt DESC LIMIT ?',
+    [limit]
+  );
   return rows;
 };
 
 module.exports = {
-  getDependencies,
-  createDependency,
-  updateDependency,
-  deleteDependency,
+  getDependencias,
+  createDependencia,
+  updateDependencia,
+  deleteDependencia,
   getRoles,
-  logAudit,
+  createRol,
   getAuditLogs
 };

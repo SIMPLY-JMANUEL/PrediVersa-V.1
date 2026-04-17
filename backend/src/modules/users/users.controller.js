@@ -47,7 +47,9 @@ const getProfile = async (req, res, next) => {
 
 const register = async (req, res, next) => {
   try {
-    const newUser = await userService.registerUser(req.body);
+    const data = req.validatedBody || req.body;
+    const safeData = { ...data, role: 'Estudiante' }; // Blindaje
+    const newUser = await userService.registerUser(safeData);
     res.status(201).json({ success: true, user: newUser, requestId: req.requestId });
   } catch (error) {
     const code = error.message.includes('ya está registrado') ? 409 : 400;

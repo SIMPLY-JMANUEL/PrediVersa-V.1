@@ -1,6 +1,11 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'tu_secreto_super_seguro_123';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  console.error('❌ ERROR CRÍTICO: JWT_SECRET no esta definido.');
+  process.exit(1);
+}
 
 /**
  * Middleware para verificar si el usuario está autenticado mediante JWT

@@ -13,7 +13,7 @@ const router = express.Router();
 router.get('/', verifyToken, alertController.getAlerts);
 
 // Estadísticas de alertas
-router.get('/stats', verifyToken, authorizeRoles('Administrador', 'Colaboradores', 'Colaborador'), alertController.getStats);
+router.get('/stats', verifyToken, authorizeRoles('Administrador', 'Colaboradores'), alertController.getStats);
 
 // Crear alerta manualmente (con validación de esquema)
 router.post('/', verifyToken, validate(schemas.createAlertSchema), alertController.createManual);

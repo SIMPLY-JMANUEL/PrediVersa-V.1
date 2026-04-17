@@ -1,54 +1,56 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const helmet = require('helmet');
+const crypto = require('crypto');
 const authRoutes = require('./modules/auth/auth.routes');
 const userRoutes = require('./modules/users/users.routes');
 const alertRoutes = require('./modules/alerts/alerts.routes');
 const chatbotRoutes = require('./modules/chatbot/chatbot.routes');
 const dashboardRoutes = require('./modules/dashboard/dashboard.routes');
 const configRoutes = require('./modules/config/config.routes');
+const logger = require('./utils/logger');
 
 const app = express();
 
-// Log de Petición Entrante (Trazabilidad Base)
+// 🛡️ SEGURIDAD: Cabeceras HTTP (Helmet) - Requerido en Auditoría Fase 1
+app.use(helmet());
+
+// 🆔 TRAZABILIDAD: Generar Request ID para cada petición
 app.use((req, res, next) => {
-  console.log(`📡 [${new Date().toISOString()}] ${req.method} ${req.url} - IP: ${req.ip}`);
+  req.requestId = crypto.randomUUID();
+  console.log(`📡 [${new Date().toISOString()}] ${req.method} ${req.url} - IP: ${req.ip} - ID: ${req.requestId}`);
   next();
 });
 
 // Middlewares
 const corsOptions = {
   origin: (origin, callback) => {
-    const allowedPatterns = [
-      /https:\/\/.*\.amplifyapp\.com$/, 
-      /https:\/\/.*\.awsapprunner\.com$/,
-      /http:\/\/localhost:\d+$/,
-      /https:\/\/localhost:\d+$/
-    ];
+    // Si no hay origen (ej. Postman) lo permitimos solo en desarrollo
+    if (!origin && process.env.NODE_ENV === 'development') return callback(null, true);
     
-    const isAllowed = !origin || allowedPatterns.some(pattern => pattern.test(origin));
+    const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim());
+    const isAllowed = allowedOrigins.includes(origin) || 
+                      (process.env.NODE_ENV === 'development' && origin && origin.includes('localhost'));
     
     if (isAllowed) {
       callback(null, true);
     } else {
-      console.error(`🚨 CORS BLOQUEADO: El origen "${origin}" no está en la lista blanca.`);
-      // Retornar error con código 403 para que no parezca un error 500 del servidor
-      const corsError = new Error('No permitido por políticas de seguridad CORS');
-      corsError.statusCode = 403;
-      callback(corsError);
+      logger.error(`🚨 CORS BLOQUEADO: El origen "${origin}" no está en la lista blanca.`);
+      callback(new Error('No permitido por políticas CORS'));
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-botpress-token'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 };
 
 // Permitir preflight requests
 app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
-// Middlewares (Blindados para Cargas Masivas)
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// Middlewares (Blindados contra DoS - Límites Normalizados)
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ limit: '1mb', extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -117,19 +119,22 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Error interno del servidor';
-  const errorName = err.name || 'Error';
+  const isDevelopment = process.env.NODE_ENV === 'development';
   
-  // Log masivo para diagnóstico total
-  console.error(`🚨 [${errorName} - ${statusCode}] FALLO EN RUTA: ${req.method} ${req.originalUrl}`);
-  console.error(`👉 Mensaje: ${message}`);
-  if (err.stack) console.error(`📚 Stack: ${err.stack}`);
+  // Log centralizado con Winston (Trazabilidad P0)
+  logger.error({
+    message: message,
+    type: err.name || 'Error',
+    statusCode,
+    path: req.originalUrl,
+    method: req.method,
+    requestId: req.requestId,
+    stack: isDevelopment ? err.stack : undefined
+  });
   
   res.status(statusCode).json({ 
     success: false, 
-    type: errorName,
-    message: message,
-    // Exponiendo detalles técnicos para que el usuario pueda enviármelos
-    errorDetails: err.message,
+    message: statusCode === 500 && !isDevelopment ? 'Error interno del servidor' : message,
     requestId: req.requestId || 'no-id'
   });
 });

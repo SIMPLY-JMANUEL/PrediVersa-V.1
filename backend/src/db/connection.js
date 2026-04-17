@@ -1,20 +1,6 @@
 // AWS RDS MySQL Database Configuration
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
-require('dotenv').config();
-
-// --- BLINDAJE DE SEGURIDAD: VALIDACIÓN DE VARIABLES ---
-const REQUIRED_VARS = ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_DATABASE', 'JWT_SECRET'];
-const missingVars = REQUIRED_VARS.filter(v => !process.env[v] || process.env[v].trim() === '');
-
-if (missingVars.length > 0) {
-  console.error('\n' + '!'.repeat(60));
-  console.error('❌ ERROR FATAL DE CONFIGURACIÓN ❌');
-  console.error(`Faltan las siguientes variables de entorno: ${missingVars.join(', ')}`);
-  console.error('Por favor, configúrelas en la consola de AWS App Runner.');
-  console.error('!'.repeat(60) + '\n');
-  // En producción, podrías usar process.exit(1) para forzar el reinicio ordenado
-}
 
 const pool = mysql.createPool({
   host: (process.env.DB_HOST || '').trim(),
@@ -31,51 +17,29 @@ const pool = mysql.createPool({
   enableKeepAlive: true,
   keepAliveInitialDelay: 10000, 
   charset: 'utf8mb4',
-  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: true } : undefined
 });
 
-// Manejador de errores del pool para reconexión persistente
 pool.on('error', (err) => {
   console.error('🚨 Error inesperado en el pool de RDS:', err.message);
-  if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-    console.log('🔄 Conexión perdida. El pool intentará reconectar en la próxima petición.');
-  }
 });
 
-// Función auxiliar para queries
+// Helpers para queries centralizados
 async function query(sql, params) {
   const [rows] = await pool.query(sql, params);
   return rows;
 }
 
-// Función para obtener una sola fila
 async function querySingle(sql, params) {
   const [rows] = await pool.query(sql, params);
   return rows[0] || null;
 }
 
-// Test de conexión
-async function testConnection() {
-  try {
-    const connection = await pool.getConnection();
-    console.log('✅ Conexión exitosa a AWS RDS MySQL');
-    console.log(`📍 Host: ${process.env.DB_HOST}`);
-    console.log(`🗄️  Base de datos: ${process.env.DB_DATABASE}`);
-    connection.release();
-    return true;
-  } catch (error) {
-    console.error('❌ Error de conexión a RDS:', error.message);
-    return false;
-  }
-}
-
-// Función para ejecutar queries (Segura contra parámetros nulos)
-async function executeQuery(sql, params = null) {
+async function executeQuery(sql, params = []) {
   let connection;
   try {
     connection = await pool.getConnection();
-    // Si params es un array, se usa directamente. Si es un objeto, se extraen los valores. Si es null, se pasa array vacío.
-    const queryParams = params ? (Array.isArray(params) ? params : Object.values(params)) : [];
+    const queryParams = Array.isArray(params) ? params : Object.values(params);
     const [rows] = await connection.query(sql, queryParams);
     return { recordset: rows };
   } catch (error) {
@@ -86,12 +50,28 @@ async function executeQuery(sql, params = null) {
   }
 }
 
-// Función para inicializar la base de datos (crear tabla si no existe)
-const initializeDatabase = async () => {
+async function testConnection() {
   try {
     const connection = await pool.getConnection();
+    console.log('✅ Conexión exitosa a AWS RDS MySQL');
+    connection.release();
+    return true;
+  } catch (error) {
+    console.error('❌ Error de conexión a RDS:', error.message);
+    return false;
+  }
+}
 
-    // Crear tabla de usuarios si no existe con TODAS las columnas necesarias
+/**
+ * 🏛️ INICIALIZADOR DE BASE DE DATOS (Fase 2 - Consolidado)
+ * Define el esquema final de una sola vez, sin parches manuales.
+ */
+const initializeDatabase = async () => {
+  let connection;
+  try {
+    connection = await pool.getConnection();
+
+    // 1. Tabla de Usuarios (Esquema Titanium Consolidado)
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -105,8 +85,6 @@ const initializeDatabase = async () => {
         birthDate DATE DEFAULT NULL,
         profilePicture LONGTEXT DEFAULT NULL,
         status ENUM('Activo', 'Inactivo') DEFAULT 'Activo',
-        
-        -- Columnas adicionales de la migración v1.1
         edad VARCHAR(10) DEFAULT '',
         lugarNacimiento VARCHAR(100) DEFAULT '',
         nombrePadre VARCHAR(100) DEFAULT '',
@@ -121,48 +99,14 @@ const initializeDatabase = async () => {
         repAddress VARCHAR(255) DEFAULT '',
         institutionalEmail VARCHAR(100) DEFAULT '',
         isVerified BOOLEAN DEFAULT false,
-
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         INDEX idx_role (role),
-        INDEX idx_status (status),
-        INDEX idx_createdAt (createdAt)
+        INDEX idx_status (status)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
 
-    // 🔥 PARCHE DE ACTUALIZACIÓN: Agregar columnas si la tabla ya existía
-    const columnsToPatch = [
-      "edad VARCHAR(10) DEFAULT ''",
-      "lugarNacimiento VARCHAR(100) DEFAULT ''",
-      "nombrePadre VARCHAR(100) DEFAULT ''",
-      "nombreMadre VARCHAR(100) DEFAULT ''",
-      "grado VARCHAR(50) DEFAULT ''",
-      "repName VARCHAR(100) DEFAULT ''",
-      "repDocType VARCHAR(10) DEFAULT ''",
-      "repDocId VARCHAR(20) DEFAULT ''",
-      "repRelationship VARCHAR(50) DEFAULT ''",
-      "repPhone VARCHAR(20) DEFAULT ''",
-      "repEmail VARCHAR(100) DEFAULT ''",
-      "repAddress VARCHAR(255) DEFAULT ''",
-      "institutionalEmail VARCHAR(100) DEFAULT ''",
-      "isVerified BOOLEAN DEFAULT false"
-    ];
-
-    for (const colDef of columnsToPatch) {
-      const colName = colDef.split(' ')[0];
-      try {
-        await connection.execute(`ALTER TABLE users ADD COLUMN ${colDef};`);
-        console.log(`✅ Columna de parche añadida: ${colName}`);
-      } catch (err) {
-        if (err.code !== 'ER_DUP_FIELDNAME') {
-          console.warn(`⚠️ Aviso al añadir columna ${colName}:`, err.message);
-        }
-      }
-    }
-
-    console.log('✅ Tabla de usuarios verificada/actualizada correctamente');
-
-    // TABLA DE TOKENS (SISTEMA DDD MIGRACIÓN)
+    // 2. Tabla de Refresh Tokens (Seguridad JWT)
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS refresh_tokens (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -176,199 +120,123 @@ const initializeDatabase = async () => {
         CONSTRAINT fk_user_refresh FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
-    console.log('✅ Tabla refresh_tokens (Auth) verificada/creada');
 
-    // Crear tabla de alertas si no existe
+    // 3. Tabla de Alertas (Gestión de Riesgo)
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS alerts (
         id INT AUTO_INCREMENT PRIMARY KEY,
         userId INT DEFAULT NULL,
         studentName VARCHAR(100) NOT NULL,
         studentDocumentId VARCHAR(20) DEFAULT '',
-        studentAge VARCHAR(10) DEFAULT '',
-        studentGrade VARCHAR(50) DEFAULT '',
-        studentUsername VARCHAR(100) DEFAULT '',
         alertType ENUM('Informativa', 'Preventiva', 'Advertencia', 'Critica') NOT NULL,
         description TEXT NOT NULL,
         ticketNumber VARCHAR(20) DEFAULT '',
-        alertDate DATE DEFAULT NULL,
-        alertTime TIME DEFAULT NULL,
-        deadline VARCHAR(50) DEFAULT '',
-        assignedTo VARCHAR(100) DEFAULT '',
         status ENUM('Pendiente', 'En Proceso', 'Resuelta', 'Cerrada', 'Urgente') DEFAULT 'Pendiente',
-        createdBy INT DEFAULT NULL,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         INDEX idx_alertType (alertType),
-        INDEX idx_status (status),
-        INDEX idx_createdAt (createdAt)
+        INDEX idx_status (status)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
 
-    console.log('✅ Tabla de alertas verificada/creada correctamente');
-
-    // ─────────────────────────────────────────────────────
-    // TABLAS DEL CHATBOT PREDICTIVO
-    // ─────────────────────────────────────────────────────
-
-    // Tabla para reporte de interacciones (MIGRACIÓN DDD)
-    await connection.execute(`
-      CREATE TABLE IF NOT EXISTS chatbot_interacciones (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        session_id VARCHAR(100) NOT NULL,
-        user_input TEXT NOT NULL,
-        response TEXT NOT NULL,
-        risk VARCHAR(20) DEFAULT 'BAJO',
-        risk_score DECIMAL(5,2) DEFAULT 0,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        INDEX idx_session (session_id),
-        INDEX idx_risk (risk)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-    `);
-    console.log('✅ Tabla chatbot_interacciones verificada/creada');
-
-    // Tabla para reportes del chatbot (riesgo bajo y medio)
-    await connection.execute(`
-      CREATE TABLE IF NOT EXISTS chatbot_reportes (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        estudiante_id VARCHAR(100) NOT NULL DEFAULT 'anonimo',
-        nombre VARCHAR(200) NOT NULL DEFAULT 'Anónimo',
-        descripcion TEXT NOT NULL,
-        tipo_violencia VARCHAR(100) DEFAULT 'no_especificado',
-        frecuencia VARCHAR(50) DEFAULT 'no_especificado',
-        nivel_riesgo ENUM('bajo','medio','alto') NOT NULL DEFAULT 'medio',
-        keywords JSON DEFAULT NULL,
-        sentiment_score DECIMAL(5,2) DEFAULT 0,
-        resumen_patron TEXT DEFAULT NULL,
-        ticket_number VARCHAR(30) DEFAULT NULL,
-        estado ENUM('pendiente','en_proceso','resuelto','cerrado') DEFAULT 'pendiente',
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        INDEX idx_estudiante (estudiante_id),
-        INDEX idx_nivel_riesgo (nivel_riesgo),
-        INDEX idx_estado (estado),
-        INDEX idx_createdAt (createdAt)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-    `);
-    console.log('✅ Tabla chatbot_reportes verificada/creada');
-
-    // Tabla para alertas críticas del chatbot (riesgo alto)
-    await connection.execute(`
-      CREATE TABLE IF NOT EXISTS chatbot_alertas_criticas (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        estudiante_id VARCHAR(100) NOT NULL DEFAULT 'anonimo',
-        nombre VARCHAR(200) NOT NULL DEFAULT 'Anónimo',
-        descripcion TEXT NOT NULL,
-        tipo_violencia VARCHAR(100) DEFAULT 'no_especificado',
-        frecuencia VARCHAR(50) DEFAULT 'no_especificado',
-        nivel_riesgo VARCHAR(10) DEFAULT 'alto',
-        prioridad VARCHAR(20) DEFAULT 'URGENTE',
-        keywords_criticas JSON DEFAULT NULL,
-        reporte_pdf_url VARCHAR(500) DEFAULT NULL,
-        ticket_number VARCHAR(30) DEFAULT NULL,
-        estado ENUM('pendiente','en_proceso','resuelto','cerrado') DEFAULT 'pendiente',
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        INDEX idx_estudiante (estudiante_id),
-        INDEX idx_estado (estado),
-        INDEX idx_createdAt (createdAt)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-    `);
-    console.log('✅ Tabla chatbot_alertas_criticas verificada/creada');
-
-    // Tabla para reuniones agendadas desde el chatbot
-    await connection.execute(`
-      CREATE TABLE IF NOT EXISTS chatbot_reuniones (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        estudiante_id VARCHAR(100) NOT NULL DEFAULT 'anonimo',
-        nombre VARCHAR(200) NOT NULL,
-        fecha_reunion DATETIME DEFAULT NULL,
-        motivo TEXT DEFAULT NULL,
-        estado ENUM('pendiente','confirmada','cancelada','completada') DEFAULT 'pendiente',
-        fecha_solicitud TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        INDEX idx_estudiante (estudiante_id),
-        INDEX idx_estado (estado),
-        INDEX idx_fecha_reunion (fecha_reunion)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-    `);
-    console.log('✅ Tabla chatbot_reuniones verificada/creada');
-
-    // Tabla para actuaciones y remisiones (Seguimiento de casos extendido)
-    await connection.execute(`
-      CREATE TABLE IF NOT EXISTS case_actions (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        alertId INT NOT NULL,
-        collaboratorId INT NOT NULL,
-        category ENUM('Remision', 'Actuacion', 'Soporte', 'Normatividad') NOT NULL,
-        actionType VARCHAR(100) NOT NULL,
-        responsibleName VARCHAR(100),
-        description TEXT,
-        area VARCHAR(100),
-        urgency VARCHAR(20),
-        result VARCHAR(255),
-        fileName VARCHAR(255),
-        fileUrl VARCHAR(500),
-        normType VARCHAR(100),
-        normArticle VARCHAR(100),
-        actionDate DATETIME DEFAULT CURRENT_TIMESTAMP,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        INDEX idx_alert (alertId),
-        INDEX idx_collaborator (collaboratorId),
-        INDEX idx_category (category)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-    `);
-    // Tabla para ajustes manuales de la IA (Feedback/ML)
-    await connection.execute(`
-      CREATE TABLE IF NOT EXISTS chatbot_ajustes_ia (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        mensaje_original TEXT NOT NULL,
-        nivel_original ENUM('bajo','medio','alto') NOT NULL,
-        nivel_corregido ENUM('bajo','medio','alto') NOT NULL,
-        razon_ajuste TEXT,
-        admin_id INT,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-    `);
-    console.log('✅ Tabla chatbot_ajustes_ia verificada/creada');
-
-    // 🔥 TABLA DE INTERACCIONES (CON HISTORY Y SCORING REAL-TIME)
+    // 4. Tablas del Chatbot VERSA (Consolidadas)
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS chatbot_interacciones (
         id INT AUTO_INCREMENT PRIMARY KEY,
         session_id VARCHAR(100) NOT NULL,
         user_input TEXT,
         response TEXT,
-        risk VARCHAR(10),
-        risk_score INT DEFAULT 0,
+        risk VARCHAR(20),
+        risk_score DECIMAL(5,2) DEFAULT 0,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         INDEX idx_session (session_id),
-        INDEX idx_risk (risk),
-        INDEX idx_createdAt (createdAt)
+        INDEX idx_risk (risk)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
-    console.log('✅ Tabla chatbot_interacciones (Scoring Engine) lista.');
 
-    console.log('✅ Tabla case_actions verificada/creada');
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS chatbot_reportes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        estudiante_id VARCHAR(100) NOT NULL DEFAULT 'anonimo',
+        nombre VARCHAR(200) NOT NULL DEFAULT 'Anónimo',
+        descripcion TEXT NOT NULL,
+        nivel_riesgo ENUM('bajo','medio','alto') NOT NULL DEFAULT 'medio',
+        ticket_number VARCHAR(30) DEFAULT NULL,
+        estado ENUM('pendiente','en_proceso','resuelto','cerrado') DEFAULT 'pendiente',
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX idx_nivel_riesgo (nivel_riesgo)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
 
-    // 🚀 SEMILLA AUTOMÁTICA: Asegurar que existe al menos un Administrador
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS chatbot_reuniones (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        estudiante_id VARCHAR(100) NOT NULL DEFAULT 'anonimo',
+        nombre VARCHAR(200) NOT NULL,
+        fecha_reunion DATETIME DEFAULT NULL,
+        estado ENUM('pendiente','confirmada','cancelada','completada') DEFAULT 'pendiente',
+        fecha_solicitud TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    // 5. Gestión de Dependencias Institucionales
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS dependencias (
+        id_dependencia INT AUTO_INCREMENT PRIMARY KEY,
+        nombre VARCHAR(150) NOT NULL,
+        tipo VARCHAR(100) DEFAULT 'Otro',
+        id_responsable INT DEFAULT NULL,
+        correo VARCHAR(100) DEFAULT '',
+        telefono VARCHAR(20) DEFAULT '',
+        estado ENUM('Activa', 'Inactiva') DEFAULT 'Activa',
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    // 6. Configuración de Roles y Permisos (Sistema Dinámico)
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS roles (
+        id_rol INT AUTO_INCREMENT PRIMARY KEY,
+        nombre_rol VARCHAR(50) NOT NULL UNIQUE,
+        descripcion TEXT,
+        permisos JSON DEFAULT NULL,
+        estado ENUM('Activo', 'Inactivo') DEFAULT 'Activo',
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    // 7. Logs de Auditoría (Cumplimiento de Seguridad)
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS audit_logs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        action VARCHAR(100) NOT NULL,
+        userId INT DEFAULT NULL,
+        details TEXT,
+        ip_address VARCHAR(45),
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    // 🚀 VERIFICACIÓN DE INTEGRIDAD: Asegurar que existe al menos un Administrador
     const [adminCheck] = await connection.execute("SELECT id FROM users WHERE role = 'Administrador' LIMIT 1");
     if (adminCheck.length === 0) {
-      console.log('🛠️ Base de datos vacía o sin Admin. Creando usuario inicial...');
-      const adminHashed = await bcrypt.hash('admin123', 10);
-      await connection.execute(
-        `INSERT INTO users (documentId, email, password, name, role, status) 
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        ['ADMIN-001', 'admin@prediversa.com', adminHashed, 'Administrador Inicial', 'Administrador', 'Activo']
-      );
-      console.log('✅ Admin creado: admin@prediversa.com / admin123');
+      console.warn('⚠️ ADVERTENCIA: No se detectó ninguna cuenta de Administrador. Por favor, cree una cuenta inicial de forma segura.');
     }
 
-    console.log('✅ Estructura de base de datos lista. (Iniciado en Modo Seguro)');
+    // 🚀 OPTIMIZACIÓN DE PERFORMANCE (Fase 2+)
+    try {
+      await connection.execute(`
+        CREATE INDEX idx_chatbot_analytics ON chatbot_interacciones (createdAt, risk_score, risk)
+      `);
+      console.log('✅ Índice de analíticas creado con éxito.');
+    } catch (e) { /* El índice ya existe */ }
 
+    console.log('✅ Base de datos inicializada correctamente (Estructura Fase 2 - Hardened)');
     connection.release();
     return true;
   } catch (error) {
+    if (connection) connection.release();
     console.error('❌ Error al inicializar la base de datos:', error.message);
     return false;
   }

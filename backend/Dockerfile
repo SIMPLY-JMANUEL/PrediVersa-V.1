@@ -1,28 +1,27 @@
-# 🏛️ PREDIVERSA BACKEND - DOCKER PRO STAGE
-# Multi-stage build for light & secure images
+FROM node:18-alpine
 
-# -- STAGE 1: Build & Dependencies --
-FROM node:20-alpine AS builder
+# Instalación de dependencias mínimas de seguridad
+RUN apk add --no-cache tzdata
 
 WORKDIR /app
+
 COPY package*.json ./
 RUN npm ci --only=production
 
-# -- STAGE 2: Runtime --
-FROM node:20-alpine
-
-WORKDIR /app
-COPY --from=builder /app/node_modules ./node_modules
 COPY . .
 
-# 🛡️ SEGURIDAD: Usuario no-root para prevenir escalada
-RUN addgroup -S predigroup && adduser -S prediuser -G predigroup
-USER prediuser
+# Crear usuario no privilegiado y asignar permisos
+RUN addgroup -S predigroup && adduser -S prediver -G predigroup && \
+    chown -R prediver:predigroup /app
 
-# 🛰️ PUERTO INSTITUCIONAL
-EXPOSE 3001
+# Cambiar a usuario no root
+USER prediver
 
-# ⚡ VARIABLES BASE
-ENV NODE_ENV=production
+# El puerto 8080 es el estándar para AWS App Runner
+EXPOSE 8080
+
+# Salud del contenedor (Opcional pero recomendado)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:8080/api/health', (res) => res.statusCode === 200 ? process.exit(0) : process.exit(1))"
 
 CMD ["node", "src/server.js"]
