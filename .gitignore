@@ -39,9 +39,7 @@ coverage/
 *.pem
 
 # Package managers
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
+# Eliminados de gitignore para permitir despliegues CI/CD estables
 
 # Development
 .cache/
