@@ -46,16 +46,23 @@ async function dispatchNotifications(data) {
     }
   } catch (e) { console.error('Falló SNS:', e.message); }
 
-  // 2. Envío de Email via SES
+  // 2. Envío de Email via SES (Multi-email)
   try {
-    await sesClient.send(new SendEmailCommand({
-      Source: process.env.SES_SOURCE_EMAIL,
-      Destination: { ToAddresses: [process.env.ADMIN_EMAIL] },
-      Message: {
-        Subject: { Data: `⚠️ ALERTA CRÍTICA: ${data.risk_level}` },
-        Body: { Text: { Data: message } }
+    const adminEmails = (process.env.ADMIN_EMAILS || "").split(',').filter(e => e.trim() !== "");
+    const emailSource = process.env.SES_SOURCE_EMAIL;
+
+    if (emailSource && adminEmails.length > 0) {
+      for (const email of adminEmails) {
+        await sesClient.send(new SendEmailCommand({
+          Source: emailSource,
+          Destination: { ToAddresses: [email.trim()] },
+          Message: {
+            Subject: { Data: `🚨 ALERTA CRÍTICA: ${data.risk_level}` },
+            Body: { Text: { Data: message } }
+          }
+        }));
+        console.log(`✅ Email enviado a: ${email}`);
       }
-    }));
-    console.log('✅ Email enviado con éxito');
+    }
   } catch (e) { console.error('Falló SES:', e.message); }
 }
