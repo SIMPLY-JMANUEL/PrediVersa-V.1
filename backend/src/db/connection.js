@@ -6,7 +6,7 @@ const pool = mysql.createPool({
   host: (process.env.DB_HOST || '').trim(),
   user: (process.env.DB_USER || '').trim(),
   password: (process.env.DB_PASSWORD || '').trim(),
-  database: (process.env.DB_DATABASE || '').trim(),
+  database: (process.env.DB_DATABASE || process.env.DB_NAME || 'prediversa').trim(),
   port: parseInt(process.env.DB_PORT || '3306'),
   waitForConnections: true,
   connectionLimit: 15,
