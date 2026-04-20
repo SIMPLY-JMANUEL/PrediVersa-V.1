@@ -22,37 +22,37 @@ function AppRoutes({ user, isLoginOpen, setIsLoginOpen, handleLogin, handleLogou
       <Routes>
         <Route path="/" element={
           <>
-            <Header onLoginClick={() => setIsLoginOpen(true)} />
+            <Header onLoginClick={() => setIsLoginOpen(true)} user={user} onLogout={handleLogout} />
             <Main />
           </>
         } />
         <Route path="/quienes-somos" element={
           <>
-            <Header onLoginClick={() => setIsLoginOpen(true)} />
+            <Header onLoginClick={() => setIsLoginOpen(true)} user={user} onLogout={handleLogout} />
             <QuienesSomos />
           </>
         } />
         <Route path="/servicios" element={
           <>
-            <Header onLoginClick={() => setIsLoginOpen(true)} />
+            <Header onLoginClick={() => setIsLoginOpen(true)} user={user} onLogout={handleLogout} />
             <Servicios />
           </>
         } />
         <Route path="/noticias" element={
           <>
-            <Header onLoginClick={() => setIsLoginOpen(true)} />
+            <Header onLoginClick={() => setIsLoginOpen(true)} user={user} onLogout={handleLogout} />
             <Noticias />
           </>
         } />
         <Route path="/planes" element={
           <>
-            <Header onLoginClick={() => setIsLoginOpen(true)} />
+            <Header onLoginClick={() => setIsLoginOpen(true)} user={user} onLogout={handleLogout} />
             <Planes />
           </>
         } />
         <Route path="/contacto" element={
           <>
-            <Header onLoginClick={() => setIsLoginOpen(true)} />
+            <Header onLoginClick={() => setIsLoginOpen(true)} user={user} onLogout={handleLogout} />
             <Contacto />
           </>
         } />

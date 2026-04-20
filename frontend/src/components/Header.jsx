@@ -3,8 +3,19 @@ import logo from '../assets/images/logo-prediversa.png'
 
 import { Link, useNavigate } from 'react-router-dom'
 
-function Header({ onLoginClick }) {
+function Header({ onLoginClick, user, onLogout }) {
   const navigate = useNavigate();
+
+  const getDashboardPath = () => {
+    if (!user) return '/';
+    switch (user.role) {
+      case 'Estudiante': return '/student';
+      case 'Administrador': return '/admin';
+      case 'Colaborador':
+      case 'Colaboradores': return '/collaborator';
+      default: return '/';
+    }
+  };
 
   return (
     <header className="header">
@@ -38,7 +49,14 @@ function Header({ onLoginClick }) {
           <li>
             <Link to="/contacto" style={{ color: 'inherit', textDecoration: 'none' }}>Contacto</Link>
           </li>
-          <li onClick={onLoginClick} className="login-link">Inicio de Sesión</li>
+          {user ? (
+            <>
+              <li onClick={() => navigate(getDashboardPath())} className="dashboard-link">Mi Dashboard</li>
+              <li onClick={onLogout} className="logout-link-header">Cerrar Sesión</li>
+            </>
+          ) : (
+            <li onClick={onLoginClick} className="login-link">Inicio de Sesión</li>
+          )}
         </ul>
       </nav>
     </header>

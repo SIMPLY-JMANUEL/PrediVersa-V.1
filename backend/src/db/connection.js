@@ -17,7 +17,7 @@ const pool = mysql.createPool({
   enableKeepAlive: true,
   keepAliveInitialDelay: 10000, 
   charset: 'utf8mb4',
-  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: true } : undefined
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined
 });
 
 pool.on('error', (err) => {

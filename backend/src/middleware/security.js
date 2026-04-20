@@ -34,7 +34,7 @@ const globalLimiter = rateLimit({
  */
 const loginLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutos
-  max: 5, // Solo 5 intentos permitidos
+  max: 15, // Aumentado a 15 intentos para facilitar pruebas
   message: {
     success: false,
     message: 'Demasiados intentos de inicio de sesión. IP bloqueada por 10 minutos.'
