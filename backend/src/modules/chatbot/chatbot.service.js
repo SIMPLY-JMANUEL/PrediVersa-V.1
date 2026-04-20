@@ -71,14 +71,10 @@ const processMessage = async (text, user, sessionId, historial = []) => {
       nivel_riesgo: context.riesgo.nivel,
       score: context.riesgo.score,
       alerta: context.alerta?.activar || false,
-      tipo_alerta: context.alerta?.tipo || 'N/A',
-      urgencia: context.alerta?.urgencia || 'BAJA',
       razon: context.alerta?.justificacion || 'Analizado por VERSA v3.1 Titanium'
     },
     metadata: {
-      emotion: context.emocion.clase,
-      gender: context.identidad.genero,
-      confidence: context.auditoria?.decision_confianza || 0,
+      emotion: context.emocion?.clase || 'neutral',
       engine: 'VERSA_v3.1_TITANIUM'
     }
   };
