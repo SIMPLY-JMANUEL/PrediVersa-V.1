@@ -1,0 +1,6 @@
+[
+  {
+    "Id": "1",
+    "Arn": "arn:aws:sqs:us-east-1:649536287623:PrediVersa-Alert-Queue"
+  }
+]

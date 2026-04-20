@@ -63,68 +63,54 @@ class CentralAIService {
   }
 
   /**
-   * Analiza un mensaje para detectar niveles de riesgo de forma anónima.
+   * 🧠 MOTOR DE CONTEXTO TOTAL VERSA v3.1 (Arquetipo Titanium)
+   * Analiza Riesgo, Emoción e Identidad en un solo flujo optimizado.
    */
-  async analizarRiesgo(datosAnonimos) {
-    const { mensaje, historial = [] } = datosAnonimos;
+  async analizarContextoTotalV3(datos) {
+    const text = typeof datos === 'string' ? datos : datos.mensaje;
     
-    // 1. Detección Directa (Filtro Rojo/Naranja/Amarillo)
-    const categoria = await this.categorizeMessage(mensaje);
-    let nivel_riesgo = categoria.nivel;
-
-    // 2. Validación y Contexto con Bedrock (IA Superior)
-    const systemPrompt = `Eres un motor de detección de riesgos psicosociales para PrediVersa. 
-    Analiza el mensaje y devuelve un JSON estricto. 
-    Si el mensaje es una broma clara, saludo o no tiene riesgo real, clasifícalo como BAJO aunque use palabras ruidosas.`;
+    // --- CAPA 1: FAST FILTER (Regex) ---
+    const categoria = await this.categorizeMessage(text);
     
-    const userPrompt = `
-      MENSAJE DEL ESTUDIANTE: "${mensaje}"
-      DETECCIÓN PALABRAS CLAVE: ${categoria.detectadas.join(', ') || 'Ninguna'}
-      NIVEL BASE DETECTADO: ${nivel_riesgo}
-      HISTORIAL RECIENTE: ${historial.length ? historial.map(h => h.text).slice(-3).join(' | ') : 'N/A'}
-
-      RESPONDE ÚNICAMENTE CON ESTE FORMATO JSON:
-      {
-        "nivel_riesgo": "BAJO" | "MEDIO" | "ALTO",
-        "score": (0-100 calculo interno),
-        "intencion_principal": "string",
-        "emociones_detectadas": ["string"],
-        "palabras_clave_criticas": ["string"],
-        "razon": "Explicación breve de por qué se asignó este nivel",
-        "requiere_intervencion_humana": boolean
-      }
-    `;
-
+    // --- CAPA 2: SEMANTIC ANALYSIS (Bedrock) ---
+    const systemPrompt = `Eres VERSA Engine. Analiza el mensaje para PrediVersa.
+    Devuelve JSON: { "nivel": "BAJO"|"MEDIO"|"ALTO", "score": 0-100, "emocion": "string", "razon": "string" }`;
+    
+    let aiResult = { nivel: categoria.nivel, score: categoria.nivel === 'ALTO' ? 90 : 10, razon: 'Análisis base' };
+    
     try {
       const command = new ConverseCommand({
         modelId: this.modelId,
-        messages: [{ role: "user", content: [{ text: userPrompt }] }],
+        messages: [{ role: "user", content: [{ text: `Mensaje: "${text}"` }] }],
         system: [{ text: systemPrompt }],
-        inferenceConfig: { maxTokens: 512, temperature: 0 }
+        inferenceConfig: { maxTokens: 300, temperature: 0 }
       });
-
       const response = await this.client.send(command);
-      const resText = response.output.message.content[0].text;
-      const aiResult = JSON.parse(resText.replace(/```json|```/g, '').trim());
+      aiResult = JSON.parse(response.output.message.content[0].text.replace(/```json|```/g, '').trim());
+    } catch (e) { console.warn('⚠️ Fallback Capa 2:', e.message); }
 
-      // REGLA DE SEGURIDAD CRÍTICA - ZERO TOLERANCE: 
-      // Si el diccionario detectó un Riesgo ALTO (Palabra Crítica), se mantiene ALTO sin importar el análisis de la IA.
-      if (nivel_riesgo === "ALTO") {
-        aiResult.nivel_riesgo = "ALTO"; 
-        aiResult.score = Math.max(aiResult.score, 99); 
-        aiResult.requiere_intervencion_humana = true;
-      }
+    // --- CAPA 3: SCORING & EVENT BRIDGE ---
+    const finalLevel = (categoria.nivel === 'ALTO' || aiResult.nivel === 'ALTO') ? 'ALTO' : aiResult.nivel;
+    const finalScore = finalLevel === 'ALTO' ? Math.max(aiResult.score, 90) : aiResult.score;
 
-      return aiResult;
-    } catch (error) {
-      console.warn('⚠️ Bedrock falló, usando Detección Directa:', error.message);
-      return {
-        nivel_riesgo,
-        score: nivel_riesgo === 'ALTO' ? 90 : (nivel_riesgo === 'MEDIO' ? 50 : 10),
-        razon: "Fallo de conexión API - Usando Diccionario de Impacto",
-        requiere_intervencion_humana: nivel_riesgo === 'ALTO'
-      };
+    const context = {
+      riesgo: { nivel: finalLevel, score: finalScore },
+      emocion: { clase: aiResult.emocion || 'neutral' },
+      alerta: { activar: finalLevel === 'ALTO', justificacion: aiResult.razon }
+    };
+
+    // 📡 DESACOPLAMIENTO: Emitir a EventBridge si riesgo es ALTO
+    if (context.alerta.activar) {
+      const eventBridge = require('./eventBridgeService');
+      eventBridge.emitRiskEvent({
+        message: text,
+        risk_level: 'CRITICAL',
+        confidence: finalScore / 100,
+        source: 'versa-engine-v3.1'
+      });
     }
+
+    return context;
   }
 
   /**

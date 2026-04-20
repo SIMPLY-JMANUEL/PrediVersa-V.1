@@ -137,9 +137,9 @@ const dispatchAlertEnterprise = async (text, user, context, requestId) => {
   // 1. Audit Log (CloudWatch Ready) 🕵️‍♂️📈
   logger.warn({ event: "CRITICAL_ALERT_TRIGGERED", requestId, payload });
 
-  // 2. Multicast en Paralelo 🏎️💨
+  // 2. Multicast en Paralelo (LIGERO)
   const dispatchPromises = [
-    // Persistencia en DB
+    // Persistencia en DB (Para trazabilidad del Dashboard)
     alertRepository.create({
       studentName: payload.studentName,
       studentUsername: payload.studentEmail,
@@ -149,7 +149,7 @@ const dispatchAlertEnterprise = async (text, user, context, requestId) => {
       status: payload.urgency === 'INMEDIATA' ? 'Urgente' : 'Pendiente'
     }),
     
-    // TIEMPO REAL: Platform/SSE
+    // TIEMPO REAL: Notificación interna vía Web UI (PLATFORM)
     channels.includes("PLATFORM") && notificarAdmins({
       tipo: 'alerta_versa',
       nivel: payload.riskLevel,
@@ -159,47 +159,9 @@ const dispatchAlertEnterprise = async (text, user, context, requestId) => {
     })
   ];
 
-  // SMS: AWS SNS 📲
-  if (channels.includes("SMS")) {
-    const adminPhones = (process.env.ADMIN_PHONES || "").split(',').filter(p => p.trim() !== "");
-    adminPhones.forEach(phone => {
-      dispatchPromises.push(snsClient.send(new PublishCommand({
-        Message: `🚨 [ALERTA CRÍTICA PREDIVERSA]\nTipo: ${payload.alertType}\nEstudiante: ${payload.studentName}\nUrgencia: ${payload.urgency}`,
-        PhoneNumber: phone.trim(),
-        MessageAttributes: { 'AWS.SNS.SMS.SMSType': { DataType: 'String', StringValue: 'Transactional' } }
-      })));
-    });
-  }
-
-  // EMAIL: AWS SES 📧
-  if (channels.includes("EMAIL")) {
-    const emailSource = process.env.SES_SOURCE_EMAIL;
-    const emailDestinations = (process.env.ADMIN_EMAILS || "").split(',').filter(e => e.trim() !== "");
-
-    if (emailSource && emailDestinations.length > 0) {
-      const emailBody = `
-        <h2>🚨 ALERTA CRÍTICA - PREDIVERSA v3.1</h2>
-        <p><b>Estudiante:</b> ${payload.studentName}</p>
-        <p><b>Nivel de Riesgo:</b> ${payload.riskLevel}</p>
-        <p><b>Tipo de Alerta:</b> ${payload.alertType}</p>
-        <p><b>Urgencia:</b> ${payload.urgency}</p>
-        <hr/>
-        <p><b>Detalle:</b> ${payload.message}</p>
-        <p><b>Evidencia Detectada:</b> ${payload.evidence.join(", ")}</p>
-        <br/>
-        <p><i>Acción requerida: Intervención inmediata del equipo institucional.</i></p>
-      `;
-      
-      dispatchPromises.push(sesClient.send(new SendEmailCommand({
-        Source: emailSource,
-        Destination: { ToAddresses: emailDestinations },
-        Message: {
-          Subject: { Data: `🚨 Alerta Crítica [${payload.alertType}] - ${payload.studentName}` },
-          Body: { Html: { Data: emailBody } }
-        }
-      })));
-    }
-  }
+  // 📡 NOTA DEL ARQUITECTO: 
+  // SNS (SMS) y SES (Email) han sido delegados al sistema EventBridge + SQS
+  // Esto libera el proceso de App Runner y garantiza resiliencia ante caídas de red.
 
   await Promise.allSettled(dispatchPromises);
 };
