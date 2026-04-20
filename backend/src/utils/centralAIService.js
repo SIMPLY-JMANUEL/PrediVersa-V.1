@@ -101,23 +101,29 @@ class CentralAIService {
 
     // 📡 DESACOPLAMIENTO: Emitir a EventBridge si riesgo es ALTO
     if (context.alerta.activar) {
-      const eventBridge = require('./eventBridgeService');
-      eventBridge.emitRiskEvent({
-        message: text,
-        risk_level: 'CRITICAL',
-        confidence: finalScore / 100,
-        source: 'versa-engine-v3.1'
-      });
+      try {
+        const eventBridge = require('./eventBridgeService');
+        await eventBridge.emitRiskEvent({
+          message: text,
+          risk_level: 'CRITICAL',
+          confidence: finalScore / 100,
+          source: 'versa-engine-v3.1'
+        });
+      } catch (alertError) {
+        console.warn('⚠️ No se pudo emitir alerta a EventBridge:', alertError.message);
+        // Continuamos: El chat NO debe morir porque falle el sistema de alertas
+      }
     }
 
     return context;
   }
 
   /**
-   * Genera respuestas empáticas (VERSA Persona).
+   * Genera respuestas empáticas (VERSA Persona v3.1 Titanium).
    */
-  async generarRespuesta(datos) {
-    const { mensaje, nivelRiesgo, historial = [] } = datos;
+  async generarRespuestaV3(datos) {
+    const { mensaje, contexto, historial = [] } = datos;
+    const nivelRiesgo = contexto?.riesgo?.nivel || "BAJO";
     let chatHistory = historial.map(m => `${m.type === 'user' ? 'Estudiante' : 'Versa'}: ${m.text}`).join('\n');
 
     const systemPrompt = `
@@ -162,7 +168,7 @@ class CentralAIService {
       return finalResponse;
     } catch (error) {
       console.error('❌ Error Bedrock:', error.message);
-      return null;
+      return "Lo siento, tuve un pequeño problema procesando tu mensaje. Pero recuerda que estoy aquí para escucharte y apoyarte.";
     }
   }
 }
