@@ -134,7 +134,7 @@ app.use((err, req, res, next) => {
   
   res.status(statusCode).json({ 
     success: false, 
-    message: message, // Devuelve el error real para diagnóstico
+    message: statusCode === 500 && !isDevelopment ? 'Error interno del servidor' : message,
     requestId: req.requestId || 'no-id'
   });
 });
