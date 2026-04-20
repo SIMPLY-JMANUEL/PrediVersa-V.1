@@ -34,13 +34,16 @@ exports.handler = async (event) => {
 async function dispatchNotifications(data) {
   const message = `🚨 ALERTA PREDIVERSA (${data.risk_level})\nEstudiante: ${data.user_id}\nMensaje: ${data.message}\nConfianza: ${data.confidence}`;
 
-  // 1. Envío de SMS via SNS
+  // 1. Envío de SMS via SNS (Multi-número)
   try {
-    await snsClient.send(new PublishCommand({
-      PhoneNumber: process.env.ADMIN_PHONE, // Configurado en Lambda Env Vars
-      Message: message
-    }));
-    console.log('✅ SMS enviado con éxito');
+    const adminPhones = (process.env.ADMIN_PHONES || "").split(',').filter(p => p.trim() !== "");
+    for (const phone of adminPhones) {
+      await snsClient.send(new PublishCommand({
+        PhoneNumber: phone.trim().startsWith('+') ? phone.trim() : `+57${phone.trim()}`,
+        Message: message
+      }));
+      console.log(`✅ SMS enviado a: ${phone}`);
+    }
   } catch (e) { console.error('Falló SNS:', e.message); }
 
   // 2. Envío de Email via SES
