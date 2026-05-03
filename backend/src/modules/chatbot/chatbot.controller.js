@@ -74,8 +74,54 @@ const checkIntegrity = (req, res) => {
   res.json({ success: true, diagnostico: status, requestId: req.requestId });
 };
 
+const analyze = async (req, res, next) => {
+  try {
+    const { mensaje, estudiante_id } = req.body;
+    if (!mensaje) return next(new AppError('El mensaje es obligatorio', 400));
+
+    const data = await chatbotService.analyzeRisk(mensaje, estudiante_id);
+    res.json({ success: true, data, requestId: req.requestId });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const chatIA = async (req, res, next) => {
+  try {
+    const { mensaje, nivelRiesgo, historial = [] } = req.body;
+    if (!mensaje) return next(new AppError('El mensaje es obligatorio', 400));
+
+    const respuesta = await chatbotService.generateAIResponse(mensaje, nivelRiesgo, historial);
+    res.json({ success: true, respuesta, requestId: req.requestId });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const createAlert = async (req, res, next) => {
+  try {
+    const alert = await chatbotService.createAlert(req.body);
+    res.json({ success: true, alert, requestId: req.requestId });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const createMeeting = async (req, res, next) => {
+  try {
+    const result = await chatbotService.createMeeting(req.body);
+    res.json({ success: true, ...result, requestId: req.requestId });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   postMessage,
+  analyze,
+  chatIA,
+  createAlert,
+  createMeeting,
   getStream,
   getStats,
   checkIntegrity

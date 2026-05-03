@@ -162,11 +162,61 @@ const dispatchAlertEnterprise = async (text, user, context, requestId) => {
   await Promise.allSettled(dispatchPromises);
 };
 
-const getStats = async () => {
-  return await chatbotRepository.getStats();
+const analyzeRisk = async (text, studentId) => {
+  try {
+    const context = await centralAI.analizarContextoTotalV3(text);
+    return {
+      nivel_riesgo: context.riesgo.nivel.toLowerCase(),
+      score: context.riesgo.score,
+      keywords_encontradas: context.riesgo.detectadas || [],
+      tipos_violencia: context.alerta?.tipos || [],
+      emocion: context.emocion.clase
+    };
+  } catch (error) {
+    logger.error(`Error en analyzeRisk: ${error.message}`);
+    // Fallback básico
+    const level = text.toLowerCase().includes('morir') ? 'alto' : 'bajo';
+    return { nivel_riesgo: level, score: level === 'alto' ? 90 : 10, keywords_encontradas: [] };
+  }
+};
+
+const generateAIResponse = async (text, nivelRiesgo, historial = []) => {
+  try {
+    return await centralAI.generarRespuestaV3({
+      mensaje: text,
+      contexto: { riesgo: { nivel: nivelRiesgo } },
+      historial
+    });
+  } catch (error) {
+    logger.error(`Error en generateAIResponse: ${error.message}`);
+    return "Lo siento, tuve un problema procesando tu mensaje. Pero recuerda que estoy aquí para escucharte.";
+  }
+};
+
+const createAlert = async (alertData) => {
+  const { estudiante_id, nombre, descripcion, nivel_riesgo, keywords } = alertData;
+  return await alertRepository.create({
+    studentName: nombre,
+    studentUsername: estudiante_id,
+    alertType: nivel_riesgo === 'alto' ? 'Critica' : 'Advertencia',
+    description: `[VERSA v3.1] ${descripcion}\nKeywords: ${keywords?.join(', ')}`,
+    ticketNumber: `VERSA-${Date.now()}`,
+    status: nivel_riesgo === 'alto' ? 'Urgente' : 'Pendiente'
+  });
+};
+
+const createMeeting = async (meetingData) => {
+  const { estudiante_id, nombre, fecha, motivo } = meetingData;
+  // Por ahora lo guardamos como un log o podríamos tener un repositorio de citas
+  logger.info(`📅 Cita solicitada: ${nombre} (${estudiante_id}) para ${fecha}. Motivo: ${motivo}`);
+  return { success: true, fecha };
 };
 
 module.exports = {
   processMessage,
+  analyzeRisk,
+  generateAIResponse,
+  createAlert,
+  createMeeting,
   getStats
 };

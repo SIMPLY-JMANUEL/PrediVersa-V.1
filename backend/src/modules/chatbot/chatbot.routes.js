@@ -18,11 +18,46 @@ router.get('/stream',
 /**
  * @route POST /api/chatbot/message
  * @desc Mensajería unificada con Amazon Lex y Motor VERSA (DDD)
- * Delegación completa al controlador para mantener rutas limpias.
  */
 router.post('/message', 
   verifyToken, 
   chatbotController.postMessage
+);
+
+/**
+ * @route POST /api/chatbot/analizar
+ * @desc Análisis de riesgo inmediato (Motor VERSA v3.1 Titanium)
+ */
+router.post('/analizar',
+  verifyToken,
+  chatbotController.analyze
+);
+
+/**
+ * @route POST /api/chatbot/chat-ia
+ * @desc Generación de respuesta conversacional empática
+ */
+router.post('/chat-ia',
+  verifyToken,
+  chatbotController.chatIA
+);
+
+/**
+ * @route POST /api/chatbot/alerta
+ * @desc Registro de alertas críticas desde el chatbot
+ */
+router.post('/alerta',
+  verifyToken,
+  chatbotController.createAlert
+);
+
+/**
+ * @route POST /api/chatbot/reunion
+ * @desc Solicitud de citas con orientación
+ */
+router.post('/reunion',
+  verifyToken,
+  chatbotController.createMeeting
 );
 
 /**

@@ -3,7 +3,7 @@ import DashboardHeader from './DashboardHeader'
 import DenunciaFacil from './DenunciaFacil'
 import Normatividad from './Normatividad'
 import TestVersa from './TestVersa'
-import AmazonLexChat from './AmazonLexChat'
+import ChatbotVersa from './ChatbotVersa'
 import UniversalSidebar from './shared/UniversalSidebar'
 import { MessageSquare, AlertTriangle, Scale, ClipboardList, Info } from 'lucide-react'
 import '../ProfessionalTheme.css'
@@ -56,11 +56,11 @@ function StudentDashboard({ user, onLogout }) {
             <div className="dashboard-card mgmt-content">
               {activeMenu === 'chat' && (
                 <div className="animate-fade-in" style={{ padding: '0.5rem 0' }}>
-                  <AmazonLexChat user={user} />
+                  <ChatbotVersa user={user} />
                   
                   <div className="chatbot-footer-hint">
                     <div className="dot-online"></div>
-                    <span>Conexión Protegida — Amazon Lex & Motor Versa IA</span>
+                    <span>Motor Versa IA Titanium v3.1 — Protegido por Amazon Bedrock</span>
                   </div>
                 </div>
               )}
