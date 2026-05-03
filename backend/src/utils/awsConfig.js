@@ -10,22 +10,30 @@ require('dotenv').config();
  */
 
 const region = process.env.AWS_REGION || "us-east-1";
-const credentials = {
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
-};
+
+// Hardening: Configuramos el cliente base. 
+// Solo inyectamos credenciales manuales si existen en el entorno (ej. Desarrollo Local).
+// En producción (App Runner/ECS), esto permite que el SDK asuma el IAM Role nativo de forma segura.
+const clientConfig = { region };
+
+if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+  clientConfig.credentials = {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  };
+}
 
 // Cliente para Amazon Lex V2 (Chatbot)
-const lexClient = new LexRuntimeV2Client({ region, credentials });
+const lexClient = new LexRuntimeV2Client(clientConfig);
 
 // Cliente para Amazon Bedrock (IA Central - Claude)
-const bedrockClient = new BedrockRuntimeClient({ region, credentials });
+const bedrockClient = new BedrockRuntimeClient(clientConfig);
 
 // Cliente para Amazon SNS (Alertas SMS)
-const snsClient = new SNSClient({ region, credentials });
+const snsClient = new SNSClient(clientConfig);
 
 // Cliente para Amazon SES (Alertas Email)
-const sesClient = new SESClient({ region, credentials });
+const sesClient = new SESClient(clientConfig);
 
 console.log('🛡️ Configuración centralizada de AWS Versa cargada correctamente.');
 
