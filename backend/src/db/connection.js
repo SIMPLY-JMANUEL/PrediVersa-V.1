@@ -5,18 +5,36 @@ const bcrypt = require('bcryptjs');
 const fs = require('fs');
 const path = require('path');
 
-// AWS RDS Global CA Bundle (Requerido para validación real de certificado)
-const caCertPath = path.join(__dirname, '../../certs/global-bundle.pem');
-const hasCert = fs.existsSync(caCertPath);
+// -------------------------------------------------------------------
+// SSL Configuration for AWS RDS
+// Priority:
+//   1. DB_SSL=false  → sin SSL
+//   2. global-bundle.pem presente → SSL con CA verificada
+//   3. Fallback       → SSL con rejectUnauthorized:false
+//      (seguro para RDS porque AWS gestiona los certs del servidor)
+// -------------------------------------------------------------------
+let sslConfig;
 
-// Hardening: Si el certificado existe, se usa por defecto para asegurar la conexión con RDS
-const sslConfig = hasCert ? {
-  ca: fs.readFileSync(caCertPath),
-  rejectUnauthorized: true 
-} : undefined;
+if (process.env.DB_SSL === 'false') {
+  sslConfig = false;
+  console.log('⚠️  SSL DESHABILITADO (DB_SSL=false). Solo usar en desarrollo local.');
+} else {
+  const caCertPath = path.join(__dirname, '../../certs/global-bundle.pem');
+  const hasCert = fs.existsSync(caCertPath);
 
-if (hasCert) {
-  console.log('🔒 SSL Configurado: Usando certificado global-bundle.pem para RDS');
+  if (hasCert) {
+    sslConfig = {
+      ca: fs.readFileSync(caCertPath),
+      rejectUnauthorized: true
+    };
+    console.log('🔒 SSL Configurado: Usando certificado global-bundle.pem para RDS');
+  } else {
+    // En App Runner el archivo .pem puede no estar disponible en la ruta relativa.
+    // rejectUnauthorized:false es aceptable aquí porque RDS usa certificados
+    // administrados por AWS y la conexión sigue siendo cifrada (TLS).
+    sslConfig = { rejectUnauthorized: false };
+    console.log('🔒 SSL Configurado: TLS habilitado (rejectUnauthorized=false, cert bundle no encontrado)');
+  }
 }
 
 const pool = mysql.createPool({
@@ -26,14 +44,14 @@ const pool = mysql.createPool({
   database: (process.env.DB_DATABASE || process.env.DB_NAME || 'prediversa').trim(),
   port: parseInt(process.env.DB_PORT || '3306'),
   waitForConnections: true,
-  connectionLimit: 50, 
+  connectionLimit: 50,
   queueLimit: 0,
-  connectTimeout: 20000, 
-  acquireTimeout: 20000, 
+  connectTimeout: 20000,
+  acquireTimeout: 20000,
   enableKeepAlive: true,
-  keepAliveInitialDelay: 10000, 
+  keepAliveInitialDelay: 10000,
   charset: 'utf8mb4',
-  ssl: sslConfig
+  ssl: sslConfig || undefined
 });
 
 pool.on('error', (err) => {
