@@ -212,6 +212,10 @@ const createMeeting = async (meetingData) => {
   return { success: true, fecha };
 };
 
+const getStats = async () => {
+  return await chatbotRepository.getStats();
+};
+
 module.exports = {
   processMessage,
   analyzeRisk,

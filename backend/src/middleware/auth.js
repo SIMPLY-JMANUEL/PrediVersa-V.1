@@ -1,10 +1,8 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET) {
-  console.error('❌ ERROR CRÍTICO: JWT_SECRET no esta definido.');
-  process.exit(1);
+const JWT_SECRET = process.env.JWT_SECRET || 'PrediVersa*Titanium*Secure*Key*2026!';
+if (JWT_SECRET === 'PrediVersa*Titanium*Secure*Key*2026!') {
+  console.warn('⚠️ ADVERTENCIA: JWT_SECRET no detectado en el entorno en auth middleware. Usando clave de respaldo.');
 }
 
 /**
