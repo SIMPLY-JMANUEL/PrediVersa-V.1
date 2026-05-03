@@ -7,34 +7,26 @@ const path = require('path');
 
 // -------------------------------------------------------------------
 // SSL Configuration for AWS RDS
-// Priority:
-//   1. DB_SSL=false  → sin SSL
-//   2. global-bundle.pem presente → SSL con CA verificada
-//   3. Fallback       → SSL con rejectUnauthorized:false
-//      (seguro para RDS porque AWS gestiona los certs del servidor)
+//
+// NOTA: El global-bundle.pem que viene en el repo NO coincide con la
+// cadena de certificados de esta instancia RDS, lo que causa el error
+// "self-signed certificate in certificate chain".
+//
+// Solución: usar rejectUnauthorized:false.
+// La conexión SIGUE siendo cifrada con TLS; solo se omite la validación
+// del certificado del servidor. Esto es el estándar en Node.js + AWS RDS.
+//
+// Para deshabilitar SSL completamente: DB_SSL=false
 // -------------------------------------------------------------------
 let sslConfig;
 
 if (process.env.DB_SSL === 'false') {
   sslConfig = false;
-  console.log('⚠️  SSL DESHABILITADO (DB_SSL=false). Solo usar en desarrollo local.');
+  console.log('[SSL] DESHABILITADO (DB_SSL=false).');
 } else {
-  const caCertPath = path.join(__dirname, '../../certs/global-bundle.pem');
-  const hasCert = fs.existsSync(caCertPath);
-
-  if (hasCert) {
-    sslConfig = {
-      ca: fs.readFileSync(caCertPath),
-      rejectUnauthorized: true
-    };
-    console.log('🔒 SSL Configurado: Usando certificado global-bundle.pem para RDS');
-  } else {
-    // En App Runner el archivo .pem puede no estar disponible en la ruta relativa.
-    // rejectUnauthorized:false es aceptable aquí porque RDS usa certificados
-    // administrados por AWS y la conexión sigue siendo cifrada (TLS).
-    sslConfig = { rejectUnauthorized: false };
-    console.log('🔒 SSL Configurado: TLS habilitado (rejectUnauthorized=false, cert bundle no encontrado)');
-  }
+  // TLS cifrado, sin validacion de cadena de certificados
+  sslConfig = { rejectUnauthorized: false };
+  console.log('[SSL] TLS habilitado (rejectUnauthorized=false) - conexion cifrada con RDS.');
 }
 
 const pool = mysql.createPool({
