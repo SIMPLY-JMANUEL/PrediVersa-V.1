@@ -1,4 +1,6 @@
 const authService = require('./auth.service');
+const userRepository = require('../users/users.repository');
+const bcrypt = require('bcryptjs');
 const AppError = require('../../utils/appError');
 
 /**
@@ -26,7 +28,6 @@ const login = async (req, res, next) => {
       requestId: req.requestId 
     });
   } catch (error) {
-    // Convertir a AppError Operacional (401)
     next(new AppError(error.message, 401));
   }
 };
@@ -34,6 +35,8 @@ const login = async (req, res, next) => {
 const refresh = async (req, res, next) => {
   try {
     const token = req.cookies.refreshToken;
+    if (!token) throw new AppError('No refresh token provided', 401);
+    
     const { accessToken, refreshToken: newRefreshToken } = await authService.refreshSession(token);
 
     res.cookie('refreshToken', newRefreshToken, {
@@ -56,16 +59,12 @@ const logout = async (req, res, next) => {
     res.clearCookie('refreshToken');
     res.json({ success: true, message: 'Sesión cerrada', requestId: req.requestId });
   } catch (error) {
-    next(error); // Error Crítico o Desconocido
+    next(error);
   }
 };
 
 const register = async (req, res, next) => {
   try {
-    const userRepository = require('../users/users.repository');
-    const bcrypt = require('bcryptjs');
-    
-    // 🔥 SEGURIDAD: Usar req.validatedBody de Zod y FORZAR el rol de Estudiante
     const data = req.validatedBody || req.body; 
     const safeData = {
       ...data,
@@ -74,28 +73,27 @@ const register = async (req, res, next) => {
     };
 
     const existingUser = await userRepository.findByEmail(safeData.email);
-    if (existingUser) return res.status(409).json({ success: false, message: 'El email ya está registrado' });
+    if (existingUser) throw new AppError('El email ya está registrado', 409);
 
-    const hashedPassword = await bcrypt.hash(safeData.password, 10);
+    const hashedPassword = await bcrypt.hash(safeData.password, 12); // Aumentado costo de hash
     const result = await userRepository.create({ ...safeData, password: hashedPassword });
     
     res.status(201).json({ 
       success: true, 
-      message: 'Usuario registrado exitosamente como Estudiante', 
+      message: 'Usuario registrado exitosamente', 
       user: { id: result.insertId, email: safeData.email, name: safeData.name, role: 'Estudiante' } 
     });
   } catch (error) {
-    console.error('❌ Error en registro:', error.message);
-    next(new AppError('Error interno del servidor en registro', 500));
+    next(error);
   }
 };
 
 const me = async (req, res, next) => {
   try {
-    const userRepository = require('../users/users.repository');
-    // Using req.user hydrated by verifyToken middleware
     const user = await userRepository.findById(req.user.id);
-    if (!user || user.status !== 'Activo') return res.status(403).json({ success: false, message: 'Sesión inválida o cuenta inactiva' });
+    if (!user || user.status !== 'Activo') {
+      throw new AppError('Sesión inválida o cuenta inactiva', 403);
+    }
     
     res.json({
       success: true,
@@ -104,7 +102,7 @@ const me = async (req, res, next) => {
       }
     });
   } catch (error) {
-    res.status(401).json({ success: false, message: 'Token expirado o inválido' });
+    next(error);
   }
 };
 

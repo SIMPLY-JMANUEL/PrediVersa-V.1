@@ -12,11 +12,18 @@ export const getAuthHeaders = () => {
   };
 };
 
-/**
- * FIX E-3: apiFetch con interceptor de 401 para logout automático
- * Si el servidor devuelve 401, despacha el evento 'auth:expired' que
- * capturado en App.jsx fuerza el logout del usuario.
- */
+let isRefreshing = false;
+let refreshSubscribers = [];
+
+const subscribeTokenRefresh = (cb) => {
+  refreshSubscribers.push(cb);
+};
+
+const onTokenRefreshed = (token) => {
+  refreshSubscribers.map((cb) => cb(token));
+  refreshSubscribers = [];
+};
+
 export const apiFetch = async (endpoint, options = {}) => {
   const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint}`;
   const headers = {
@@ -29,10 +36,43 @@ export const apiFetch = async (endpoint, options = {}) => {
     headers,
   });
 
-  // Interceptor de sesión expirada (excepto peticiones de login)
-  if (response.status === 401 && !endpoint.includes('/login')) {
-    window.dispatchEvent(new Event('auth:expired'));
-    return { success: false, message: 'Sesión expirada' };
+  // Interceptor de sesión expirada (401)
+  if (response.status === 401 && !url.includes('/api/auth/login') && !url.includes('/api/auth/refresh')) {
+    if (!isRefreshing) {
+      isRefreshing = true;
+      try {
+        const refreshRes = await fetch(`${BASE_URL}/api/auth/refresh`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          // Nota: El backend espera la cookie HttpOnly, por lo que incluimos credenciales
+          credentials: 'include' 
+        });
+
+        if (refreshRes.ok) {
+          const { token } = await refreshRes.json();
+          localStorage.setItem('token', token);
+          isRefreshing = false;
+          onTokenRefreshed(token);
+        } else {
+          throw new Error('Refresh failed');
+        }
+      } catch (err) {
+        isRefreshing = false;
+        window.dispatchEvent(new Event('auth:expired'));
+        return { success: false, message: 'Sesión expirada' };
+      }
+    }
+
+    // Encolar peticiones mientras se refresca el token
+    return new Promise((resolve) => {
+      subscribeTokenRefresh((token) => {
+        const retryHeaders = {
+          ...headers,
+          'Authorization': `Bearer ${token}`
+        };
+        resolve(fetch(url, { ...options, headers: retryHeaders }).then(res => res.json()));
+      });
+    });
   }
 
   return response.json();

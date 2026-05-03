@@ -2,6 +2,16 @@
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
 
+const fs = require('fs');
+const path = require('path');
+
+// AWS RDS Global CA Bundle (Requerido para validación real de certificado)
+const caCertPath = path.join(__dirname, '../../certs/global-bundle.pem');
+const sslConfig = process.env.DB_SSL === 'true' ? {
+  ca: fs.existsSync(caCertPath) ? fs.readFileSync(caCertPath) : undefined,
+  rejectUnauthorized: true // Hardening: No permitir MITM
+} : undefined;
+
 const pool = mysql.createPool({
   host: (process.env.DB_HOST || '').trim(),
   user: (process.env.DB_USER || '').trim(),
@@ -9,15 +19,14 @@ const pool = mysql.createPool({
   database: (process.env.DB_DATABASE || process.env.DB_NAME || 'prediversa').trim(),
   port: parseInt(process.env.DB_PORT || '3306'),
   waitForConnections: true,
-  connectionLimit: 15,
+  connectionLimit: 50, // Aumentado para escalabilidad
   queueLimit: 0,
-  connectTimeout: 20000, 
-  acquireTimeout: 20000, 
-  timeout: 30000,        
+  connectTimeout: 10000, 
+  acquireTimeout: 10000, 
   enableKeepAlive: true,
   keepAliveInitialDelay: 10000, 
   charset: 'utf8mb4',
-  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined
+  ssl: sslConfig
 });
 
 pool.on('error', (err) => {

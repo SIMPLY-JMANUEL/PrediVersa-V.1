@@ -31,30 +31,31 @@ const generateTokens = (user) => {
 };
 
 const login = async (email, password) => {
-  console.log(`🔍 [AUTH] Iniciando intento de login para: ${email}`);
+  const maskedEmail = email.replace(/^(..)(.*)(@.*)$/, "$1***$3");
+  console.log(`🔍 [AUTH] Iniciando intento de login para: ${maskedEmail}`);
   
   // ── SEGURIDAD: Sin backdoors hardcodeadas. Toda autenticación pasa por la DB. ──
   const user = await userRepository.findByEmail(email);
   
   if (!user) {
-    console.warn(`⚠️ [AUTH] Usuario no encontrado: ${email}`);
+    console.warn(`⚠️ [AUTH] Intento de login fallido: Usuario no encontrado.`);
     throw new Error('Credenciales inválidas');
   }
 
-  console.log(`✅ [AUTH] Usuario localizado. Verificando hash de contraseña...`);
+  console.log(`✅ [AUTH] Usuario localizado. Verificando credenciales...`);
   const match = await bcrypt.compare(password, user.password);
   
   if (!match) {
-    console.warn(`❌ [AUTH] Contraseña incorrecta para: ${email}`);
+    console.warn(`❌ [AUTH] Contraseña incorrecta para: ${maskedEmail}`);
     throw new Error('Credenciales inválidas');
   }
 
   if (user.status !== 'Activo') {
-    console.warn(`🚫 [AUTH] Intento de entrada en cuenta inactiva: ${email}`);
+    console.warn(`🚫 [AUTH] Intento de entrada en cuenta inactiva: ${maskedEmail}`);
     throw new Error('Cuenta inactiva. Contacte al administrador.');
   }
 
-  console.log(`🎫 [AUTH] Generando tokens para: ${user.email} (Rol: ${user.role})`);
+  console.log(`🎫 [AUTH] Generando tokens de sesión...`);
   const { accessToken, refreshToken } = generateTokens(user);
 
   const expiresAt = new Date();
@@ -63,8 +64,8 @@ const login = async (email, password) => {
   console.log(`💾 [AUTH] Guardando Refresh Token en DB...`);
   await authRepository.saveRefreshToken(user.id, refreshToken, expiresAt);
 
-  console.log(`✨ [AUTH] Login exitoso: ${user.email}`);
-  logger.info({ event: 'USER_LOGIN_SUCCESS', userId: user.id, email: user.email, role: user.role });
+  console.log(`✨ [AUTH] Login exitoso para usuario ID: ${user.id}`);
+  logger.info({ event: 'USER_LOGIN_SUCCESS', userId: user.id, role: user.role });
   
   return { accessToken, refreshToken, user };
 };
