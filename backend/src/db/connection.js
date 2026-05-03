@@ -20,16 +20,16 @@ if (hasCert) {
 }
 
 const pool = mysql.createPool({
-  host: (process.env.DB_HOST || '').trim(),
-  user: (process.env.DB_USER || '').trim(),
-  password: (process.env.DB_PASSWORD || '').trim(),
+  host: (process.env.DB_HOST || 'prediversa-db.ce1qo0a0sygg.us-east-1.rds.amazonaws.com').trim(),
+  user: (process.env.DB_USER || 'admin').trim(),
+  password: (process.env.DB_PASSWORD || 'Prediversa2026').trim(),
   database: (process.env.DB_DATABASE || process.env.DB_NAME || 'prediversa').trim(),
   port: parseInt(process.env.DB_PORT || '3306'),
   waitForConnections: true,
-  connectionLimit: 50, // Aumentado para escalabilidad
+  connectionLimit: 50, 
   queueLimit: 0,
-  connectTimeout: 10000, 
-  acquireTimeout: 10000, 
+  connectTimeout: 20000, 
+  acquireTimeout: 20000, 
   enableKeepAlive: true,
   keepAliveInitialDelay: 10000, 
   charset: 'utf8mb4',
