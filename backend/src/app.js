@@ -55,8 +55,9 @@ app.get('/api/health', async (req, res) => {
 // Middlewares
 const corsOptions = {
   origin: (origin, callback) => {
-    // Si no hay origen (ej. Postman o peticiones del mismo servidor)
-    if (!origin) return callback(null, true);
+    // Si no hay origen (ej. Postman, peticiones internas o health checks de AWS App Runner).
+    // App Runner puede enviar Origin: "undefined" como string literal — tratarlo igual que vacío.
+    if (!origin || origin === 'undefined') return callback(null, true);
     
     const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim());
     
