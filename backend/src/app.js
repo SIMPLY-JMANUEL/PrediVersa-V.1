@@ -26,12 +26,16 @@ app.use((req, res, next) => {
 // Middlewares
 const corsOptions = {
   origin: (origin, callback) => {
-    // Si no hay origen (ej. Postman) lo permitimos solo en desarrollo
-    if (!origin && process.env.NODE_ENV === 'development') return callback(null, true);
+    // Si no hay origen (ej. Postman o peticiones del mismo servidor)
+    if (!origin) return callback(null, true);
     
     const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim());
+    
+    // Hardening dinámico: Permitir orígenes oficiales, localhost y dominios de despliegue Amplify
     const isAllowed = allowedOrigins.includes(origin) || 
-                      (process.env.NODE_ENV === 'development' && origin && origin.includes('localhost'));
+                      origin.includes('localhost') || 
+                      origin.includes('127.0.0.1') ||
+                      origin.includes('amplifyapp.com');
     
     if (isAllowed) {
       callback(null, true);
