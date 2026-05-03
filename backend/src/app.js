@@ -104,10 +104,18 @@ app.get('/api/health', async (req, res) => {
     res.json({ 
       status: isDbConnected ? 'online' : 'error',
       database: isDbConnected ? 'CONECTADO ✅' : 'FALLO DE CONEXIÓN ❌',
-      serverTime: new Date().toISOString()
+      serverTime: new Date().toISOString(),
+      version: '3.1.2-Titanium'
     });
   } catch (e) {
-    res.status(500).json({ status: 'error', database: 'DESCONECTADO ❌', error: e.message });
+    logger.error(`🚨 HEALTH CHECK FAILED: ${e.message}`);
+    res.status(500).json({ 
+      status: 'error', 
+      database: 'DESCONECTADO ❌', 
+      error: e.message,
+      code: e.code,
+      stack: process.env.NODE_ENV === 'development' ? e.stack : undefined
+    });
   }
 });
 
