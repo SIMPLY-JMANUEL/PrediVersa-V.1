@@ -23,6 +23,29 @@ app.use((req, res, next) => {
   next();
 });
 
+// Health checks con prueba de vida a la base de datos (MOVIDO ARRIBA)
+const { testConnection } = require('./db/connection');
+app.get('/api/health', async (req, res) => {
+  try {
+    const isDbConnected = await testConnection();
+    res.json({ 
+      status: isDbConnected ? 'online' : 'error',
+      database: isDbConnected ? 'CONECTADO ✅' : 'FALLO DE CONEXIÓN ❌',
+      serverTime: new Date().toISOString(),
+      version: '3.1.2-Titanium'
+    });
+  } catch (e) {
+    logger.error(`🚨 HEALTH CHECK FAILED: ${e.message}`);
+    res.status(500).json({ 
+      status: 'error', 
+      database: 'DESCONECTADO ❌', 
+      error: e.message,
+      code: e.code,
+      stack: e.stack
+    });
+  }
+});
+
 // Middlewares
 const corsOptions = {
   origin: (origin, callback) => {
@@ -96,29 +119,7 @@ if (fs.existsSync(frontendPath)) {
   });
 }
 
-// Health checks con prueba de vida a la base de datos
-const { testConnection } = require('./db/connection');
-app.get('/api/health', async (req, res) => {
-  try {
-    const isDbConnected = await testConnection();
-    res.json({ 
-      status: isDbConnected ? 'online' : 'error',
-      database: isDbConnected ? 'CONECTADO ✅' : 'FALLO DE CONEXIÓN ❌',
-      serverTime: new Date().toISOString(),
-      version: '3.1.2-Titanium'
-    });
-  } catch (e) {
-    logger.error(`🚨 HEALTH CHECK FAILED: ${e.message}`);
-    res.status(500).json({ 
-      status: 'error', 
-      database: 'DESCONECTADO ❌', 
-      error: e.message,
-      code: e.code,
-      stack: process.env.NODE_ENV === 'development' ? e.stack : undefined
-    });
-  }
-});
-
+// (Health check movido arriba)
 // 404 Handler - Siempre devolver JSON
 app.use((req, res) => {
   res.status(404).json({ 
@@ -141,12 +142,13 @@ app.use((err, req, res, next) => {
     path: req.originalUrl,
     method: req.method,
     requestId: req.requestId,
-    stack: isDevelopment ? err.stack : undefined
+    stack: err.stack
   });
   
   res.status(statusCode).json({ 
     success: false, 
-    message: statusCode === 500 && !isDevelopment ? 'Error interno del servidor' : message,
+    message: message, // DEBUG: Siempre mostrar mensaje real
+    stack: err.stack, // DEBUG: Siempre mostrar stack trace
     requestId: req.requestId || 'no-id'
   });
 });
