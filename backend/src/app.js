@@ -23,7 +23,13 @@ app.use((req, res, next) => {
   next();
 });
 
-// Health checks con prueba de vida a la base de datos (MOVIDO ARRIBA)
+// 🔥 ANTI-ROLLBACK: Health Checks Ultra-Rápidos para AWS App Runner
+// Estos endpoints responden inmediatamente con 200 OK sin consultar bases de datos.
+// Previenen que App Runner revierta la implementación por timeouts.
+app.get('/', (req, res) => res.status(200).send('OK'));
+app.get('/health', (req, res) => res.status(200).send('OK'));
+
+// Health checks detallado con prueba de vida a la base de datos
 const { testConnection } = require('./db/connection');
 app.get('/api/health', async (req, res) => {
   try {
