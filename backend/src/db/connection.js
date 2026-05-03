@@ -7,10 +7,17 @@ const path = require('path');
 
 // AWS RDS Global CA Bundle (Requerido para validación real de certificado)
 const caCertPath = path.join(__dirname, '../../certs/global-bundle.pem');
-const sslConfig = process.env.DB_SSL === 'true' ? {
-  ca: fs.existsSync(caCertPath) ? fs.readFileSync(caCertPath) : undefined,
-  rejectUnauthorized: true // Hardening: No permitir MITM
+const hasCert = fs.existsSync(caCertPath);
+
+// Hardening: Si el certificado existe, se usa por defecto para asegurar la conexión con RDS
+const sslConfig = hasCert ? {
+  ca: fs.readFileSync(caCertPath),
+  rejectUnauthorized: true 
 } : undefined;
+
+if (hasCert) {
+  console.log('🔒 SSL Configurado: Usando certificado global-bundle.pem para RDS');
+}
 
 const pool = mysql.createPool({
   host: (process.env.DB_HOST || '').trim(),
