@@ -44,7 +44,7 @@ const processMessage = async (text, user, sessionId, historial = []) => {
   if (context.riesgo.nivel === "ALTO") {
     const lowerRes = finalResponse.toLowerCase();
     if (!lowerRes.includes("no estás solo")) {
-      finalResponse += "\n\nNo estás solo, parce. Sería bueno hablar con alguien de confianza para no cargar con esto solo.";
+      finalResponse += "\n\nRecuerda que no estás solo. Sería muy importante hablar con alguien de confianza para que pueda apoyarte en este momento.";
     }
   }
 

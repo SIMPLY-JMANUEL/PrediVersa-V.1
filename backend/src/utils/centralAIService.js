@@ -5,7 +5,7 @@ require('dotenv').config();
 const IMPACT_CATEGORIES = {
   CRITICO: ["suicidio", "matarme", "no quiero vivir", "morirme", "muerte", "violan", "abuso", "quitarme la vida", "ahorcarme"],
   MODERADO: ["acoso", "bullying", "pegan", "amenaza", "golpe", "insulto", "maltrato"],
-  EMOCIONAL: ["solo", "triste", "ansiedad", "llorar", "paila", "desespero", "vacio"]
+  EMOCIONAL: ["solo", "triste", "ansiedad", "llorar", "mal", "desespero", "vacio", "angustia"]
 };
 
 /**
@@ -137,11 +137,20 @@ class CentralAIService {
     let chatHistory = historial.map(m => `${m.type === 'user' ? 'Estudiante' : 'Versa'}: ${m.text}`).join('\n');
 
     const systemPrompt = `
-      Eres VERSA, orientador colombiano empático. Tu estilo es el de un "pana que sabe escuchar".
-      Usa expresiones como "parce", "tranqui", "te entiendo". 
-      REGLAS: Máximo 3-4 líneas, sin diagnósticos, fluidez total.
-      RIESGO ACTUAL: ${nivelRiesgo.toUpperCase()}
-      ${nivelRiesgo.toUpperCase() === 'ALTO' ? 'REGLA CRÍTICA: Guía al usuario sutilmente pero con firmeza a buscar ayuda inmediata con un adulto de confianza o el orientador presencial del colegio al finalizar tu respuesta.' : ''}
+      Eres VERSA, un asistente virtual experto en apoyo y orientación para niños, niñas y adolescentes (8-17 años).
+      Tu propósito es brindar información y asistencia de forma clara, segura, amigable y respetuosa.
+
+      TONO Y PERSONALIDAD:
+      - Amigable, positivo y paciente.
+      - Evita tecnicismos y lenguaje infantilizado o condescendiente.
+      - Usa frases cortas y fáciles de entender (máximo 3 líneas).
+      - Promueve valores de respeto, seguridad y responsabilidad.
+
+      REGLAS DE INTERACCIÓN:
+      - Si el usuario no entiende, reformula de manera más simple.
+      - Si detectas lenguaje inapropiado, responde con orientación respetuosa.
+      - RIESGO ACTUAL: ${nivelRiesgo.toUpperCase()}
+      ${nivelRiesgo.toUpperCase() === 'ALTO' ? 'REGLA CRÍTICA: Eres un apoyo inicial. Debes guiar al usuario de forma clara a buscar ayuda inmediata con un adulto de confianza o el orientador presencial del colegio.' : ''}
     `;
 
     const userPrompt = `
@@ -168,8 +177,8 @@ class CentralAIService {
         const lowerRes = finalResponse.toLowerCase();
         if (!lowerRes.includes("no estás solo") && !lowerRes.includes("hablar con alguien")) {
            const emergencyTips = [
-             "\n\nNo estás solo, parce. De verdad sería bueno hablar con un orientador presencial o alguien de tu total confianza ahora mismo, ¿sí?",
-             "\n\nHey, recuerda que hay personas que te quieren apoyar. ¿Te sentirías cómodo hablando con algún familiar o con el orientador del colegio hoy?"
+             "\n\nRecuerda que no estás solo. Es muy importante que hables con un orientador presencial o alguien de tu total confianza ahora mismo para que te apoyen.",
+             "\n\nMe importa mucho tu bienestar. ¿Te sentirías cómodo hablando con algún familiar o con el orientador del colegio hoy mismo? Ellos están para ayudarte."
            ];
            finalResponse += emergencyTips[Math.floor(Math.random() * emergencyTips.length)];
         }
