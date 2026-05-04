@@ -18,6 +18,15 @@ const DIRECT_RESPONSES = {
  * CAPA DE SERVICIO (BUSINESS LOGIC) - DOMINIO CHATBOT
  */
 
+const handleAlertResponse = (level) => {
+  const responses = {
+    BAJO: "Estoy aquí para ayudarte 😊. ¿Quieres contarme un poco más?",
+    MEDIO: "Lo que me dices es importante. Voy a ayudarte mejor, ¿te parece si seguimos hablando?",
+    ALTO: "Esto es muy importante. Voy a pedir ayuda para apoyarte mejor. No estás solo/a."
+  };
+  return responses[level] || responses.BAJO;
+};
+
 const processMessage = async (text, user, sessionId, historial = []) => {
   // 1. Análisis de Contexto VERSA v3 (Riesgo + Género + Emoción)
   let context = { 
@@ -36,33 +45,28 @@ const processMessage = async (text, user, sessionId, historial = []) => {
   // 2. Generación de Respuesta Empatizada v3
   let finalResponse = "He recibido tu mensaje.";
   try {
-    // ⚡ OPTIMIZACIÓN: Respuesta directa si el intent es claro y seguro (Bypass Bedrock)
-    if (context.bypassLLM && DIRECT_RESPONSES[context.intent]) {
-      finalResponse = DIRECT_RESPONSES[context.intent];
-      logger.info({ event: 'NLU_LOCAL_MATCH', intent: context.intent, userId: user.id || 'anonimo' });
-    } else {
-      // 🤖 Bedrock para casos complejos, emocionales o de riesgo
-      // Sincronización Lex (Opcional, se mantiene por compatibilidad)
-      await sendToLex(user.id || sessionId || 'anonimo', text).catch(() => {});
-      
-      const respuestaV3 = await centralAI.generarRespuestaV3({
-        mensaje: text,
-        contexto: context,
-        historial
-      });
-      if (respuestaV3) finalResponse = respuestaV3;
-    }
-  } catch (error) { console.error('❌ Error en Generador v3:', error.message); }
+    // 🤖 Bedrock para casos complejos, emocionales o de riesgo
+    await sendToLex(user.id || sessionId || 'anonimo', text).catch(() => {});
+    
+    finalResponse = await centralAI.generarRespuestaV3({
+      mensaje: text,
+      contexto: context,
+      historial
+    });
+  } catch (error) { 
+    console.error('❌ Error en Generador v3:', error.message);
+    finalResponse = handleAlertResponse(context.riesgo.nivel); // Fallback determinístico
+  }
 
-  // 🧼 Post-procesamiento de seguridad ALTO RIESGO
-  if (context.riesgo.nivel === "ALTO") {
-    const lowerRes = finalResponse.toLowerCase();
-    if (!lowerRes.includes("no estás solo")) {
-      finalResponse += "\n\nRecuerda que no estás solo. Sería muy importante hablar con alguien de confianza para que pueda apoyarte en este momento.";
+  // 3. Blindaje de Respuesta: Si hay alerta, asegurar mensaje de soporte
+  if (context.riesgo.nivel === "ALTO" || context.riesgo.nivel === "MEDIO") {
+    const supportMessage = handleAlertResponse(context.riesgo.nivel);
+    if (!finalResponse.includes(supportMessage.substring(0, 15))) {
+      finalResponse += `\n\n${supportMessage}`;
     }
   }
 
-  // 3. Persistencia de Interacción v3
+  // 4. Persistencia de Interacción v3
   await chatbotRepository.saveInteraction({
     sessionId: user.id || sessionId || 'anonimo',
     userInput: text,
@@ -76,7 +80,7 @@ const processMessage = async (text, user, sessionId, historial = []) => {
     }
   });
 
-  // 4. Gestión de Alerta y Escalamiento Enterprise v3.1 (Multicanal)
+  // 5. Gestión de Alerta y Escalamiento Enterprise v3.1 (Multicanal)
   await dispatchAlertEnterprise(text, user, context, sessionId || 'system-trace');
 
   return { 
