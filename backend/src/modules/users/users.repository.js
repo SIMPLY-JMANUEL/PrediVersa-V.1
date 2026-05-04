@@ -83,6 +83,15 @@ const countByStatus = async (status) => {
   return rows[0].count;
 };
 
+const findCollaborators = async () => {
+  const [rows] = await pool.execute(
+    `SELECT id, name, role FROM users 
+     WHERE role NOT IN ('Estudiante') AND status = 'Activo' 
+     ORDER BY name ASC`
+  );
+  return rows;
+};
+
 module.exports = {
   findAll,
   findById,
@@ -91,5 +100,6 @@ module.exports = {
   create,
   update,
   remove,
-  countByStatus
+  countByStatus,
+  findCollaborators
 };

@@ -21,22 +21,14 @@ const AlertAssignment = ({ selectedAlert, fetchAlerts, onBack, user, token }) =>
 
   const fetchCollaborators = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/api/users`, {
+      const response = await fetch(`${BASE_URL}/api/users/collaborators`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
       if (data.success) {
-        const visibleRoles = {
-          'Administrador': ['Psicologo', 'Coordinador', 'Docente', 'Colaboradores'],
-          'Coordinador': ['Psicologo', 'Coordinador', 'Docente', 'Colaboradores'],
-          'Psicologo': ['Psicologo', 'Coordinador'],
-          'Docente': ['Coordinador'],
-          'Colaboradores': ['Coordinador']
-        };
-
-        const allowedRoles = visibleRoles[currentRole] || ['Coordinador'];
-        const filtered = data.users.filter(u => allowedRoles.includes(u.role) && u.id !== user.id);
-        setCollaborators(filtered);
+        // Backend ya filtra solo roles operativos (Psicologo, Coordinador, Docente, Colaboradores)
+        // y usuarios activos.
+        setCollaborators(data.users || []);
       }
     } catch (error) {
       console.error('Error fetching collaborators:', error);

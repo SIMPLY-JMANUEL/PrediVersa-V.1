@@ -71,10 +71,15 @@ const deactivateUser = async (id) => {
   return { success: true, message: 'Usuario desactivado' };
 };
 
+const getCollaborators = async () => {
+  return await userRepository.findCollaborators();
+};
+
 module.exports = {
   getProfile,
   getAll,
   registerUser,
   updateProfile,
-  deactivateUser
+  deactivateUser,
+  getCollaborators
 };

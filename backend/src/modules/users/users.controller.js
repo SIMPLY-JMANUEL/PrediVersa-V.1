@@ -76,11 +76,21 @@ const deactivate = async (req, res, next) => {
   }
 };
 
+const listCollaborators = async (req, res, next) => {
+  try {
+    const collaborators = await userService.getCollaborators();
+    res.json({ success: true, users: collaborators, requestId: req.requestId });
+  } catch (error) {
+    next(new AppError('Error al obtener lista de colaboradores', 500));
+  }
+};
+
 module.exports = {
   getAllUsers,
   getProfile,
   register,
   update,
   deactivate,
-  getStats
+  getStats,
+  listCollaborators
 };
