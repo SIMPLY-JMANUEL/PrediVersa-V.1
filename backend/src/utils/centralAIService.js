@@ -188,28 +188,30 @@ class CentralAIService {
     let chatHistory = historial.map(m => `${m.type === 'user' ? 'Estudiante' : 'Versa'}: ${m.text}`).join('\n');
 
     const systemPrompt = `
-      Eres VERSA, un asistente virtual experto en apoyo y orientación para niños, niñas y adolescentes (8-17 años).
-      Tu propósito es brindar información y asistencia de forma clara, segura, amigable y respetuosa.
+      Eres VERSA, un acompañante digital empático y protector para estudiantes.
+      Tu misión es escuchar, validar emociones y orientar de forma HUMANA y CERCANA.
 
-      TONO Y PERSONALIDAD:
-      - Amigable, positivo y paciente.
-      - Evita tecnicismos y lenguaje infantilizado o condescendiente.
-      - Usa frases cortas y fáciles de entender (máximo 3 líneas).
-      - Promueve valores de respeto, seguridad y responsabilidad.
+      ESTILO DE COMUNICACIÓN:
+      - Sé cálido y directo. Di cosas como "Te escucho", "Entiendo que esto es difícil", "No estás solo".
+      - NUNCA uses lenguaje técnico (como "Protocolo de Riesgo", "Nivel Alto", "JSON", "Sistema").
+      - NUNCA digas frases como "Mi respuesta será" o "Entiendo la gravedad". Sé natural.
+      - Evita sonar como un manual de procedimientos o un bot legalista.
+      - Usa un lenguaje que un joven de 14 años entienda y aprecie.
 
-      REGLAS DE INTERACCIÓN:
-      - Si el usuario no entiende, reformula de manera más simple.
-      - Si detectas lenguaje inapropiado, responde con orientación respetuosa.
-      - RIESGO ACTUAL: ${nivelRiesgo.toUpperCase()}
-      ${nivelRiesgo.toUpperCase() === 'ALTO' ? 'REGLA CRÍTICA: Eres un apoyo inicial. Debes guiar al usuario de forma clara a buscar ayuda inmediata con un adulto de confianza o el orientador presencial del colegio.' : ''}
+      MANEJO DE RIESGO:
+      - Si el riesgo es ALTO, tu prioridad es la seguridad sin asustar. 
+      - En lugar de dar una lista de pasos 1, 2, 3, integra la ayuda de forma natural: "Me preocupa lo que me cuentas y quiero que estés bien. ¿Qué te parece si hablamos con el orientador o un profe en el que confíes hoy mismo?".
+
+      REGLA DE ORO: Responde ÚNICAMENTE con el mensaje de apoyo. No incluyas explicaciones de tu lógica.
     `;
 
     const userPrompt = `
-      HISTORIAL:
+      [CONTEXTO DE APOYO: Riesgo ${nivelRiesgo}]
+      [HISTORIAL RECIENTE]:
       ${chatHistory}
       
       ESTUDIANTE DICE: "${mensaje}"
-      VERSA RESPONDE:
+      RESPUESTA DE VERSA (Sin preámbulos técnicos):
     `;
 
     try {
@@ -217,21 +219,23 @@ class CentralAIService {
         modelId: this.modelId,
         messages: [{ role: "user", content: [{ text: userPrompt }] }],
         system: [{ text: systemPrompt }],
-        inferenceConfig: { maxTokens: 300, temperature: 0.7 }
+        inferenceConfig: { maxTokens: 400, temperature: 0.8, topP: 0.9 }
       });
 
       const response = await this.client.send(command);
       let finalResponse = response.output.message.content[0].text.trim();
 
-      // Post-procesamiento de seguridad
+      // Limpieza de seguridad por si la IA "alucina" con etiquetas
+      finalResponse = finalResponse
+        .replace(/PROTOCOLO DE RIESGO:?.*/gi, '')
+        .replace(/Mi respuesta será:?.*/gi, '')
+        .trim();
+
+      // Post-procesamiento de seguridad HUMANO
       if (nivelRiesgo.toUpperCase() === "ALTO") {
         const lowerRes = finalResponse.toLowerCase();
-        if (!lowerRes.includes("no estás solo") && !lowerRes.includes("hablar con alguien")) {
-           const emergencyTips = [
-             "\n\nRecuerda que no estás solo. Es muy importante que hables con un orientador presencial o alguien de tu total confianza ahora mismo para que te apoyen.",
-             "\n\nMe importa mucho tu bienestar. ¿Te sentirías cómodo hablando con algún familiar o con el orientador del colegio hoy mismo? Ellos están para ayudarte."
-           ];
-           finalResponse += emergencyTips[Math.floor(Math.random() * emergencyTips.length)];
+        if (!lowerRes.includes("orientador") && !lowerRes.includes("adulto") && !lowerRes.includes("confianza")) {
+           finalResponse += "\n\nOye, me importa mucho que estés bien. ¿Crees que podríamos buscar a alguien del cole o a un adulto de confianza para contale esto? No tienes que pasar por esto solo.";
         }
       }
 
