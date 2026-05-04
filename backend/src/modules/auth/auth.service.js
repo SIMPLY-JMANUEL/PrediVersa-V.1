@@ -34,11 +34,12 @@ const generateTokens = (user) => {
 };
 
 const login = async (email, password) => {
-  const maskedEmail = email.replace(/^(..)(.*)(@.*)$/, "$1***$3");
+  const cleanEmail = String(email || '').trim().toLowerCase();
+  const maskedEmail = cleanEmail.replace(/^(..)(.*)(@.*)$/, "$1***$3");
   console.log(`🔍 [AUTH] Iniciando intento de login para: ${maskedEmail}`);
   
   // ── SEGURIDAD: Sin backdoors hardcodeadas. Toda autenticación pasa por la DB. ──
-  const user = await userRepository.findByEmail(email);
+  const user = await userRepository.findByEmail(cleanEmail);
   
   if (!user) {
     console.warn(`⚠️ [AUTH] Intento de login fallido: Usuario no encontrado.`);
