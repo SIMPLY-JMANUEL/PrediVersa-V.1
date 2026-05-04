@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { BASE_URL } from '../../utils/api';
-import { UserPlus, ShieldAlert, Send } from 'lucide-react';
+import { UserPlus, ShieldAlert, Clock, Layout } from 'lucide-react';
 
 const AlertAssignment = ({ selectedAlert, fetchAlerts, onBack, user, token }) => {
   const [collaborators, setCollaborators] = useState([]);
   const [loading, setLoading] = useState(false);
   const [assignment, setAssignment] = useState({
     toUserId: '',
-    notes: ''
+    area: 'Psicología',
+    deadline: '',
+    reason: ''
   });
   const [message, setMessage] = useState('');
 
@@ -24,7 +26,6 @@ const AlertAssignment = ({ selectedAlert, fetchAlerts, onBack, user, token }) =>
       });
       const data = await response.json();
       if (data.success) {
-        // Matriz de visibilidad RBAC v4.5
         const visibleRoles = {
           'Administrador': ['Psicologo', 'Coordinador', 'Docente', 'Colaboradores'],
           'Coordinador': ['Psicologo', 'Coordinador', 'Docente', 'Colaboradores'],
@@ -49,7 +50,7 @@ const AlertAssignment = ({ selectedAlert, fetchAlerts, onBack, user, token }) =>
 
   const handleAssign = async () => {
     if (!assignment.toUserId) {
-      setMessage('⚠️ Debe seleccionar un profesional receptor.');
+      setMessage('⚠️ Debe seleccionar un responsable receptor.');
       return;
     }
     setLoading(true);
@@ -57,96 +58,118 @@ const AlertAssignment = ({ selectedAlert, fetchAlerts, onBack, user, token }) =>
       const response = await fetch(`${BASE_URL}/api/alerts/${selectedAlert.id}/reassign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ 
-          toUserId: assignment.toUserId,
-          reason: assignment.notes 
-        })
+        body: JSON.stringify(assignment)
       });
       const data = await response.json();
       if (data.success) {
-        setMessage(`✅ Caso reasignado a ${data.new_assigned} exitosamente.`);
-        
-        // Registrar mensaje de contexto en el chat automáticamente
-        if (assignment.notes) {
-          await fetch(`${BASE_URL}/api/alerts/${selectedAlert.id}/messages`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ message: `[REASIGNACIÓN] Contexto: ${assignment.notes}` })
-          });
-        }
-
+        setMessage(`✅ Caso remitido exitosamente.`);
         setTimeout(() => {
           fetchAlerts();
           onBack();
         }, 2000);
       } else {
-        setMessage('❌ ' + (data.message || 'Error al reasignar'));
+        setMessage('❌ ' + (data.message || 'Error al remitir'));
       }
     } catch (error) {
-      setMessage('❌ Error de conexión al servidor.');
+      setMessage('❌ Error de conexión.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="alert-assignment-view">
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-        <div style={{ background: '#f0f9ff', padding: '16px', borderRadius: '12px', border: '1px solid #bae6fd' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0369a1', marginBottom: '8px' }}>
-            <ShieldAlert size={18} />
-            <span style={{ fontWeight: '800', fontSize: '0.85rem' }}>Protocolo de Autonomía v4.5</span>
-          </div>
-          <p style={{ fontSize: '0.8rem', color: '#0c4a6e', lineHeight: '1.5' }}>
-            Como <strong>{currentRole}</strong>, usted puede gestionar este caso y derivarlo a otros profesionales según la red de mando establecida.
-          </p>
-        </div>
+    <div className="alert-assignment-view animate-fade-in">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <h3 style={{ fontSize: '1rem', fontWeight: '800', color: '#0c4a6e', margin: 0 }}>Remitir a Colaborador</h3>
+        <button 
+          onClick={onBack} 
+          style={{ background: '#f1f5f9', border: '1px solid #e2e8f0', padding: '6px 12px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: '600', color: '#475569', cursor: 'pointer' }}
+        >
+          ← Volver
+        </button>
+      </div>
 
-        <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '20px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div>
-              <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', marginBottom: '6px', display: 'block' }}>PROFESIONAL RECEPTOR</label>
+      <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+          
+          <div className="form-field">
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', color: '#64748b', marginBottom: '8px' }}>RESPONSABLE RECEPTOR *</label>
+            <div style={{ position: 'relative' }}>
               <select 
                 name="toUserId" 
                 value={assignment.toUserId} 
                 onChange={handleInputChange}
-                style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid #e2e8f0', background: '#f8fafc', fontSize: '0.85rem' }}
+                style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1.5px solid #e2e8f0', background: '#f8fafc', fontSize: '0.85rem', outline: 'none', appearance: 'none' }}
               >
-                <option value="">Seleccione un profesional de la red...</option>
+                <option value="">Seleccione un colaborador...</option>
                 {collaborators.map(c => (
-                  <option key={c.id} value={c.id}>{c.name} — {c.role}</option>
+                  <option key={c.id} value={c.id}>{c.name} ({c.role})</option>
                 ))}
               </select>
             </div>
-
-            <div>
-              <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', marginBottom: '6px', display: 'block' }}>NOTAS DE ENTREGA / CONTEXTO</label>
-              <textarea 
-                name="notes" 
-                value={assignment.notes} 
-                onChange={handleInputChange}
-                placeholder="Explique al receptor por qué se le deriva este caso..."
-                rows="4"
-                style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid #e2e8f0', background: '#f8fafc', fontSize: '0.85rem', resize: 'vertical' }}
-              />
-            </div>
-
-            {message && (
-              <div style={{ padding: '12px', borderRadius: '8px', background: message.includes('✅') ? '#f0fdf4' : '#fef2f2', color: message.includes('✅') ? '#16a34a' : '#dc2626', fontSize: '0.8rem', fontWeight: '700', textAlign: 'center' }}>
-                {message}
-              </div>
-            )}
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
-              <button 
-                onClick={handleAssign}
-                disabled={loading || !assignment.toUserId}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '10px', background: '#0c4a6e', color: '#fff', border: 'none', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}
-              >
-                {loading ? 'Procesando...' : <><UserPlus size={16} /> Reasignar y Notificar</>}
-              </button>
-            </div>
           </div>
+
+          <div className="form-field">
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', color: '#64748b', marginBottom: '8px' }}>ÁREA O DEPENDENCIA</label>
+            <select 
+              name="area" 
+              value={assignment.area} 
+              onChange={handleInputChange} 
+              style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', border: '1.5px solid #e2e8f0', background: '#f8fafc', fontSize: '0.85rem', outline: 'none' }}
+            >
+              <option>Psicología</option>
+              <option>Coordinación académica</option>
+              <option>Bienestar</option>
+              <option>Dirección</option>
+              <option>Orientación Escolar</option>
+            </select>
+          </div>
+
+          <div className="form-field">
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', color: '#64748b', marginBottom: '8px' }}>FECHA LÍMITE ATENCIÓN</label>
+            <input 
+              type="date" 
+              name="deadline" 
+              value={assignment.deadline} 
+              onChange={handleInputChange} 
+              style={{ width: '100%', padding: '11px 14px', borderRadius: '10px', border: '1.5px solid #e2e8f0', background: '#f8fafc', fontSize: '0.85rem', outline: 'none' }}
+            />
+          </div>
+
+          <div className="form-field" style={{ gridColumn: '1 / span 2' }}>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: '700', color: '#64748b', marginBottom: '8px' }}>INSTRUCCIONES / OBSERVACIONES PARA EL COLABORADOR</label>
+            <textarea 
+              name="reason" 
+              value={assignment.reason} 
+              onChange={handleInputChange} 
+              placeholder="Indique qué acciones debe priorizar el colaborador..."
+              rows="4"
+              style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1.5px solid #e2e8f0', background: '#f8fafc', fontSize: '0.85rem', outline: 'none', resize: 'vertical', fontFamily: 'inherit' }}
+            />
+          </div>
+        </div>
+
+        {message && (
+          <div style={{ marginTop: '20px', padding: '12px', borderRadius: '10px', background: message.includes('✅') ? '#f0fdf4' : '#fef2f2', color: message.includes('✅') ? '#16a34a' : '#dc2626', fontWeight: '700', fontSize: '0.85rem', textAlign: 'center' }}>
+            {message}
+          </div>
+        )}
+
+        <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
+          <button 
+            onClick={handleAssign}
+            disabled={loading || !assignment.toUserId}
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: '10px', 
+              padding: '14px 32px', borderRadius: '12px', 
+              background: '#0c4a6e', color: '#fff', border: 'none', 
+              fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer',
+              transition: 'all 0.2s', opacity: loading ? 0.7 : 1,
+              boxShadow: '0 4px 6px -1px rgba(12, 74, 110, 0.2)'
+            }}
+          >
+            {loading ? 'Remitiendo...' : <><UserPlus size={18} /> Remitir Caso Ahora</>}
+          </button>
         </div>
       </div>
     </div>

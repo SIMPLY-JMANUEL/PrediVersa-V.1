@@ -99,8 +99,14 @@ const restart = async (req, res, next) => {
 
 const reassign = async (req, res, next) => {
   try {
-    const { toUserId } = req.body;
-    const result = await alertService.reassignAlert(req.params.id, req.user, toUserId);
+    const { toUserId, area, deadline, reason } = req.body;
+    const result = await alertService.reassignAlert(req.params.id, req.user, toUserId, area, deadline);
+    
+    // Si hay una razón/nota, guardarla en el chat también
+    if (reason) {
+      await alertService.postMessage(req.params.id, req.user.id, `[DERIVACIÓN a ${area || 'Área'}] ${reason}`);
+    }
+
     res.json({ success: true, message: 'Caso reasignado exitosamente', ...result, requestId: req.requestId });
   } catch (error) {
     next(new AppError(`Fallo al reasignar caso: ${error.message}`, 403));

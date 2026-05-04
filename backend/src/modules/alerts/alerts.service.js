@@ -105,7 +105,7 @@ const updateAlert = async (id, data) => {
 
 // --- Colaboración v4.5: Autonomía y Chat ---
 
-const reassignAlert = async (alertId, fromUser, toUserId) => {
+const reassignAlert = async (alertId, fromUser, toUserId, area, deadline) => {
   const original = await alertRepository.findById(alertId);
   if (!original) throw new Error('Alerta no encontrada');
 
@@ -123,8 +123,14 @@ const reassignAlert = async (alertId, fromUser, toUserId) => {
     throw new Error(`El rol ${fromUser.role} no tiene permisos para reasignar a un ${targetUser.role}`);
   }
 
-  await alertRepository.update(alertId, ['assignedTo = ?', 'status = ?'], [toUserId, 'En Proceso']);
+  // 1. Ejecutar Cambio con todos los campos
+  await alertRepository.update(
+    alertId, 
+    ['assignedTo = ?', 'assignedArea = ?', 'deadline = ?', 'status = ?'], 
+    [toUserId, area || null, deadline || null, 'En Proceso']
+  );
 
+  // 2. Registrar en Historial
   await alertRepository.saveHistory({
     alert_id: alertId,
     action: 'assigned',
@@ -133,6 +139,8 @@ const reassignAlert = async (alertId, fromUser, toUserId) => {
       from_role: fromUser.role,
       to_name: targetUser.name, 
       to_role: targetUser.role,
+      area: area,
+      deadline: deadline,
       reason: 'Reasignación autónoma operativa'
     }
   });
