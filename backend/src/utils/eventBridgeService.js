@@ -1,8 +1,6 @@
-const { EventBridgeClient, PutEventsCommand } = require("@aws-sdk/client-eventbridge");
-const { region } = require("./awsConfig");
+const { PutEventsCommand } = require("@aws-sdk/client-eventbridge");
+const { eventBridgeClient: client } = require("./awsConfig");
 const { v4: uuidv4 } = require('uuid');
-
-const client = new EventBridgeClient({ region });
 
 /**
  * SERVICIO DE EVENTOS PREDIVERSA

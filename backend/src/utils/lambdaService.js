@@ -1,17 +1,6 @@
-const { LambdaClient, InvokeCommand } = require("@aws-sdk/client-lambda");
+const { InvokeCommand } = require("@aws-sdk/client-lambda");
+const { lambdaClient: client } = require("./awsConfig");
 const { analyzeText: localAnalyzeText } = require("./motorVersa");
-
-// Configuración del cliente Lambda
-const clientConfig = { region: process.env.AWS_REGION || "us-east-1" };
-
-if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
-  clientConfig.credentials = {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  };
-}
-
-const client = new LambdaClient(clientConfig);
 
 /**
  * Invoca el Motor Versa 2.0 en AWS Lambda

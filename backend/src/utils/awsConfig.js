@@ -2,10 +2,12 @@ const { LexRuntimeV2Client } = require("@aws-sdk/client-lex-runtime-v2");
 const { BedrockRuntimeClient } = require("@aws-sdk/client-bedrock-runtime");
 const { SNSClient } = require("@aws-sdk/client-sns");
 const { SESClient } = require("@aws-sdk/client-ses");
+const { LambdaClient } = require("@aws-sdk/client-lambda");
+const { EventBridgeClient } = require("@aws-sdk/client-eventbridge");
 require('dotenv').config();
 
 /**
- * CONFIGURACIÓN CENTRALIZADA DE AWS (v1.0)
+ * CONFIGURACIÓN CENTRALIZADA DE AWS (v1.1)
  * Centraliza las instancias de los clientes para optimizar memoria y configuración.
  */
 
@@ -23,24 +25,22 @@ if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
   };
 }
 
-// Cliente para Amazon Lex V2 (Chatbot)
+// Clientes AWS
 const lexClient = new LexRuntimeV2Client(clientConfig);
-
-// Cliente para Amazon Bedrock (IA Central - Claude)
 const bedrockClient = new BedrockRuntimeClient(clientConfig);
-
-// Cliente para Amazon SNS (Alertas SMS)
 const snsClient = new SNSClient(clientConfig);
-
-// Cliente para Amazon SES (Alertas Email)
 const sesClient = new SESClient(clientConfig);
+const lambdaClient = new LambdaClient(clientConfig);
+const eventBridgeClient = new EventBridgeClient(clientConfig);
 
-console.log('🛡️ Configuración centralizada de AWS Versa cargada correctamente.');
+console.log('🛡️ Configuración centralizada de AWS Versa (v1.1) cargada correctamente.');
 
 module.exports = {
   lexClient,
   bedrockClient,
   snsClient,
   sesClient,
+  lambdaClient,
+  eventBridgeClient,
   region
 };
