@@ -42,11 +42,11 @@ const login = async (email, password) => {
   const user = await userRepository.findByEmail(cleanEmail);
   
   if (!user) {
-    console.warn(`⚠️ [AUTH] Intento de login fallido: Usuario no encontrado.`);
+    console.warn(`⚠️ [AUTH] Intento de login fallido: Usuario [${cleanEmail}] no encontrado en la base de datos.`);
     throw new Error('Credenciales inválidas');
   }
 
-  console.log(`✅ [AUTH] Usuario localizado. Verificando credenciales...`);
+  console.log(`✅ [AUTH] Usuario localizado: ${user.email} (ID: ${user.id}). Verificando contraseña...`);
   const match = await bcrypt.compare(password, user.password);
   
   if (!match) {

@@ -1,0 +1,61 @@
+﻿{
+    "events": [
+        {
+            "timestamp": 1777851855563,
+            "message": "> prediversa-backend@1.0.0 start",
+            "ingestionTime": 1777851860427
+        },
+        {
+            "timestamp": 1777851855563,
+            "message": "> node src/server.js",
+            "ingestionTime": 1777851860427
+        },
+        {
+            "timestamp": 1777851855889,
+            "message": "­ƒöÆ SSL Configurado: Usando certificado global-bundle.pem para RDS",
+            "ingestionTime": 1777851860427
+        },
+        {
+            "timestamp": 1777851855890,
+            "message": "Ignoring invalid configuration option passed to Connection: acquireTimeout. This is currently a warning, but in future versions of MySQL2, an error will be thrown if you pass an invalid configuration option to a Connection",
+            "ingestionTime": 1777851860427
+        },
+        {
+            "timestamp": 1777851856258,
+            "message": "­ƒøí´©Å Configuraci├│n centralizada de AWS Versa cargada correctamente.",
+            "ingestionTime": 1777851860427
+        },
+        {
+            "timestamp": 1777851856265,
+            "message": "ÔÜá´©Å ADVERTENCIA: No se encontr├│ la carpeta frontend/dist. El servidor funcionar├í solo como API.",
+            "ingestionTime": 1777851860427
+        },
+        {
+            "timestamp": 1777851856273,
+            "message": "­ƒÜÇ Servidor ejecut├índose en puerto 8080 (0.0.0.0)",
+            "ingestionTime": 1777851860427
+        },
+        {
+            "timestamp": 1777851856273,
+            "message": "­ƒôí API disponible en: http://0.0.0.0:8080/api",
+            "ingestionTime": 1777851860427
+        },
+        {
+            "timestamp": 1777851856274,
+            "message": "­ƒ®║ Health check disponible en: http://0.0.0.0:8080/",
+            "ingestionTime": 1777851860427
+        },
+        {
+            "timestamp": 1777851856322,
+            "message": "ÔØî Error de conexi├│n a RDS: self-signed certificate in certificate chain",
+            "ingestionTime": 1777851860427
+        },
+        {
+            "timestamp": 1777851856323,
+            "message": "ÔØî No se pudo conectar a la base de datos. Verifica RDS.",
+            "ingestionTime": 1777851860427
+        }
+    ],
+    "nextForwardToken": "f/39647421248593897526290509713557725973704001434976649226/s",
+    "nextBackwardToken": "b/39647421231645331175407236125990580086491246690431533056/s"
+}

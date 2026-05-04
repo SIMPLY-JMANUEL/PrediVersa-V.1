@@ -1,0 +1,86 @@
+﻿{
+    "events": [
+        {
+            "timestamp": 1777848451713,
+            "message": "­ƒôí [2026-05-03T22:47:31.713Z] GET /health - IP: 169.254.172.2 - ID: 21faa628-60ba-4e9f-9356-421cc2991468",
+            "ingestionTime": 1777848454057
+        },
+        {
+            "timestamp": 1777848451713,
+            "message": "\u001b[31merror\u001b[39m: ­ƒÜ¿ CORS BLOQUEADO: El origen \"undefined\" no est├í en la lista blanca. {\"service\":\"prediversa-backend\",\"timestamp\":\"2026-05-03T22:47:31.713Z\"}",
+            "ingestionTime": 1777848454057
+        },
+        {
+            "timestamp": 1777848451714,
+            "message": "\u001b[31merror\u001b[39m: No permitido por pol├¡ticas CORS {\"method\":\"GET\",\"path\":\"/health\",\"requestId\":\"21faa628-60ba-4e9f-9356-421cc2991468\",\"service\":\"prediversa-backend\",\"statusCode\":500,\"timestamp\":\"2026-05-03T22:47:31.713Z\",\"type\":\"Error\"}",
+            "ingestionTime": 1777848454057
+        },
+        {
+            "timestamp": 1777848824141,
+            "message": "­ƒôí [2026-05-03T22:53:44.141Z] GET /health - IP: 169.254.172.2 - ID: 3b4e2462-dd65-4736-8e59-72b2f8ff67fa",
+            "ingestionTime": 1777848829038
+        },
+        {
+            "timestamp": 1777848824141,
+            "message": "\u001b[31merror\u001b[39m: ­ƒÜ¿ CORS BLOQUEADO: El origen \"undefined\" no est├í en la lista blanca. {\"service\":\"prediversa-backend\",\"timestamp\":\"2026-05-03T22:53:44.141Z\"}",
+            "ingestionTime": 1777848829038
+        },
+        {
+            "timestamp": 1777848824141,
+            "message": "\u001b[31merror\u001b[39m: No permitido por pol├¡ticas CORS {\"method\":\"GET\",\"path\":\"/health\",\"requestId\":\"3b4e2462-dd65-4736-8e59-72b2f8ff67fa\",\"service\":\"prediversa-backend\",\"statusCode\":500,\"timestamp\":\"2026-05-03T22:53:44.141Z\",\"type\":\"Error\"}",
+            "ingestionTime": 1777848829038
+        },
+        {
+            "timestamp": 1777849724210,
+            "message": "npm error path /app/backend",
+            "ingestionTime": 1777849728951
+        },
+        {
+            "timestamp": 1777849724210,
+            "message": "npm error command failed",
+            "ingestionTime": 1777849728951
+        },
+        {
+            "timestamp": 1777849724212,
+            "message": "npm error signal SIGTERM",
+            "ingestionTime": 1777849728951
+        },
+        {
+            "timestamp": 1777849724212,
+            "message": "npm error command sh -c node src/server.js",
+            "ingestionTime": 1777849728951
+        },
+        {
+            "timestamp": 1777849724213,
+            "message": "npm notice",
+            "ingestionTime": 1777849728951
+        },
+        {
+            "timestamp": 1777849724213,
+            "message": "npm notice New major version of npm available! 10.9.4 -> 11.13.0",
+            "ingestionTime": 1777849728951
+        },
+        {
+            "timestamp": 1777849724213,
+            "message": "npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.13.0",
+            "ingestionTime": 1777849728951
+        },
+        {
+            "timestamp": 1777849724213,
+            "message": "npm notice To update run: npm install -g npm@11.13.0",
+            "ingestionTime": 1777849728951
+        },
+        {
+            "timestamp": 1777849724213,
+            "message": "npm notice",
+            "ingestionTime": 1777849728951
+        },
+        {
+            "timestamp": 1777849724214,
+            "message": "npm error A complete log of this run can be found in: /root/.npm/_logs/2026-05-03T21_14_33_813Z-debug-0.log",
+            "ingestionTime": 1777849728951
+        }
+    ],
+    "nextForwardToken": "f/39647373700974353032362131460182235887141492873427484681/s",
+    "nextBackwardToken": "b/39647345323253787156945651691586852077336801044147666944/s"
+}

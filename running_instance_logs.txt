@@ -1,0 +1,28 @@
+﻿{
+    "events": [
+        {
+            "timestamp": 1777842874211,
+            "message": "> prediversa-backend@1.0.0 start",
+            "ingestionTime": 1777842879113
+        },
+        {
+            "timestamp": 1777842874211,
+            "message": "> node src/server.js",
+            "ingestionTime": 1777842879113
+        },
+        {
+            "timestamp": 1777842874545,
+            "message": "Ignoring invalid configuration option passed to Connection: acquireTimeout. This is currently a warning, but in future versions of MySQL2, an error will be thrown if you pass an invalid configuration option to a Connection",
+            "ingestionTime": 1777842879113
+        },
+        {
+            "timestamp": 1777842874878,
+aws : 
+En línea: 1 Carácter: 1
++ aws logs get-log-events --log-group-name "/aws/apprunner/prediversa-b ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+aws: [ERROR]: 'charmap' codec can't encode characters in position 1-2: character maps to <undefined>
+            "message": 
