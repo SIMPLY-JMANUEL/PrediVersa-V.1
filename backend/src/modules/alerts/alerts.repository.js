@@ -50,7 +50,8 @@ const create = async (alertData) => {
   const { 
     userId, studentName, studentDocumentId, studentAge, studentGrade, 
     studentUsername, alertType, description, ticketNumber, alertDate, 
-    alertTime, deadline, assignedTo, status, createdBy 
+    alertTime, deadline, assignedTo, status, createdBy,
+    restart_count, parent_alert_id 
   } = alertData;
   
   const [result] = await pool.execute(
@@ -64,7 +65,8 @@ const create = async (alertData) => {
      assignedTo || '', status || 'Pendiente', createdBy || null, restart_count || 0, parent_alert_id || null]
   );
   
-  return await findById(result.insertId);
+  const [newRow] = await pool.execute('SELECT * FROM alerts WHERE id = ?', [result.insertId]);
+  return newRow[0] || null;
 };
 
 const update = async (id, updates, values) => {

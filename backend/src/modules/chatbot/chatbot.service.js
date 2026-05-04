@@ -104,11 +104,12 @@ const shouldTriggerAlert = (context) => {
   // Regla 1: Explícito del modelo 🤖
   if (context.alerta?.activar) return true;
   
-  // Regla 2: Fallback defensivo crítico (Riesgo ALTO siempre alerta) 🆘
-  if (context.riesgo?.nivel === "ALTO") return true;
+  // Regla 2: Fallback defensivo crítico (Riesgo ALTO o MEDIO siempre alerta) 🆘
+  // Blindaje institucional: No se debe perder ninguna advertencia.
+  if (context.riesgo?.nivel === "ALTO" || context.riesgo?.nivel === "MEDIO") return true;
   
-  // Regla 3: Score de riesgo extremo 📈
-  if (context.riesgo?.score >= 85) return true;
+  // Regla 3: Score de riesgo significativo 📈
+  if (context.riesgo?.score >= 70) return true;
   
   return false;
 };
