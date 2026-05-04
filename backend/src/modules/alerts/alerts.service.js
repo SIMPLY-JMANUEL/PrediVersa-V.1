@@ -20,7 +20,20 @@ const createManualAlert = async (alertData, userId) => {
   if (!data.ticketNumber) {
     data.ticketNumber = `TKT-${Date.now()}`;
   }
-  return await alertRepository.create(data);
+  const newAlertId = await alertRepository.create(data);
+  const newAlert = await alertRepository.findById(newAlertId);
+
+  // 🔥 Notificación en Tiempo Real
+  notificarAdmins({
+    tipo: 'alerta_manual',
+    nivel: newAlert.alertType === 'Critica' ? 'alto' : 'medio',
+    nombre: newAlert.studentName,
+    ticket: newAlert.ticketNumber,
+    descripcion: `Nueva alerta manual creada por administrador.`,
+    timestamp: new Date().toISOString()
+  });
+
+  return newAlert;
 };
 
 const analyzeAndCreateAlert = async (inputData) => {
@@ -52,7 +65,7 @@ const analyzeAndCreateAlert = async (inputData) => {
     `Fuente: Motor Versa Unified`
   ].join('\n');
 
-  const newAlert = await alertRepository.create({
+  const newAlertId = await alertRepository.create({
     studentName,
     studentUsername,
     alertType: finalAlertType,
@@ -61,6 +74,19 @@ const analyzeAndCreateAlert = async (inputData) => {
     alertDate: now.toISOString().split('T')[0],
     alertTime: now.toTimeString().slice(0, 5),
     status: (analisis.nivel_riesgo === 'alto' || esUrgente) ? 'Urgente' : 'Pendiente'
+  });
+
+  const newAlert = await alertRepository.findById(newAlertId);
+
+  // 🔥 Notificación en Tiempo Real
+  notificarAdmins({
+    tipo: 'alerta_versa',
+    nivel: analisis.nivel_riesgo === 'alto' ? 'alto' : 'medio',
+    nombre: studentName,
+    ticket: ticketNumber,
+    descripcion: `Detección automática Versa: ${analisis.nivel_riesgo.toUpperCase()}`,
+    tipo_violencia: tipoViolencia,
+    timestamp: new Date().toISOString()
   });
 
   return { alert: newAlert, score: analisis.score };

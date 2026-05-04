@@ -118,10 +118,12 @@ const shouldTriggerAlert = (context) => {
  */
 const resolveChannels = (context) => {
   const urgency = context.alerta?.urgencia;
-  if (urgency === "INMEDIATA") return ["PLATFORM", "SMS", "EMAIL"];
-  if (urgency === "ALTA") return ["PLATFORM", "EMAIL"];
-  if (urgency === "MEDIA") return ["PLATFORM"];
-  return [];
+  const channels = ["PLATFORM"]; // 🔥 PLATFORM (SSE) siempre por defecto para alertas
+
+  if (urgency === "INMEDIATA") channels.push("SMS", "EMAIL");
+  else if (urgency === "ALTA") channels.push("EMAIL");
+  
+  return channels;
 };
 
 /**
@@ -130,16 +132,18 @@ const resolveChannels = (context) => {
 const dispatchAlertEnterprise = async (text, user, context, requestId) => {
   if (!shouldTriggerAlert(context)) return;
 
+  const ticketNumber = `VERSA-${Date.now()}`;
   const payload = {
     requestId,
     studentName: user.name || 'Estudiante Lex',
     studentEmail: user.email || 'N/A',
-    riskLevel: context.riesgo.nivel,
+    riskLevel: context.riesgo.nivel === 'ALTO' ? 'alto' : 'medio',
     alertType: context.alerta?.tipo || 'EMOCIONAL',
     urgency: context.alerta?.urgencia || 'MEDIA',
     message: context.alerta?.justificacion || 'Detección automática de riesgo.',
     evidence: context.alerta?.evidencia || [text],
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    ticketNumber
   };
 
   const channels = resolveChannels(context);
@@ -153,9 +157,9 @@ const dispatchAlertEnterprise = async (text, user, context, requestId) => {
     alertRepository.create({
       studentName: payload.studentName,
       studentUsername: payload.studentEmail,
-      alertType: payload.alertType,
+      alertType: payload.riskLevel === 'alto' ? 'Critica' : 'Advertencia',
       description: `[VERSA v3.1] ${payload.message}\nEvidencia: ${payload.evidence.join(', ')}`,
-      ticketNumber: `VERSA-${Date.now()}`,
+      ticketNumber: payload.ticketNumber,
       status: payload.urgency === 'INMEDIATA' ? 'Urgente' : 'Pendiente'
     }),
     
@@ -163,9 +167,11 @@ const dispatchAlertEnterprise = async (text, user, context, requestId) => {
     channels.includes("PLATFORM") && notificarAdmins({
       tipo: 'alerta_versa',
       nivel: payload.riskLevel,
-      estudiante: payload.studentName,
+      nombre: payload.studentName,
+      ticket: payload.ticketNumber,
       mensaje: payload.message,
-      urgencia: payload.urgency
+      urgencia: payload.urgency,
+      timestamp: payload.timestamp
     })
   ];
 
