@@ -8,6 +8,12 @@ const IMPACT_CATEGORIES = {
   EMOCIONAL: ["solo", "triste", "ansiedad", "llorar", "mal", "desespero", "vacio", "angustia"]
 };
 
+const INTENT_PATTERNS = {
+  SALUDO: [/hola/i, /hey/i, /buen[ao]s/i, /\bq\s+mas\b/i, /salu2/i, /quiobo/i, /que tal/i],
+  AYUDA: [/ayuda/i, /help/i, /que\s+haces/i, /quien\s+eres/i, /como\s+funciona/i, /que puedes hacer/i],
+  DESPEDIDA: [/chao/i, /adios/i, /bye/i, /gracias/i, /nos\s+vemos/i, /hasta luego/i]
+};
+
 /**
  * SERVICIO CENTRAL DE IA (BEDROCK EDITION)
  * Migrado de Gemini a Amazon Bedrock (Claude 3 Sonnet) para alta disponibilidad.
@@ -20,11 +26,41 @@ class CentralAIService {
   }
 
   /**
-   * 🧼 PRE-PROCESAMIENTO: Normaliza input
+   * 🧼 NORMALIZACIÓN AVANZADA (Staff Engineer Level)
+   * Limpia ruido, elimina acentos y expande jerga juvenil.
    */
-  preprocess(text) {
+  normalizeInput(text) {
     if (!text) return "";
-    return text.toLowerCase().trim().replace(/\s+/g, ' ');
+    return text
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Elimina acentos
+      .replace(/\bq\b/g, "que")
+      .replace(/\bxq\b/g, "porque")
+      .replace(/\bpq\b/g, "porque")
+      .replace(/\btmb\b/g, "tambien")
+      .replace(/\bdnd\b/g, "donde")
+      .replace(/\bx\b/g, "por")
+      .replace(/\btoy\b/g, "estoy")
+      .replace(/\bsalu2\b/g, "saludos")
+      .replace(/[^\w\s]/g, "") // Elimina emojis y signos raros
+      .trim();
+  }
+
+  /**
+   * 🎯 CLASIFICADOR LIGERO (Pattern Matching)
+   * Evita llamadas costosas a Bedrock para intents triviales.
+   */
+  classifyIntent(normalizedText) {
+    for (const [intent, patterns] of Object.entries(INTENT_PATTERNS)) {
+      if (patterns.some(pattern => pattern.test(normalizedText))) {
+        return { intent, confidence: 1.0 };
+      }
+    }
+    return { intent: 'UNKNOWN', confidence: 0.0 };
+  }
+
+  preprocess(text) {
+    return this.normalizeInput(text);
   }
 
   /**
@@ -68,9 +104,24 @@ class CentralAIService {
    */
   async analizarContextoTotalV3(datos) {
     const text = typeof datos === 'string' ? datos : datos.mensaje;
+    const cleanText = this.normalizeInput(text);
     
-    // --- CAPA 1: FAST FILTER (Regex) ---
-    const categoria = await this.categorizeMessage(text);
+    // 1. Detección rápida de Intent (Local)
+    const localIntent = this.classifyIntent(cleanText);
+    
+    // 2. Análisis de Riesgo Base (Regex Fast Filter)
+    const categoria = await this.categorizeMessage(cleanText);
+    
+    // 🚀 OPTIMIZACIÓN: Bypass de Bedrock si el intent es claro y el riesgo es bajo
+    if (localIntent.confidence > 0.8 && categoria.nivel === 'BAJO') {
+      return {
+        riesgo: { nivel: 'BAJO', score: 0 },
+        emocion: { clase: 'neutral' },
+        alerta: { activar: false },
+        intent: localIntent.intent,
+        bypassLLM: true
+      };
+    }
     
     // --- CAPA 2: SEMANTIC ANALYSIS (Bedrock) ---
     const systemPrompt = `Eres VERSA Engine, un sistema experto en análisis de riesgo psicológico para PrediVersa.

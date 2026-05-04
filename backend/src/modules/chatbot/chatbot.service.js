@@ -8,6 +8,12 @@ const { adminClients, notificarAdmins } = require('../../utils/notificaciones');
 const alertRepository = require('../alerts/alerts.repository');
 const logger = require('../../utils/logger');
 
+const DIRECT_RESPONSES = {
+  SALUDO: "¡Hola! Soy Versa, un asistente virtual experto en apoyo y orientación. ¿En qué puedo ayudarte hoy?",
+  AYUDA: "Puedo escucharte si algo te preocupa, ayudarte con dudas del colegio o guiarte si necesitas apoyo emocional. ¡Cuéntame qué pasa!",
+  DESPEDIDA: "¡Cuídate mucho! Recuerda que siempre estoy aquí para escucharte y apoyarte. ¡Hasta pronto!"
+};
+
 /**
  * CAPA DE SERVICIO (BUSINESS LOGIC) - DOMINIO CHATBOT
  */
@@ -30,14 +36,22 @@ const processMessage = async (text, user, sessionId, historial = []) => {
   // 2. Generación de Respuesta Empatizada v3
   let finalResponse = "He recibido tu mensaje.";
   try {
-    // Sincronización Lex (Opcional, se mantiene por compatibilidad)
-    await sendToLex(user.id || sessionId || 'anonimo', text).catch(() => {});
-    
-    const respuestaV3 = await centralAI.generarRespuestaV3({
-      mensaje: text,
-      contexto: context
-    });
-    if (respuestaV3) finalResponse = respuestaV3;
+    // ⚡ OPTIMIZACIÓN: Respuesta directa si el intent es claro y seguro (Bypass Bedrock)
+    if (context.bypassLLM && DIRECT_RESPONSES[context.intent]) {
+      finalResponse = DIRECT_RESPONSES[context.intent];
+      logger.info({ event: 'NLU_LOCAL_MATCH', intent: context.intent, userId: user.id || 'anonimo' });
+    } else {
+      // 🤖 Bedrock para casos complejos, emocionales o de riesgo
+      // Sincronización Lex (Opcional, se mantiene por compatibilidad)
+      await sendToLex(user.id || sessionId || 'anonimo', text).catch(() => {});
+      
+      const respuestaV3 = await centralAI.generarRespuestaV3({
+        mensaje: text,
+        contexto: context,
+        historial
+      });
+      if (respuestaV3) finalResponse = respuestaV3;
+    }
   } catch (error) { console.error('❌ Error en Generador v3:', error.message); }
 
   // 🧼 Post-procesamiento de seguridad ALTO RIESGO
