@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BASE_URL } from '../../utils/api';
-import { AlertTriangle, FileText, Send, Clock, CheckSquare, ArrowLeft, CheckCircle } from 'lucide-react';
+import { AlertTriangle, FileText, Send, Clock, CheckSquare, ArrowLeft, CheckCircle, RotateCcw, History } from 'lucide-react';
 import AlertDetails from './AlertDetails';
 import AlertAssignment from './AlertAssignment';
 import CaseTimeline from './CaseTimeline';
@@ -10,6 +10,7 @@ const TABS = [
   { id: 'informacion',   label: 'Información del Caso',  icon: FileText },
   { id: 'analisis',      label: 'Análisis y Remisión',   icon: Send },
   { id: 'seguimiento',   label: 'Seguimiento',           icon: Clock },
+  { id: 'trazabilidad',  label: 'Trazabilidad v4.0',     icon: History },
   { id: 'control-final', label: 'Control Final',         icon: CheckSquare },
 ];
 
@@ -19,11 +20,50 @@ const AlertCaseView = ({ selectedAlert, onBack, fetchAlerts, token }) => {
   const [closingNotes, setClosingNotes] = useState('');
   const [closingMsg, setClosingMsg] = useState('');
   const [closingLoading, setClosingLoading] = useState(false);
+  const [isRestarting, setIsRestarting] = useState(false);
+  const [traceability, setTraceability] = useState([]);
+  const [loadingTrace, setLoadingTrace] = useState(false);
 
   useEffect(() => {
     setCaseStatus(selectedAlert?.status || 'Pendiente');
     setActiveTab('la-alerta');
+    if (selectedAlert?.id) fetchTraceability();
   }, [selectedAlert?.id]);
+
+  const fetchTraceability = async () => {
+    setLoadingTrace(true);
+    try {
+      const res = await fetch(`${BASE_URL}/api/alerts/${selectedAlert.id}/actions`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) setTraceability(data.actions || []);
+    } catch (e) { console.error(e); }
+    finally { setLoadingTrace(false); }
+  };
+
+  const handleRestart = async () => {
+    if (!window.confirm('¿Está seguro de reiniciar el ciclo de seguimiento? Se creará una nueva versión de la alerta y la actual se cerrará.')) return;
+    setIsRestarting(true);
+    try {
+      const res = await fetch(`${BASE_URL}/api/alerts/${selectedAlert.id}/restart`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('✅ Ciclo de seguimiento reiniciado con éxito. Nueva alerta creada.');
+        fetchAlerts();
+        onBack();
+      } else {
+        alert('❌ Error al reiniciar: ' + data.message);
+      }
+    } catch (e) {
+      alert('❌ Error de red al intentar reiniciar.');
+    } finally {
+      setIsRestarting(false);
+    }
+  };
 
   if (!selectedAlert) return null;
 
@@ -110,11 +150,29 @@ const AlertCaseView = ({ selectedAlert, onBack, fetchAlerts, token }) => {
               🤖 Versa IA
             </span>
           )}
+
+          {selectedAlert.restart_count > 0 && (
+            <span style={{ background: '#fff7ed', color: '#ea580c', borderRadius: '8px', padding: '4px 12px', fontSize: '0.75rem', fontWeight: '800', border: '1px solid #ffedd5' }}>
+              🔄 Versión {selectedAlert.restart_count + 1}
+            </span>
+          )}
         </div>
 
-        <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: '600' }}>
-          👤 {selectedAlert.studentName}
-        </span>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button 
+            onClick={handleRestart} 
+            disabled={isRestarting}
+            className="btn-secondary-pro" 
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px', fontSize: '0.75rem', fontWeight: '700', background: '#fff7ed', color: '#c2410c', border: '1px solid #fdba74' }}
+          >
+            <RotateCcw size={14} />
+            {isRestarting ? 'Reiniciando...' : 'Reiniciar Seguimiento'}
+          </button>
+          
+          <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: '600' }}>
+            👤 {selectedAlert.studentName}
+          </span>
+        </div>
       </div>
 
       {/* ── Barra de pestañas ── */}
@@ -225,6 +283,65 @@ const AlertCaseView = ({ selectedAlert, onBack, fetchAlerts, token }) => {
           </div>
           <div style={card}>
             <CaseTimeline alertId={selectedAlert.id} token={token} />
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+            <button onClick={() => setActiveTab('control-final')} className="btn-primary-pro">
+              Control Final →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── 4.5 TRAZABILIDAD v4.0 ── */}
+      {activeTab === 'trazabilidad' && (
+        <div className="animate-fade-in">
+          <div style={{ marginBottom: '14px' }}>
+            <p style={sectionTitle}>Trazabilidad Operativa v4.0</p>
+            <p style={{ fontSize: '0.8rem', color: '#64748b' }}>Registro inmutable de versiones y cambios estructurales del caso.</p>
+          </div>
+
+          <div style={card}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                <p style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '700', marginBottom: '4px' }}>ESTADO DEL CICLO</p>
+                <p style={{ fontSize: '0.85rem', color: '#1e293b' }}>
+                  {selectedAlert.restart_count === 0 
+                    ? 'Esta es la versión original del caso (Ciclo Inicial).' 
+                    : `Este caso es el reinicio número ${selectedAlert.restart_count} del reporte original.`}
+                </p>
+                {selectedAlert.parent_alert_id && (
+                  <p style={{ fontSize: '0.7rem', color: '#0369a1', marginTop: '4px', fontWeight: '600' }}>
+                    🔗 Vinculado a la alerta ID: #{selectedAlert.parent_alert_id}
+                  </p>
+                )}
+              </div>
+
+              <div style={{ marginTop: '10px' }}>
+                <p style={sectionTitle}>Historial de Intervención</p>
+                {loadingTrace ? (
+                  <p style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>Cargando trazabilidad...</p>
+                ) : traceability.length === 0 ? (
+                  <p style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>No hay registros de trazabilidad aún.</p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {traceability.map((item, idx) => (
+                      <div key={idx} style={{ display: 'flex', gap: '12px', padding: '10px', borderLeft: '3px solid #0c4a6e', background: '#fff' }}>
+                        <div style={{ fontSize: '0.7rem', color: '#94a3b8', width: '80px', flexShrink: 0 }}>
+                          {new Date(item.actionDate || item.timestamp).toLocaleDateString()}
+                        </div>
+                        <div>
+                          <p style={{ fontSize: '0.8rem', fontWeight: '700', color: '#1e293b' }}>
+                            {item.actionType || item.action} 
+                            <span style={{ fontWeight: '400', color: '#64748b', marginLeft: '5px' }}>por {item.collaboratorName || item.userName || 'Sistema'}</span>
+                          </p>
+                          <p style={{ fontSize: '0.75rem', color: '#475569', marginTop: '2px' }}>{item.description || 'Cambio de estado operativo.'}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
             <button onClick={() => setActiveTab('control-final')} className="btn-primary-pro">
