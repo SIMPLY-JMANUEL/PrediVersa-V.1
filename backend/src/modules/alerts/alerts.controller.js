@@ -7,7 +7,6 @@ const AppError = require('../../utils/appError');
 
 const getAlerts = async (req, res, next) => {
   try {
-    // Paginación server-side: ?page=1&limit=20&status=&alertType=
     const page    = Math.max(1, parseInt(req.query.page)  || 1);
     const limit   = Math.min(100, parseInt(req.query.limit) || 20);
     const status  = req.query.status  || null;
@@ -49,7 +48,6 @@ const analyze = async (req, res, next) => {
     const result = await alertService.analyzeAndCreateAlert(req.body);
     res.status(201).json({ success: true, ...result, requestId: req.requestId });
   } catch (error) {
-    // Error operacional en el análisis IA
     next(new AppError(`Error en análisis Versa: ${error.message}`, 400));
   }
 };
@@ -97,6 +95,38 @@ const restart = async (req, res, next) => {
   }
 };
 
+// --- Colaboración v4.5 ---
+
+const reassign = async (req, res, next) => {
+  try {
+    const { toUserId } = req.body;
+    const result = await alertService.reassignAlert(req.params.id, req.user, toUserId);
+    res.json({ success: true, message: 'Caso reasignado exitosamente', ...result, requestId: req.requestId });
+  } catch (error) {
+    next(new AppError(`Fallo al reasignar caso: ${error.message}`, 403));
+  }
+};
+
+const getMessages = async (req, res, next) => {
+  try {
+    const messages = await alertService.getMessages(req.params.id);
+    res.json({ success: true, messages, requestId: req.requestId });
+  } catch (error) {
+    next(new AppError('No se pudieron obtener los mensajes del chat', 400));
+  }
+};
+
+const postMessage = async (req, res, next) => {
+  try {
+    const { message } = req.body;
+    const senderId = req.user.id;
+    await alertService.postMessage(req.params.id, senderId, message);
+    res.status(201).json({ success: true, message: 'Mensaje enviado', requestId: req.requestId });
+  } catch (error) {
+    next(new AppError('Error al enviar mensaje', 400));
+  }
+};
+
 module.exports = {
   getAlerts,
   getStats,
@@ -105,5 +135,8 @@ module.exports = {
   postAction,
   getHistory,
   update,
-  restart
+  restart,
+  reassign,
+  getMessages,
+  postMessage
 };

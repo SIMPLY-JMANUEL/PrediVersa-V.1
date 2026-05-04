@@ -1,4 +1,5 @@
 const alertRepository = require('./alerts.repository');
+const userRepository = require('../users/users.repository');
 const { invokeMotorVersaLambda } = require('../../utils/lambdaService');
 const { notificarAdmins } = require('../../utils/notificaciones');
 
@@ -25,7 +26,6 @@ const createManualAlert = async (alertData, userId) => {
 const analyzeAndCreateAlert = async (inputData) => {
   const { studentName, studentUsername, mensaje, tipoViolencia, esUrgente = false } = inputData;
   
-  // 1. Invocar Inteligencia Versa (Lambda)
   const analisis = await invokeMotorVersaLambda({
     texto: mensaje || '',
     tipoViolencia: tipoViolencia || '',
@@ -40,7 +40,6 @@ const analyzeAndCreateAlert = async (inputData) => {
   
   const ticketNumber = `BOT-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}${now.getTime().toString().slice(-6)}`;
 
-  // 2. Construir Reporte Detallado
   const description = [
     `${emoji} ALERTA AUTOMÁTICA — CHATBOT PREDIVERSA`,
     `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
@@ -53,7 +52,6 @@ const analyzeAndCreateAlert = async (inputData) => {
     `Fuente: Motor Versa Unified`
   ].join('\n');
 
-  // 3. Persistir Alerta
   const newAlert = await alertRepository.create({
     studentName,
     studentUsername,
@@ -72,7 +70,6 @@ const registerAction = async (actionData) => {
   const actionId = await alertRepository.createAction(actionData);
   const alertData = await alertRepository.findById(actionData.alertId);
   
-  // Notificar por SSE a la red administrativa
   if (alertData) {
     notificarAdmins({
       tipo: 'colaborador_accion',
@@ -106,10 +103,51 @@ const updateAlert = async (id, data) => {
   return await alertRepository.update(id, updates, values);
 };
 
-/**
- * 🔄 REINICIO CONTROLADO v4.0
- * Inicia un nuevo ciclo de seguimiento sin perder el historial.
- */
+// --- Colaboración v4.5: Autonomía y Chat ---
+
+const reassignAlert = async (alertId, fromUser, toUserId) => {
+  const original = await alertRepository.findById(alertId);
+  if (!original) throw new Error('Alerta no encontrada');
+
+  const targetUser = await userRepository.findById(toUserId);
+  if (!targetUser) throw new Error('Usuario destino no encontrado');
+
+  const canReassign = (actorRole, targetRole) => {
+    if (actorRole === 'Administrador' || actorRole === 'Coordinador') return true;
+    if (actorRole === 'Psicologo') return targetRole === 'Psicologo' || targetRole === 'Coordinador';
+    if (actorRole === 'Docente') return targetRole === 'Coordinador';
+    return false;
+  };
+
+  if (!canReassign(fromUser.role, targetUser.role)) {
+    throw new Error(`El rol ${fromUser.role} no tiene permisos para reasignar a un ${targetUser.role}`);
+  }
+
+  await alertRepository.update(alertId, ['assignedTo = ?', 'status = ?'], [toUserId, 'En Proceso']);
+
+  await alertRepository.saveHistory({
+    alert_id: alertId,
+    action: 'assigned',
+    performed_by: fromUser.id,
+    metadata: { 
+      from_role: fromUser.role,
+      to_name: targetUser.name, 
+      to_role: targetUser.role,
+      reason: 'Reasignación autónoma operativa'
+    }
+  });
+
+  return { success: true, new_assigned: targetUser.name };
+};
+
+const postMessage = async (alertId, senderId, message) => {
+  return await alertRepository.createMessage({ alert_id: alertId, sender_id: senderId, message });
+};
+
+const getMessages = async (alertId) => {
+  return await alertRepository.findMessagesByAlertId(alertId);
+};
+
 const restartAlert = async (alertId, adminId) => {
   const original = await alertRepository.findById(alertId);
   if (!original) throw new Error('Alerta original no encontrada');
@@ -118,7 +156,6 @@ const restartAlert = async (alertId, adminId) => {
   const restartCount = (original.restart_count || 0) + 1;
   const newTicket = `RE-${original.ticketNumber}-${restartCount}`;
 
-  // 1. Crear Nueva Alerta (Nuevo Ciclo)
   const newAlert = await alertRepository.create({
     ...original,
     id: undefined,
@@ -133,7 +170,6 @@ const restartAlert = async (alertId, adminId) => {
     updatedAt: undefined
   });
 
-  // 2. Registrar en Historial de la ORIGINAL
   await alertRepository.saveHistory({
     alert_id: original.id,
     action: 'restarted',
@@ -145,7 +181,6 @@ const restartAlert = async (alertId, adminId) => {
     }
   });
 
-  // 3. Registrar en Historial de la NUEVA
   await alertRepository.saveHistory({
     alert_id: newAlert.id,
     action: 'created',
@@ -157,7 +192,6 @@ const restartAlert = async (alertId, adminId) => {
     }
   });
 
-  // 4. Actualizar estado de la original
   await alertRepository.update(original.id, ['status = ?'], ['Cerrada']);
 
   return newAlert;
@@ -171,5 +205,8 @@ module.exports = {
   registerAction,
   getHistory,
   updateAlert,
-  restartAlert
+  restartAlert,
+  reassignAlert,
+  postMessage,
+  getMessages
 };

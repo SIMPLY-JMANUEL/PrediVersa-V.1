@@ -4,6 +4,7 @@ import { AlertTriangle, FileText, Send, Clock, CheckSquare, ArrowLeft, CheckCirc
 import AlertDetails from './AlertDetails';
 import AlertAssignment from './AlertAssignment';
 import CaseTimeline from './CaseTimeline';
+import InternalChat from './InternalChat';
 
 const TABS = [
   { id: 'la-alerta',     label: 'La Alerta',            icon: AlertTriangle },
@@ -14,7 +15,7 @@ const TABS = [
   { id: 'control-final', label: 'Control Final',         icon: CheckSquare },
 ];
 
-const AlertCaseView = ({ selectedAlert, onBack, fetchAlerts, token }) => {
+const AlertCaseView = ({ selectedAlert, onBack, fetchAlerts, token, user }) => {
   const [activeTab, setActiveTab] = useState('la-alerta');
   const [caseStatus, setCaseStatus] = useState(selectedAlert?.status || 'Pendiente');
   const [closingNotes, setClosingNotes] = useState('');
@@ -265,7 +266,13 @@ const AlertCaseView = ({ selectedAlert, onBack, fetchAlerts, token }) => {
       {/* ── 3. ANÁLISIS Y REMISIÓN ── */}
       {activeTab === 'analisis' && (
         <div className="animate-fade-in">
-          <AlertAssignment selectedAlert={selectedAlert} fetchAlerts={fetchAlerts} onBack={() => setActiveTab('informacion')} />
+          <AlertAssignment 
+            selectedAlert={selectedAlert} 
+            fetchAlerts={fetchAlerts} 
+            onBack={() => setActiveTab('informacion')} 
+            user={user}
+            token={token}
+          />
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '14px' }}>
             <button onClick={() => setActiveTab('seguimiento')} className="btn-primary-pro">
               Ver Seguimiento →
@@ -316,7 +323,12 @@ const AlertCaseView = ({ selectedAlert, onBack, fetchAlerts, token }) => {
                 )}
               </div>
 
-              <div style={{ marginTop: '10px' }}>
+              <div style={{ marginTop: '20px' }}>
+                <p style={sectionTitle}>Coordinación del Caso (Chat Profesional)</p>
+                <InternalChat alertId={selectedAlert.id} token={token} currentUser={user} />
+              </div>
+
+              <div style={{ marginTop: '20px' }}>
                 <p style={sectionTitle}>Historial de Intervención</p>
                 {loadingTrace ? (
                   <p style={{ textAlign: 'center', padding: '20px', color: '#94a3b8' }}>Cargando trazabilidad...</p>

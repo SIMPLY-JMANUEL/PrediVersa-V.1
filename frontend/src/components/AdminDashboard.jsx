@@ -166,6 +166,7 @@ function AdminDashboard({ user, onLogout }) {
                       onBack={() => setSelectedAlert(null)}
                       fetchAlerts={fetchAlerts}
                       token={token}
+                      user={user}
                     />
                   )}
                 </div>

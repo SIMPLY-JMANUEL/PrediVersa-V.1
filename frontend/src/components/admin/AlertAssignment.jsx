@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { BASE_URL } from '../../utils/api';
+import { UserPlus, ShieldAlert, Send } from 'lucide-react';
 
-const AlertAssignment = ({ selectedAlert, fetchAlerts, onBack }) => {
+const AlertAssignment = ({ selectedAlert, fetchAlerts, onBack, user, token }) => {
   const [collaborators, setCollaborators] = useState([]);
   const [loading, setLoading] = useState(false);
   const [assignment, setAssignment] = useState({
-    assignedTo: selectedAlert?.assignedTo || '',
-    area: 'Psicología',
-    deadline: selectedAlert?.deadline || '',
+    toUserId: '',
     notes: ''
   });
   const [message, setMessage] = useState('');
+
+  const currentRole = user?.role || 'Colaboradores';
 
   useEffect(() => {
     fetchCollaborators();
@@ -18,14 +19,22 @@ const AlertAssignment = ({ selectedAlert, fetchAlerts, onBack }) => {
 
   const fetchCollaborators = async () => {
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch(`${BASE_URL}/api/users`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
       if (data.success) {
-        // Filtrar solo colaboradores o psicólogos
-        const filtered = data.users.filter(u => u.role === 'Colaboradores' || u.role === 'Psicología');
+        // Matriz de visibilidad RBAC v4.5
+        const visibleRoles = {
+          'Administrador': ['Psicologo', 'Coordinador', 'Docente', 'Colaboradores'],
+          'Coordinador': ['Psicologo', 'Coordinador', 'Docente', 'Colaboradores'],
+          'Psicologo': ['Psicologo', 'Coordinador'],
+          'Docente': ['Coordinador'],
+          'Colaboradores': ['Coordinador']
+        };
+
+        const allowedRoles = visibleRoles[currentRole] || ['Coordinador'];
+        const filtered = data.users.filter(u => allowedRoles.includes(u.role) && u.id !== user.id);
         setCollaborators(filtered);
       }
     } catch (error) {
@@ -39,146 +48,105 @@ const AlertAssignment = ({ selectedAlert, fetchAlerts, onBack }) => {
   };
 
   const handleAssign = async () => {
-    if (!assignment.assignedTo) {
-      setMessage('Debe seleccionar un responsable');
+    if (!assignment.toUserId) {
+      setMessage('⚠️ Debe seleccionar un profesional receptor.');
       return;
     }
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${BASE_URL}/api/alerts/${selectedAlert.id}`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
-        },
-        body: JSON.stringify({
-          assignedTo: assignment.assignedTo,
-          deadline: assignment.deadline,
-          status: 'Remitida',
-          description: selectedAlert.description + `\n\n[Asignación: Remitido a ${assignment.assignedTo} (${assignment.area}). Nota: ${assignment.notes}]`
+      const response = await fetch(`${BASE_URL}/api/alerts/${selectedAlert.id}/reassign`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ 
+          toUserId: assignment.toUserId,
+          reason: assignment.notes 
         })
       });
       const data = await response.json();
       if (data.success) {
-        // Registrar la acción de remisión en el historial automáticamente
-        try {
-          await fetch(`${BASE_URL}/api/alerts/actions`, {
+        setMessage(`✅ Caso reasignado a ${data.new_assigned} exitosamente.`);
+        
+        // Registrar mensaje de contexto en el chat automáticamente
+        if (assignment.notes) {
+          await fetch(`${BASE_URL}/api/alerts/${selectedAlert.id}/messages`, {
             method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}` 
-            },
-            body: JSON.stringify({
-              alertId: selectedAlert.id,
-              collaboratorId: collaborators.find(c => c.name === assignment.assignedTo)?.id || 0,
-              category: 'Remision',
-              actionType: `Remisión a ${assignment.area}`,
-              responsibleName: assignment.assignedTo,
-              description: assignment.notes || 'Asignación inicial del caso',
-              area: assignment.area,
-              urgency: 'Alta'
-            })
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ message: `[REASIGNACIÓN] Contexto: ${assignment.notes}` })
           });
-        } catch (e) { console.error('Error al registrar acción automática:', e); }
+        }
 
-        setMessage('✅ Caso remitido al colaborador exitosamente');
         setTimeout(() => {
           fetchAlerts();
-          onBack(); // Volver al listado
+          onBack();
         }, 2000);
+      } else {
+        setMessage('❌ ' + (data.message || 'Error al reasignar'));
       }
     } catch (error) {
-      setMessage('❌ Error al remitir el caso');
+      setMessage('❌ Error de conexión al servidor.');
     } finally {
       setLoading(false);
     }
   };
 
-  if (!selectedAlert) return <div className="p-4 text-center">Seleccione una alerta primero</div>;
-
   return (
     <div className="alert-assignment-view">
-      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px'}}>
-        <h3 className="alerts-section-title" style={{color: '#2A4E5F', margin: 0}}>Remitir a Colaborador</h3>
-        <button className="action-btn-small" onClick={onBack}>← Volver</button>
-      </div>
-
-      <div className="dashboard-card" style={{padding: '20px', background: '#F8FBFD'}}>
-        <div className="user-form-grid" style={{gridTemplateColumns: 'repeat(2, 1fr)'}}>
-          <div className="form-field">
-            <label>Responsable receptor *</label>
-            <select 
-              name="assignedTo" 
-              value={assignment.assignedTo} 
-              onChange={handleInputChange}
-              className="wireframe-input"
-            >
-              <option value="">Seleccione un colaborador...</option>
-              {collaborators.map(c => (
-                <option key={c.id} value={c.name}>{c.name} ({c.role})</option>
-              ))}
-            </select>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div style={{ background: '#f0f9ff', padding: '16px', borderRadius: '12px', border: '1px solid #bae6fd' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#0369a1', marginBottom: '8px' }}>
+            <ShieldAlert size={18} />
+            <span style={{ fontWeight: '800', fontSize: '0.85rem' }}>Protocolo de Autonomía v4.5</span>
           </div>
-
-          <div className="form-field">
-            <label>Área o Dependencia</label>
-            <select name="area" value={assignment.area} onChange={handleInputChange} className="wireframe-input">
-              <option>Psicología</option>
-              <option>Coordinación académica</option>
-              <option>Bienestar</option>
-              <option>Dirección</option>
-            </select>
-          </div>
-
-          <div className="form-field">
-            <label>Fecha Límite Atención</label>
-            <input 
-              type="date" 
-              name="deadline" 
-              value={assignment.deadline} 
-              onChange={handleInputChange} 
-              className="wireframe-input" 
-            />
-          </div>
-
-          <div className="form-field full-width" style={{gridColumn: '1 / span 2'}}>
-            <label>Instrucciones / Observaciones para el colaborador</label>
-            <textarea 
-              name="notes" 
-              value={assignment.notes} 
-              onChange={handleInputChange} 
-              className="wireframe-textarea" 
-              placeholder="Indique qué acciones debe priorizar el colaborador..."
-              rows="4"
-              style={{width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E2E8F0'}}
-            ></textarea>
-          </div>
+          <p style={{ fontSize: '0.8rem', color: '#0c4a6e', lineHeight: '1.5' }}>
+            Como <strong>{currentRole}</strong>, usted puede gestionar este caso y derivarlo a otros profesionales según la red de mando establecida.
+          </p>
         </div>
 
-        {message && (
-          <div style={{
-            marginTop: '15px', 
-            padding: '10px', 
-            borderRadius: '6px', 
-            backgroundColor: message.includes('✅') ? '#f0fdf4' : '#fef2f2',
-            color: message.includes('✅') ? '#16a34a' : '#dc2626',
-            fontWeight: '600',
-            textAlign: 'center'
-          }}>
-            {message}
-          </div>
-        )}
+        <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '20px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div>
+              <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', marginBottom: '6px', display: 'block' }}>PROFESIONAL RECEPTOR</label>
+              <select 
+                name="toUserId" 
+                value={assignment.toUserId} 
+                onChange={handleInputChange}
+                style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid #e2e8f0', background: '#f8fafc', fontSize: '0.85rem' }}
+              >
+                <option value="">Seleccione un profesional de la red...</option>
+                {collaborators.map(c => (
+                  <option key={c.id} value={c.id}>{c.name} — {c.role}</option>
+                ))}
+              </select>
+            </div>
 
-        <div style={{marginTop: '20px', display: 'flex', justifyContent: 'flex-end'}}>
-          <button 
-            className="save-btn" 
-            onClick={handleAssign}
-            disabled={loading}
-            style={{padding: '10px 30px'}}
-          >
-            {loading ? 'Remitiendo...' : 'Remitir Caso Ahora'}
-          </button>
+            <div>
+              <label style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', marginBottom: '6px', display: 'block' }}>NOTAS DE ENTREGA / CONTEXTO</label>
+              <textarea 
+                name="notes" 
+                value={assignment.notes} 
+                onChange={handleInputChange}
+                placeholder="Explique al receptor por qué se le deriva este caso..."
+                rows="4"
+                style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1.5px solid #e2e8f0', background: '#f8fafc', fontSize: '0.85rem', resize: 'vertical' }}
+              />
+            </div>
+
+            {message && (
+              <div style={{ padding: '12px', borderRadius: '8px', background: message.includes('✅') ? '#f0fdf4' : '#fef2f2', color: message.includes('✅') ? '#16a34a' : '#dc2626', fontSize: '0.8rem', fontWeight: '700', textAlign: 'center' }}>
+                {message}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+              <button 
+                onClick={handleAssign}
+                disabled={loading || !assignment.toUserId}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '10px', background: '#0c4a6e', color: '#fff', border: 'none', fontWeight: '700', fontSize: '0.85rem', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}
+              >
+                {loading ? 'Procesando...' : <><UserPlus size={16} /> Reasignar y Notificar</>}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

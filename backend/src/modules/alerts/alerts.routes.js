@@ -33,5 +33,10 @@ router.put('/:id', verifyToken, validate(schemas.updateAlertSchema), alertContro
 // 🔄 REINICIO CONTROLADO (Trazabilidad v4.0) — Solo Administrador
 router.post('/:id/restart', verifyToken, authorizeRoles('Administrador'), alertController.restart);
 
+// 🤝 COLABORACIÓN v4.5 (Autonomía y Chat)
+router.post('/:id/reassign', verifyToken, alertController.reassign);
+router.get('/:id/messages', verifyToken, alertController.getMessages);
+router.post('/:id/messages', verifyToken, alertController.postMessage);
+
 module.exports = router;
 

@@ -155,6 +155,29 @@ const findHistoryByAlertId = async (alert_id) => {
   return rows;
 };
 
+// --- Colaboración v4.5 ---
+
+const createMessage = async (msgData) => {
+  const { alert_id, sender_id, message, is_internal } = msgData;
+  const [result] = await pool.execute(
+    'INSERT INTO alert_messages (alert_id, sender_id, message, is_internal) VALUES (?, ?, ?, ?)',
+    [alert_id, sender_id, message, is_internal !== undefined ? is_internal : true]
+  );
+  return result.insertId;
+};
+
+const findMessagesByAlertId = async (alert_id) => {
+  const [rows] = await pool.execute(
+    `SELECT am.*, u.name as senderName, u.role as senderRole
+     FROM alert_messages am
+     LEFT JOIN users u ON am.sender_id = u.id
+     WHERE am.alert_id = ?
+     ORDER BY am.timestamp ASC`,
+    [alert_id]
+  );
+  return rows;
+};
+
 module.exports = {
   findAll,
   findById,
@@ -164,5 +187,7 @@ module.exports = {
   createAction,
   findActionsByAlertId,
   saveHistory,
-  findHistoryByAlertId
+  findHistoryByAlertId,
+  createMessage,
+  findMessagesByAlertId
 };
