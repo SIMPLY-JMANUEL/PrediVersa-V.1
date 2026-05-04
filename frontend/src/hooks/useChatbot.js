@@ -504,21 +504,22 @@ export const useChatbot = (user) => {
   const detectarIntencion = async (t) => {
     const txt = t.toLowerCase();
     
-    if (txt.length > 15 || /pega|violen|amenaza|triste|muert|abus|toca|paila|casca/.test(txt)) {
+    // Si el mensaje es largo o contiene palabras críticas, analizar riesgo inmediatamente
+    if (txt.length > 20 || /pega|violen|amenaza|triste|muert|abus|toca|golpe|daño/.test(txt)) {
       return analizarRiesgo(t);
     }
 
-    if (/bien|feliz|genial|chévere|contento|buen/.test(txt)) return handleBien();
-    if (/urgente|emergencia|peligro|ayuda|ahora|auxilio/.test(txt)) return handleUrgente();
-    if (/casa|familia|papá|mamá|padrastro|madrastra|tío|tía|primo|prima/.test(txt)) return irAContexto('violencia_familiar', '¿Qué sucede en tu hogar? Puedes contarme con total confianza. ✍️');
-    if (/redes|instagram|tiktok|whatsapp|internet|foto|video|mensaje/.test(txt)) return irAContexto('ciberbullying', '¿Cómo te están molestando por internet? Es importante saber qué redes usan. ✍️');
-    if (/novio|novia|pareja|ex/.test(txt)) return irAContexto('violencia_pareja', '¿Cómo es tu relación? ¿Sientes que te respetan? ✍️');
-    if (/pandilla|droga|banda|parche|sustancia|vicio/.test(txt)) return irAContexto('pandillas', '¿Te sientes presionado/a por algún grupo? Cuéntame los detalles. ✍️');
+    if (/bien|feliz|genial|excelente|contento|buen/.test(txt)) return handleBien();
+    if (/urgente|emergencia|peligro|ayuda|auxilio/.test(txt)) return handleUrgente();
+    if (/casa|familia|papa|mama|hogar|tio|tia|primo|prima/.test(txt)) return irAContexto('violencia_familiar', '¿Qué sucede en tu hogar? Puedes contármelo con total confianza. ✍️');
+    if (/redes|internet|foto|video|mensaje|celular/.test(txt)) return irAContexto('ciberbullying', '¿Cómo te están molestando por internet? Es importante saber qué redes están usando. ✍️');
+    if (/novio|novia|pareja|ex/.test(txt)) return irAContexto('violencia_pareja', '¿Cómo te sientes en tu relación? Cuéntame qué ha pasado para poder orientarte. ✍️');
+    if (/pandilla|droga|banda|sustancia|vicio/.test(txt)) return irAContexto('pandillas', '¿Te sientes presionado por algún grupo? Cuéntame los detalles de forma segura. ✍️');
     if (/violencia|golpe|amenaza|bullying|pegan|empujan|insultos|burlas/.test(txt)) return irAReporte();
     if (/orientador|orientadora|psicologo|psicologa|cita|hablar con/.test(txt)) return irAOrientador();
-    if (/derechos|no me dejan|discriminacion|raza|genero|orientacion/.test(txt)) return irAContexto('derechos', '¿Sientes que no están respetando tus derechos o quién eres? Cuéntame más. ✍️');
-    if (/comida|hambre|solo|sola|no me cuidan|negligencia/.test(txt)) return irAContexto('negligencia', '¿Sientes que te falta apoyo o cuidado en casa o en el colegio? ✍️');
-    if (/triste|lloro|ganas de morir|solo|ayuda|mal/.test(txt)) return irAContexto('emocional', 'Lamento que te sientas así. 💙 Por favor, dime qué te tiene así de triste. ✍️');
+    if (/derechos|discriminacion|raza|genero|orientacion/.test(txt)) return irAContexto('derechos', '¿Sientes que no están respetando tus derechos o quién eres? Cuéntame más al respecto. ✍️');
+    if (/hambre|solo|sola|no me cuidan|negligencia/.test(txt)) return irAContexto('negligencia', '¿Sientes que te falta apoyo o cuidado en casa o en el colegio? Aquí te escucho. ✍️');
+    if (/triste|lloro|mal|angustia|desesperado/.test(txt)) return irAContexto('emocional', 'Lamento que te sientas así. 💙 Por favor, dime qué te tiene así de triste para poder apoyarte. ✍️');
     
     datos.current.userMessage = t;
     return analizarRiesgo(t);
