@@ -14,6 +14,9 @@ const createRol = (data) => configRepository.createRol(data);
 
 const getAuditLogs = (limit) => configRepository.getAuditLogs(limit);
 
+const getAIConfig = () => configRepository.getSystemConfig('ai_settings');
+const updateAIConfig = (data) => configRepository.updateSystemConfig('ai_settings', data);
+
 module.exports = {
   getDependencias,
   createDependencia,
@@ -21,5 +24,7 @@ module.exports = {
   deleteDependencia,
   getRoles,
   createRol,
-  getAuditLogs
+  getAuditLogs,
+  getAIConfig,
+  updateAIConfig
 };

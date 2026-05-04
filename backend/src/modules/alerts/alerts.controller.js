@@ -82,6 +82,21 @@ const update = async (req, res, next) => {
   }
 };
 
+const restart = async (req, res, next) => {
+  try {
+    const adminId = req.user.id;
+    const newAlert = await alertService.restartAlert(req.params.id, adminId);
+    res.status(201).json({ 
+      success: true, 
+      message: 'Ciclo de seguimiento reiniciado con éxito', 
+      alert: newAlert, 
+      requestId: req.requestId 
+    });
+  } catch (error) {
+    next(new AppError(`Fallo al reiniciar alerta: ${error.message}`, 400));
+  }
+};
+
 module.exports = {
   getAlerts,
   getStats,
@@ -89,5 +104,6 @@ module.exports = {
   analyze,
   postAction,
   getHistory,
-  update
+  update,
+  restart
 };

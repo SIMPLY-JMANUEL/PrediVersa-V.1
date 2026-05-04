@@ -56,12 +56,12 @@ const create = async (alertData) => {
   const [result] = await pool.execute(
     `INSERT INTO alerts (userId, studentName, studentDocumentId, studentAge, studentGrade, 
       studentUsername, alertType, description, ticketNumber, alertDate, alertTime, 
-      deadline, assignedTo, status, createdBy) 
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      deadline, assignedTo, status, createdBy, restart_count, parent_alert_id) 
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [userId || null, studentName || '', studentDocumentId || '', studentAge || '', 
      studentGrade || '', studentUsername || '', alertType || 'Informativa', description || '', 
      ticketNumber || '', alertDate || '', alertTime || '', deadline || '', 
-     assignedTo || '', status || 'Pendiente', createdBy || null]
+     assignedTo || '', status || 'Pendiente', createdBy || null, restart_count || 0, parent_alert_id || null]
   );
   
   return await findById(result.insertId);
@@ -132,6 +132,29 @@ const findActionsByAlertId = async (alertId) => {
   return rows;
 };
 
+// --- Trazabilidad v4.0 ---
+
+const saveHistory = async (historyData) => {
+  const { alert_id, action, performed_by, metadata } = historyData;
+  const [result] = await pool.execute(
+    'INSERT INTO alert_history (alert_id, action, performed_by, metadata) VALUES (?, ?, ?, ?)',
+    [alert_id, action, performed_by, JSON.stringify(metadata || {})]
+  );
+  return result.insertId;
+};
+
+const findHistoryByAlertId = async (alert_id) => {
+  const [rows] = await pool.execute(
+    `SELECT ah.*, u.name as userName, u.role as userRole
+     FROM alert_history ah
+     LEFT JOIN users u ON ah.performed_by = u.id
+     WHERE ah.alert_id = ?
+     ORDER BY ah.timestamp DESC`,
+    [alert_id]
+  );
+  return rows;
+};
+
 module.exports = {
   findAll,
   findById,
@@ -139,5 +162,7 @@ module.exports = {
   update,
   getStats,
   createAction,
-  findActionsByAlertId
+  findActionsByAlertId,
+  saveHistory,
+  findHistoryByAlertId
 };

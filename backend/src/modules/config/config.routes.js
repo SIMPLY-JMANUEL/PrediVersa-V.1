@@ -22,4 +22,8 @@ router.delete('/dependencias/:id', configController.removeDependencia);
 router.get('/roles', configController.listRoles);
 router.get('/auditoria', configController.getAudit);
 
+// Configuración dinámica de IA (Bedrock Control)
+router.get('/ia', configController.getIAConfig);
+router.put('/ia', configController.updateIAConfig);
+
 module.exports = router;

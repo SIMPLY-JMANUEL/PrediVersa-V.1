@@ -106,6 +106,63 @@ const updateAlert = async (id, data) => {
   return await alertRepository.update(id, updates, values);
 };
 
+/**
+ * 🔄 REINICIO CONTROLADO v4.0
+ * Inicia un nuevo ciclo de seguimiento sin perder el historial.
+ */
+const restartAlert = async (alertId, adminId) => {
+  const original = await alertRepository.findById(alertId);
+  if (!original) throw new Error('Alerta original no encontrada');
+
+  const now = new Date();
+  const restartCount = (original.restart_count || 0) + 1;
+  const newTicket = `RE-${original.ticketNumber}-${restartCount}`;
+
+  // 1. Crear Nueva Alerta (Nuevo Ciclo)
+  const newAlert = await alertRepository.create({
+    ...original,
+    id: undefined,
+    ticketNumber: newTicket,
+    status: 'Pendiente',
+    restart_count: restartCount,
+    parent_alert_id: original.id,
+    description: `[REINICIO v${restartCount}] Ciclo de seguimiento reiniciado por administrador. Referencia original: ${original.ticketNumber}.`,
+    alertDate: now.toISOString().split('T')[0],
+    alertTime: now.toTimeString().slice(0, 5),
+    createdAt: undefined,
+    updatedAt: undefined
+  });
+
+  // 2. Registrar en Historial de la ORIGINAL
+  await alertRepository.saveHistory({
+    alert_id: original.id,
+    action: 'restarted',
+    performed_by: adminId,
+    metadata: { 
+      new_ticket: newTicket, 
+      new_alert_id: newAlert.id,
+      reason: 'Seguimiento reiniciado para nueva observación'
+    }
+  });
+
+  // 3. Registrar en Historial de la NUEVA
+  await alertRepository.saveHistory({
+    alert_id: newAlert.id,
+    action: 'created',
+    performed_by: adminId,
+    metadata: { 
+      is_restart: true, 
+      parent_id: original.id,
+      parent_ticket: original.ticketNumber
+    }
+  });
+
+  // 4. Actualizar estado de la original
+  await alertRepository.update(original.id, ['status = ?'], ['Cerrada']);
+
+  return newAlert;
+};
+
 module.exports = {
   getStats,
   listAlerts,
@@ -113,5 +170,6 @@ module.exports = {
   analyzeAndCreateAlert,
   registerAction,
   getHistory,
-  updateAlert
+  updateAlert,
+  restartAlert
 };

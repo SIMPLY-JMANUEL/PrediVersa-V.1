@@ -47,11 +47,27 @@ const getAudit = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
+const getIAConfig = async (req, res, next) => {
+  try {
+    const data = await configService.getAIConfig();
+    res.json({ success: true, config: data });
+  } catch (error) { next(error); }
+};
+
+const updateIAConfig = async (req, res, next) => {
+  try {
+    const data = await configService.updateAIConfig(req.body);
+    res.json({ success: true, message: 'Configuración de IA actualizada', config: data });
+  } catch (error) { next(error); }
+};
+
 module.exports = {
   listDependencias,
   signupDependencia,
   modifyDependencia,
   removeDependencia,
   listRoles,
-  getAudit
+  getAudit,
+  getIAConfig,
+  updateIAConfig
 };

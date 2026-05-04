@@ -30,5 +30,8 @@ router.get('/:id/actions', verifyToken, alertController.getHistory);
 // Actualizar una alerta (con validación de campos permitidos)
 router.put('/:id', verifyToken, validate(schemas.updateAlertSchema), alertController.update);
 
+// 🔄 REINICIO CONTROLADO (Trazabilidad v4.0) — Solo Administrador
+router.post('/:id/restart', verifyToken, authorizeRoles('Administrador'), alertController.restart);
+
 module.exports = router;
 

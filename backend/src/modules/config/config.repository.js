@@ -51,6 +51,20 @@ const getAuditLogs = async (limit = 200) => {
   return rows;
 };
 
+// --- CONFIGURACIÓN DEL SISTEMA (IA, SEGURIDAD, ETC) ---
+const getSystemConfig = async (key) => {
+  const [rows] = await pool.execute('SELECT config_value FROM system_config WHERE config_key = ?', [key]);
+  return rows[0] ? rows[0].config_value : null;
+};
+
+const updateSystemConfig = async (key, value) => {
+  await pool.execute(
+    'INSERT INTO system_config (config_key, config_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE config_value = ?',
+    [key, JSON.stringify(value), JSON.stringify(value)]
+  );
+  return value;
+};
+
 module.exports = {
   getDependencias,
   createDependencia,
@@ -58,5 +72,7 @@ module.exports = {
   deleteDependencia,
   getRoles,
   createRol,
-  getAuditLogs
+  getAuditLogs,
+  getSystemConfig,
+  updateSystemConfig
 };

@@ -147,24 +147,51 @@ const initializeDatabase = async () => {
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
 
-    // 3. Tabla de Alertas (Gestión de Riesgo)
+    // 3. Tabla de Alertas (Gestión de Riesgo + Trazabilidad v4.0)
     await connection.execute(`
       CREATE TABLE IF NOT EXISTS alerts (
         id INT AUTO_INCREMENT PRIMARY KEY,
         userId INT DEFAULT NULL,
         studentName VARCHAR(100) NOT NULL,
         studentDocumentId VARCHAR(20) DEFAULT '',
+        studentAge VARCHAR(10) DEFAULT '',
+        studentGrade VARCHAR(50) DEFAULT '',
+        studentUsername VARCHAR(100) DEFAULT NULL,
         alertType ENUM('Informativa', 'Preventiva', 'Advertencia', 'Critica') NOT NULL,
         description TEXT NOT NULL,
         ticketNumber VARCHAR(20) DEFAULT '',
         status ENUM('Pendiente', 'En Proceso', 'Resuelta', 'Cerrada', 'Urgente') DEFAULT 'Pendiente',
+        restart_count INT DEFAULT 0,
+        parent_alert_id INT DEFAULT NULL,
+        assignedTo INT DEFAULT NULL,
+        createdBy INT DEFAULT NULL,
+        alertDate DATE DEFAULT NULL,
+        alertTime TIME DEFAULT NULL,
+        deadline DATE DEFAULT NULL,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         INDEX idx_alertType (alertType),
         INDEX idx_status (status),
-        INDEX idx_alerts_dashboard (status, alertType, createdAt)
+        INDEX idx_alerts_dashboard (status, alertType, createdAt),
+        CONSTRAINT fk_parent_alert FOREIGN KEY (parent_alert_id) REFERENCES alerts(id) ON DELETE SET NULL
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
+
+    // 3.1 Tabla de Historial de Alertas (Audit Trail)
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS alert_history (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        alert_id INT NOT NULL,
+        action ENUM('created', 'assigned', 'restarted', 'closed', 'updated', 'commented') NOT NULL,
+        performed_by INT NOT NULL,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        metadata JSON DEFAULT NULL,
+        INDEX idx_alert_history (alert_id),
+        CONSTRAINT fk_history_alert FOREIGN KEY (alert_id) REFERENCES alerts(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    // ... (rest of tables) ...
 
     // 4. Tablas del Chatbot VERSA (Consolidadas)
     await connection.execute(`
